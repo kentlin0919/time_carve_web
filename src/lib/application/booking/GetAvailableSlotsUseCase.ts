@@ -1,10 +1,15 @@
-import { AvailabilityRepository, TeacherAvailabilityWeekly, TeacherAvailabilityOverride } from "@/lib/domain/teacher/AvailabilityRepository";
+import { AvailabilityRepository } from "@/lib/domain/teacher/AvailabilityRepository";
 import { BookingRepository, Booking } from "@/lib/domain/booking/repository";
 
 export interface TimeSlot {
   date: string; // YYYY-MM-DD
   startTime: string; // HH:mm
   endTime: string; // HH:mm
+}
+
+interface TimeRange {
+  start: number; // minutes from midnight
+  end: number; // minutes from midnight
 }
 
 export class GetAvailableSlotsUseCase {
@@ -31,29 +36,22 @@ export class GetAvailableSlotsUseCase {
     const availableSlots: TimeSlot[] = [];
     const current = new Date(startDate);
     
-    // Normalize time part?
-    // We treat dates as YYYY-MM-DD, iterate day by day.
-    
     while (current <= endDate) {
       const dateStr = current.toISOString().split("T")[0];
       const dayOfWeek = current.getDay(); // 0 is Sunday
 
-      // 1. Determine Availability for this day
       // 1. Determine Availability Ranges for this day
-      const dayRanges: { start: string; end: string }[] = [];
+      let rawRanges: { start: string; end: string }[] = [];
 
       // Check for overrides first
       const dayOverrides = overrides.filter((o) => o.date === dateStr);
       
       if (dayOverrides.length > 0) {
-        // If there's an explicit "unavailable" flag, the day is closed regardless of other slots?
-        // In our current UI logic, if isUnavailable is true, it blocks the whole day.
-        const isClosed = dayOverrides.some((o) => o.isUnavailable);
-        
-        if (!isClosed) {
+        // If there's an explicit "unavailable" flag, the day is closed regardless of other slots
+        if (!dayOverrides.some((o) => o.isUnavailable)) {
           dayOverrides.forEach((o) => {
              if (o.startTime && o.endTime) {
-               dayRanges.push({ start: o.startTime, end: o.endTime });
+               rawRanges.push({ start: o.startTime, end: o.endTime });
              }
           });
         }
@@ -62,16 +60,19 @@ export class GetAvailableSlotsUseCase {
         const weeklyRules = weeklyAvailability.filter((w) => w.dayOfWeek === dayOfWeek);
         weeklyRules.forEach((w) => {
            if (w.startTime && w.endTime) {
-             dayRanges.push({ start: w.startTime, end: w.endTime });
+             rawRanges.push({ start: w.startTime, end: w.endTime });
            }
         });
       }
 
-      // 2. Generate slots for each range
-      for (const range of dayRanges) {
+      // 2. Merge contiguous ranges
+      const mergedRanges = this.mergeRanges(rawRanges);
+
+      // 3. Generate slots for each merged range
+      for (const range of mergedRanges) {
         const slots = this.generateSlots(dateStr, range.start, range.end, durationMinutes);
         
-        // 3. Filter overlapping bookings
+        // 4. Filter overlapping bookings (with Buffer logic)
         const dayBookings = bookings.filter((b) => b.bookingDate === dateStr);
         
         for (const slot of slots) {
@@ -88,52 +89,85 @@ export class GetAvailableSlotsUseCase {
     return availableSlots;
   }
 
+  // --- Helpers ---
+
+  private toMinutes(time: string): number {
+    const [h, m] = time.split(":").map(Number);
+    return h * 60 + m;
+  }
+
+  private toTimeStr(mins: number): string {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+  }
+
+  private mergeRanges(ranges: { start: string; end: string }[]): { start: string; end: string }[] {
+    if (ranges.length === 0) return [];
+
+    // Convert to minutes for sorting and merging
+    const rangesInMins: TimeRange[] = ranges.map(r => ({
+      start: this.toMinutes(r.start),
+      end: this.toMinutes(r.end)
+    }));
+
+    // Sort by start time
+    rangesInMins.sort((a, b) => a.start - b.start);
+
+    const merged: TimeRange[] = [];
+    let current = rangesInMins[0];
+
+    for (let i = 1; i < rangesInMins.length; i++) {
+        const next = rangesInMins[i];
+        if (next.start <= current.end) {
+            // Overlapping or contiguous, merge
+            current.end = Math.max(current.end, next.end);
+        } else {
+            // Gap found, push current and start new
+            merged.push(current);
+            current = next;
+        }
+    }
+    merged.push(current);
+
+    return merged.map(r => ({
+        start: this.toTimeStr(r.start),
+        end: this.toTimeStr(r.end)
+    }));
+  }
+
   private generateSlots(date: string, start: string, end: string, duration: number): TimeSlot[] {
     const slots: TimeSlot[] = [];
-    
-    // Helper to convert time string to minutes
-    const toMinutes = (time: string) => {
-      const [h, m] = time.split(":").map(Number);
-      return h * 60 + m;
-    };
-    
-    // Helper to convert minutes to time string HH:mm
-    const toTimeStr = (mins: number) => {
-      const h = Math.floor(mins / 60);
-      const m = mins % 60;
-      return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-    };
+    let currentMins = this.toMinutes(start);
+    const endMins = this.toMinutes(end);
 
-    let currentMins = toMinutes(start);
-    const endMins = toMinutes(end);
-
+    // Requirement: Slots start every 30 minutes
     while (currentMins + duration <= endMins) {
       slots.push({
         date,
-        startTime: toTimeStr(currentMins),
-        endTime: toTimeStr(currentMins + duration),
+        startTime: this.toTimeStr(currentMins),
+        endTime: this.toTimeStr(currentMins + duration),
       });
-      currentMins += duration; // No buffer time for now? Or add buffer?
-      // Requirement didn't specify buffer.
+      // STRICT INTERVAL: 30 minutes
+      currentMins += 30; 
     }
 
     return slots;
   }
 
   private isOverlapping(slot: TimeSlot, bookings: Booking[]): boolean {
-    const toMinutes = (time: string) => {
-      const parts = time.split(":"); // might be HH:MM:SS or HH:MM
-      const h = parseInt(parts[0]);
-      const m = parseInt(parts[1]);
-      return h * 60 + m;
-    };
-
-    const slotStart = toMinutes(slot.startTime);
-    const slotEnd = toMinutes(slot.endTime);
+    const slotStart = this.toMinutes(slot.startTime);
+    const slotEnd = this.toMinutes(slot.endTime);
 
     return bookings.some((booking) => {
-      const bStart = toMinutes(booking.startTime);
-      const bEnd = toMinutes(booking.endTime);
+      const bStart = this.toMinutes(booking.startTime);
+      let bEnd = this.toMinutes(booking.endTime);
+
+      // BUFFER LOGIC:
+      // If booking is IN-PERSON (default if not 'online'), add 30 min buffer to the END.
+      if (booking.courseType !== 'online') {
+          bEnd += 30;
+      }
 
       // Overlap logic: (StartA < EndB) and (EndA > StartB)
       return slotStart < bEnd && slotEnd > bStart;

@@ -273,6 +273,30 @@ export default function CourseDetailForm({
     }));
   };
 
+  // Expected Outcomes Logic
+  const handleAddOutcome = () => {
+    setForm((prev) => ({
+      ...prev,
+      expectedLearningOutcomes: [...(prev.expectedLearningOutcomes || []), ""],
+    }));
+  };
+
+  const handleUpdateOutcome = (index: number, value: string) => {
+    setForm((prev) => {
+      const newOutcomes = [...(prev.expectedLearningOutcomes || [])];
+      newOutcomes[index] = value;
+      return { ...prev, expectedLearningOutcomes: newOutcomes };
+    });
+  };
+
+  const handleDeleteOutcome = (index: number) => {
+    setForm((prev) => {
+      const newOutcomes =
+        prev.expectedLearningOutcomes?.filter((_, i) => i !== index) || [];
+      return { ...prev, expectedLearningOutcomes: newOutcomes };
+    });
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full bg-background-light dark:bg-background-dark overflow-hidden relative">
       {/* Header */}
@@ -404,6 +428,68 @@ export default function CourseDetailForm({
                     placeholder="請簡述課程特色、適合對象以及學習成效..."
                     className="block w-full rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none sm:text-sm py-2.5 px-3"
                   />
+                </div>
+              </div>
+            </div>
+
+            {/* 1.2 Expected Learning Outcomes */}
+            <div className="bg-surface-light dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card overflow-hidden mb-6">
+              <div className="px-6 py-4 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-slate-800/30 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary">
+                    check_circle
+                  </span>
+                  <h3 className="text-base font-bold text-slate-800 dark:text-white">
+                    預期學習成果
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddOutcome}
+                  className="text-xs font-medium text-primary hover:text-primary-dark flex items-center gap-1"
+                >
+                  <span className="material-symbols-outlined text-sm">add</span>
+                  新增成果
+                </button>
+              </div>
+              <div className="p-6">
+                {(form.expectedLearningOutcomes || []).length === 0 && (
+                  <div className="text-center text-text-sub text-sm py-4">
+                    尚未設定學習成果，建議至少新增 3-5 項。
+                  </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {(form.expectedLearningOutcomes || []).map(
+                    (outcome, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 group"
+                      >
+                        <span className="material-symbols-outlined text-primary text-[20px]">
+                          check_circle
+                        </span>
+                        <input
+                          type="text"
+                          value={outcome}
+                          onChange={(e) =>
+                            handleUpdateOutcome(index, e.target.value)
+                          }
+                          placeholder="例如：熟練操作咬合器..."
+                          className="flex-1 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none sm:text-sm py-2 px-3"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteOutcome(index)}
+                          className="text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                          title="刪除"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">
+                            remove_circle
+                          </span>
+                        </button>
+                      </div>
+                    )
+                  )}
                 </div>
               </div>
             </div>

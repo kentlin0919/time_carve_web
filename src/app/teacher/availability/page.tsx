@@ -29,9 +29,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { TeacherProfile } from "@/lib/domain/teacher/entity";
 import {
-  TimeSlotSelector,
+  AvailabilityIntervalList,
   TimeRange,
-} from "@/components/teacher/availability/TimeSlotSelector";
+} from "@/components/teacher/availability/AvailabilityIntervalList";
 import { cn } from "@/lib/utils";
 import Link from "next/link"; // Added Link import
 
@@ -476,7 +476,7 @@ export default function AvailabilityPage() {
                   </div>
 
                   {!selectedDayOverride.isUnavailable && (
-                    <TimeSlotSelector
+                    <AvailabilityIntervalList
                       value={selectedDayOverride.slots}
                       onChange={(slots) =>
                         setSelectedDayOverride((prev) =>
@@ -658,7 +658,7 @@ export default function AvailabilityPage() {
 
               {weeklyEnabled[selectedWeeklyDay] ? (
                 <div className="animate-fade-in">
-                  <TimeSlotSelector
+                  <AvailabilityIntervalList
                     value={weeklySlots[selectedWeeklyDay]}
                     onChange={(slots) =>
                       setWeeklySlots((prev) => ({

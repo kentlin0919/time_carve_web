@@ -67,7 +67,7 @@ export default function OnboardingPage() {
             if (adminUpdateError) {
               console.error(
                 "Error updating first login for admin:",
-                adminUpdateError
+                adminUpdateError,
               );
             }
             router.push("/admin/dashboard");
@@ -98,10 +98,10 @@ export default function OnboardingPage() {
                  status_id,
                  department,
                  schools ( name )
-               `
+               `,
               )
               .eq("student_id", user.id)
-              .single();
+              .maybeSingle();
 
             if (studentEdu) {
               // Map to form state
@@ -131,10 +131,10 @@ export default function OnboardingPage() {
                  status_id,
                  department,
                  schools ( name )
-               `
+               `,
               )
               .eq("teacher_id", user.id)
-              .single();
+              .maybeSingle();
 
             if (teacherEdu) {
               // Map to form state
@@ -186,7 +186,7 @@ export default function OnboardingPage() {
           {
             p_name: school,
             p_code: codeToUse,
-          }
+          },
         );
 
         if (schoolError) {
@@ -229,7 +229,7 @@ export default function OnboardingPage() {
             .from("student_education")
             .select("id")
             .eq("student_id", user.id)
-            .single();
+            .maybeSingle();
 
           let eduError;
 
@@ -275,7 +275,7 @@ export default function OnboardingPage() {
           .from("teacher_education")
           .select("id")
           .eq("teacher_id", user.id)
-          .single();
+          .maybeSingle();
 
         let eduError;
         if (existingEdu) {
@@ -313,7 +313,7 @@ export default function OnboardingPage() {
       if (isFirstLoginUpdateError) {
         console.error(
           "Error updating first login status:",
-          isFirstLoginUpdateError
+          isFirstLoginUpdateError,
         );
         // We continue anyway since data is saved
       }

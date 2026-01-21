@@ -27,6 +27,7 @@ export interface Course {
   isActive: boolean;
   sections?: CourseSection[]; // JSONB
   imageUrl?: string | null;
+  expectedLearningOutcomes?: string[]; // 預期學習成果
   
   // UI Fields (Optional or derived)
   icon?: string;

@@ -53,6 +53,7 @@ export class SupabaseCourseRepository implements CourseRepository {
         location: course.location,
         is_active: course.isActive,
         sections: course.sections as any, // Cast to any for JSONB
+        expected_learning_outcomes: course.expectedLearningOutcomes,
       })
       .select()
       .single();
@@ -81,6 +82,7 @@ export class SupabaseCourseRepository implements CourseRepository {
     if (course.location !== undefined) updateData.location = course.location;
     if (course.isActive !== undefined) updateData.is_active = course.isActive;
     if (course.sections !== undefined) updateData.sections = course.sections;
+    if (course.expectedLearningOutcomes !== undefined) updateData.expected_learning_outcomes = course.expectedLearningOutcomes;
 
     updateData.updated_at = new Date().toISOString();
 
@@ -188,6 +190,7 @@ export class SupabaseCourseRepository implements CourseRepository {
       isActive: data.is_active,
       status: data.is_active ? "active" : "draft",
       sections: (data.sections as CourseSection[]) || [],
+      expectedLearningOutcomes: data.expected_learning_outcomes || [],
       
       // Default UI fields
       icon: "school",

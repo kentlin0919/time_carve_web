@@ -26,6 +26,7 @@ export class SupabaseBookingRepository implements BookingRepository {
         ),
         course:courses (
           title,
+          course_type,
           price
         )
       `)
@@ -52,6 +53,7 @@ export class SupabaseBookingRepository implements BookingRepository {
       studentName: item.student?.user?.name || "Unknown",
       studentEmail: item.student?.user?.email || "",
       courseTitle: item.course?.title || "",
+      courseType: item.course?.course_type || "",
       coursePrice: item.course?.price || 0,
     }));
 
@@ -130,6 +132,7 @@ export class SupabaseBookingRepository implements BookingRepository {
         ),
         course:courses (
           title,
+          course_type,
           price
         )
       `)
@@ -156,6 +159,7 @@ export class SupabaseBookingRepository implements BookingRepository {
       studentEmail: item.student?.user?.email || "",
       teacherName: item.teacher?.user?.name || "Unknown", // Add teacher name
       courseTitle: item.course?.title || "",
+      courseType: item.course?.course_type || "",
       coursePrice: item.course?.price || 0,
     }));
   }

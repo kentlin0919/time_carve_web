@@ -40,19 +40,12 @@ function LoginContent() {
   // Tab State
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
 
-  const defaultHero = {
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBHhqJqS-VgLptXAcCrNziettbp0-KH-cAC-oY7-qxcwZYspiupMFZMYTZmQSJqGYokazzYf31feFqozjVqQF5HyHuvKkZGz64lFzSWHrbd5eSVqsgr25QOyYUyD0QmGQ68tOAX8JZeAFTu72ATHh7m-IF1bgfrMZBT5moP5QMWBSoWQVf4HJYudJAFQCKV6GS2gLZIw7EVw-bFeQ1EAfPoglVwm-NI69IRGWk7vQmqDnv-qp6kGs1pYiMiyOzxQHuaWhsmcU1SjQE",
-    titleLine1: "精選課程",
-    titleLine2: "成就非凡實力",
-    subtitle:
-      "專為學員量身打造的專業家教課程，在舒適的環境中，開始您的學習之旅。",
-  };
-
-  const [heroImageUrl, setHeroImageUrl] = useState(defaultHero.imageUrl);
-  const [heroTitleLine1, setHeroTitleLine1] = useState(defaultHero.titleLine1);
-  const [heroTitleLine2, setHeroTitleLine2] = useState(defaultHero.titleLine2);
-  const [heroSubtitle, setHeroSubtitle] = useState(defaultHero.subtitle);
+  const [heroImageUrl, setHeroImageUrl] = useState("");
+  const [heroTitleLine1, setHeroTitleLine1] = useState("精選課程");
+  const [heroTitleLine2, setHeroTitleLine2] = useState("成就非凡實力");
+  const [heroSubtitle, setHeroSubtitle] = useState(
+    "專為學員量身打造的專業家教課程，在舒適的環境中，開始您的學習之旅。"
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -74,18 +67,21 @@ function LoginContent() {
 
       if (!isMounted) return;
 
-      const map = new Map(
-        (data || []).map((item) => [item.key, item.value])
-      );
+      const map = new Map((data || []).map((item) => [item.key, item.value]));
       const pick = (key: string, fallback: string) => {
         const value = map.get(key);
         return value && value.trim() ? value : fallback;
       };
 
-      setHeroImageUrl(pick("login_hero_image_url", defaultHero.imageUrl));
-      setHeroTitleLine1(pick("login_hero_title_line1", defaultHero.titleLine1));
-      setHeroTitleLine2(pick("login_hero_title_line2", defaultHero.titleLine2));
-      setHeroSubtitle(pick("login_hero_subtitle", defaultHero.subtitle));
+      setHeroImageUrl(pick("login_hero_image_url", ""));
+      setHeroTitleLine1(pick("login_hero_title_line1", "精選課程"));
+      setHeroTitleLine2(pick("login_hero_title_line2", "成就非凡實力"));
+      setHeroSubtitle(
+        pick(
+          "login_hero_subtitle",
+          "專為學員量身打造的專業家教課程，在舒適的環境中，開始您的學習之旅。"
+        )
+      );
     };
 
     loadHeroSettings();
@@ -345,63 +341,40 @@ function LoginContent() {
       </header>
       <div className="flex-1 flex items-center justify-center p-4 lg:p-8 bg-gradient-to-br from-background-light to-blue-50/50 dark:from-background-dark dark:to-gray-900">
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] border border-slate-100 dark:border-gray-700/50 overflow-hidden w-full max-w-5xl flex flex-col md:flex-row min-h-[640px]">
-          <div
-            className="hidden md:flex flex-col justify-between w-1/2 bg-cover bg-center relative p-12 text-white"
-            style={{
-              backgroundImage: `url("${heroImageUrl}")`,
-            }}
-          >
-            <div className="absolute inset-0 bg-primary/80 mix-blend-multiply opacity-90 dark:opacity-80"></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/10"></div>
-            <div className="relative z-10 flex flex-col h-full">
-              <div className="mb-12">
-                <div className="size-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 border border-white/20 shadow-lg">
-                  <span className="material-symbols-outlined text-3xl">
-                    school
-                  </span>
-                </div>
-                <h2 className="text-4xl font-bold mb-4 leading-tight tracking-tight">
-                  {heroTitleLine1}
-                  <br />
-                  {heroTitleLine2}
-                </h2>
-                <p className="text-lg text-white/90 leading-relaxed">
-                  {heroSubtitle}
-                </p>
-              </div>
-              <div className="mt-auto space-y-6">
-                <div className="p-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 shadow-lg">
-                  <div className="flex gap-1 text-yellow-400 mb-2">
-                    <span className="material-symbols-outlined text-[20px] fill-current">
-                      star
-                    </span>
-                    <span className="material-symbols-outlined text-[20px] fill-current">
-                      star
-                    </span>
-                    <span className="material-symbols-outlined text-[20px] fill-current">
-                      star
-                    </span>
-                    <span className="material-symbols-outlined text-[20px] fill-current">
-                      star
-                    </span>
-                    <span className="material-symbols-outlined text-[20px] fill-current">
-                      star
+          {heroImageUrl && (
+            <div
+              className="hidden md:flex flex-col justify-between w-1/2 bg-cover bg-center relative p-12 text-white"
+              style={{
+                backgroundImage: `url("${heroImageUrl}")`,
+              }}
+            >
+              <div className="absolute inset-0 bg-primary/80 mix-blend-multiply opacity-90 dark:opacity-80"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/10"></div>
+              <div className="relative z-10 flex flex-col h-full">
+                <div className="mb-12">
+                  <div className="size-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 border border-white/20 shadow-lg">
+                    <span className="material-symbols-outlined text-3xl">
+                      school
                     </span>
                   </div>
-                  <p className="text-sm italic text-white/95">{`"老師非常有耐心，一對一的教學讓我能真正掌握到學習的訣竅，推薦給所有想精進的同學！"`}</p>
-                  <div className="mt-3 flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-xs font-bold">
-                      L
-                    </div>
-                    <span className="text-xs font-medium opacity-80">
-                      林曉梅 - 112年國考及格
-                    </span>
-                  </div>
+                  <h2 className="text-4xl font-bold mb-4 leading-tight tracking-tight">
+                    {heroTitleLine1}
+                    <br />
+                    {heroTitleLine2}
+                  </h2>
+                  <p className="text-lg text-white/90 leading-relaxed">
+                    {heroSubtitle}
+                  </p>
                 </div>
+                {/* Reviews removed as per request */}
               </div>
             </div>
-          </div>
-          <div className="w-full md:w-1/2 p-8 lg:p-12 relative flex flex-col justify-center bg-white dark:bg-gray-800">
+          )}
+          <div
+            className={`w-full p-8 lg:p-12 relative flex flex-col justify-center bg-white dark:bg-gray-800 ${
+              heroImageUrl ? "md:w-1/2" : ""
+            }`}
+          >
             <div className="relative w-full max-w-sm mx-auto">
               {/* Note: defaultChecked in React replaces checked attribute */}
               <input

@@ -72,6 +72,8 @@ export type Database = {
           end_time: string
           id: string
           notes: string | null
+          paid_at: string | null
+          price: number | null
           start_time: string
           status_id: number
           student_id: string
@@ -85,6 +87,8 @@ export type Database = {
           end_time: string
           id?: string
           notes?: string | null
+          paid_at?: string | null
+          price?: number | null
           start_time: string
           status_id: number
           student_id: string
@@ -98,6 +102,8 @@ export type Database = {
           end_time?: string
           id?: string
           notes?: string | null
+          paid_at?: string | null
+          price?: number | null
           start_time?: string
           status_id?: number
           student_id?: string
@@ -384,6 +390,130 @@ export type Database = {
           value?: string | null
         }
         Relationships: []
+      }
+      portfolio_media: {
+        Row: {
+          created_at: string | null
+          file_type: string | null
+          file_url: string
+          id: string
+          portfolio_id: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          portfolio_id: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          portfolio_id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_media_portfolio_id_fkey"
+            columns: ["portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "portfolios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portfolio_tags: {
+        Row: {
+          portfolio_id: string
+          tag_id: string
+        }
+        Insert: {
+          portfolio_id: string
+          tag_id: string
+        }
+        Update: {
+          portfolio_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_tags_portfolio_id_fkey"
+            columns: ["portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "portfolios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portfolio_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portfolios: {
+        Row: {
+          allow_comments: boolean | null
+          category: string | null
+          content: string | null
+          cover_image_url: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          likes_count: number | null
+          publish_at: string | null
+          status: string | null
+          teacher_id: string
+          title: string
+          updated_at: string | null
+          views_count: number | null
+        }
+        Insert: {
+          allow_comments?: boolean | null
+          category?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          likes_count?: number | null
+          publish_at?: string | null
+          status?: string | null
+          teacher_id: string
+          title: string
+          updated_at?: string | null
+          views_count?: number | null
+        }
+        Update: {
+          allow_comments?: boolean | null
+          category?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          likes_count?: number | null
+          publish_at?: string | null
+          status?: string | null
+          teacher_id?: string
+          title?: string
+          updated_at?: string | null
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolios_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_info"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       schools: {
         Row: {
