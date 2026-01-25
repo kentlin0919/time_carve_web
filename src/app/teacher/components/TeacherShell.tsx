@@ -1,10 +1,10 @@
 "use client";
-
 import { useState } from "react";
 import Image from "next/image";
 import TeacherSidebar from "./TeacherSidebar";
 import UserSync from "@/components/UserSync";
 import { User } from "@/lib/domain/auth/repository";
+import { usePathname } from "next/navigation";
 
 export default function TeacherShell({
   children,
@@ -14,6 +14,19 @@ export default function TeacherShell({
   user: User;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+  const isPreview = pathname?.endsWith("/preview");
+
+  if (isPreview) {
+    return (
+      <>
+        <UserSync user={user} />
+        <div className="min-h-screen bg-background-light dark:bg-background-dark font-display antialiased">
+          {children}
+        </div>
+      </>
+    );
+  }
 
   return (
     <>

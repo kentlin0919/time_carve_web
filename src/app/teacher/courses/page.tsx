@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useModal } from "@/components/providers/ModalContext";
 
 import { createClient } from "@/lib/supabase/client";
@@ -13,6 +13,7 @@ import CourseDetailForm from "./CourseDetailForm";
 
 export default function TeacherCoursesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,6 +58,25 @@ export default function TeacherCoursesPage() {
 
     loadCourses();
   }, []);
+
+  // Check for 'new=true' query param
+  useEffect(() => {
+    if (searchParams.get("new") === "true") {
+      setEditForm({
+        title: "",
+        price: 0,
+        priceUnit: "小時",
+        desc: "",
+        status: "draft",
+        sections: [],
+      });
+      setIsCreating(true);
+      setIsEditing(false);
+
+      // Optional: Clean up the URL
+      router.replace("/teacher/courses");
+    }
+  }, [searchParams, router]);
 
   // When selected course changes, reset edit mode
   useEffect(() => {
@@ -280,11 +300,10 @@ export default function TeacherCoursesPage() {
                       <div
                         key={course.id}
                         onClick={() => setSelectedCourseId(course.id)}
-                        className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors border-l-4 ${
-                          isSelected
+                        className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors border-l-4 ${isSelected
                             ? "border-primary bg-blue-50/50 dark:bg-blue-900/10"
                             : "border-transparent"
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center gap-3">
                           {thumbnailUrl ? (
@@ -298,15 +317,11 @@ export default function TeacherCoursesPage() {
                             </div>
                           ) : (
                             <div
-                              className={`size-12 rounded-lg bg-${
-                                course.iconColor || "blue"
-                              }-100 dark:bg-${
-                                course.iconColor || "blue"
-                              }-900/30 text-${
-                                course.iconColor || "blue"
-                              }-600 dark:text-${
-                                course.iconColor || "blue"
-                              }-400 flex items-center justify-center flex-shrink-0 shadow-sm`}
+                              className={`size-12 rounded-lg bg-${course.iconColor || "blue"
+                                }-100 dark:bg-${course.iconColor || "blue"
+                                }-900/30 text-${course.iconColor || "blue"
+                                }-600 dark:text-${course.iconColor || "blue"
+                                }-400 flex items-center justify-center flex-shrink-0 shadow-sm`}
                             >
                               <span className="material-symbols-outlined">
                                 {course.icon || "school"}
@@ -499,7 +514,7 @@ export default function TeacherCoursesPage() {
                               selectedCourse.price || 0
                             ).toLocaleString()}`,
                             selectedCourse.price !== undefined &&
-                              selectedCourse.price !== null
+                            selectedCourse.price !== null
                           )}
                           {renderField(
                             "計價單位",
@@ -598,7 +613,7 @@ export default function TeacherCoursesPage() {
 
                         <div className="space-y-3">
                           {!selectedCourse.sections ||
-                          selectedCourse.sections.length === 0 ? (
+                            selectedCourse.sections.length === 0 ? (
                             <p className="text-text-sub text-sm">
                               尚未建立任何章節
                             </p>

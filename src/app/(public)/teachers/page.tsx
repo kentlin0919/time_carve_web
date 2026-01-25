@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { TimelineItem } from "@/components/ui/TimelineItem";
+import Link from "next/link";
+import type { Portfolio } from "@/lib/domain/portfolio/entity";
 
 type PublicTeacherProfile = {
   teacher_code: string;
@@ -16,56 +18,37 @@ type PublicTeacherProfile = {
   base_price: number | null;
   specialties: string[] | null;
   philosophy_items:
-    | {
-        title: string;
-        description: string;
-        icon: string;
-      }[]
-    | null;
+  | {
+    title: string;
+    description: string;
+    icon: string;
+  }[]
+  | null;
   philosophy_subtitle: string | null;
   educations:
-    | {
-        school_name: string | null;
-        department: string | null;
-        degree: string | null;
-        degree_level: string | null;
-        study_year: number | null;
-        start_year: number | null;
-        end_year: number | null;
-      }[]
-    | null;
+  | {
+    school_name: string | null;
+    department: string | null;
+    degree: string | null;
+    degree_level: string | null;
+    study_year: number | null;
+    start_year: number | null;
+    end_year: number | null;
+  }[]
+  | null;
   experiences:
-    | {
-        title: string;
-        organization: string;
-        start_date: string;
-        end_date: string | null;
-        is_current: boolean;
-        description: string | null;
-      }[]
-    | null;
+  | {
+    title: string;
+    organization: string;
+    start_date: string;
+    end_date: string | null;
+    is_current: boolean;
+    description: string | null;
+  }[]
+  | null;
 };
 
-const portfolioItems = [
-  {
-    title: "前牙美學修復",
-    description: "全瓷冠形態雕刻與染色",
-    image:
-      'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDwgPOMKrp6Qoq0TlCmMh8jxktAmptu4Shci6qtOmZK4ln1UlEX7Qi05pZAV0TlPhIESCGZBqrRpYm64jycUZn87CYjpBnjjCtVUygSKIoBpV9qnrLkx2OMt59-ZioGmFLYovQBgqEsQmSQmxShjf2Wbw7LLmcRgUB-zMWKy0j-znq2jKi1yrgDB1jdiRSVcb9SU43RjQFQ5L_Kp7_IgZL9hNgQfiQkpHIie7nkMUsJnH8IqbnGZDjgtD_LuzM7fVwjhFzo6djP020")',
-  },
-  {
-    title: "精密蠟型堆築",
-    description: "後牙咬合面功能重建",
-    image:
-      'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBlNxVP5acES4Vx8j4JUlRqn1zwtcf48PythdeBHsjwonpbXDvRp5w7SPjgeaYt7Zq3kWzuLs2MV7dVpY55pT0FhJUssCAY2WZ9G3o66iHm9utnbHl8kWB2rIeKRHX0YQIgoQXgqSZ3VzKdgSGe0_ZdoAduDz8ndjFQzL7JFcmYLETmmLGrTj1fKZHYu3BykMjDtoehWwvAxu5JcdhFnKoZd3ojRTD2oyrb_VIE48xr8mHtr-oI56nZa_csheUyS5GLAlc9rSkihF4")',
-  },
-  {
-    title: "石膏模型分析",
-    description: "教學示範標準模型",
-    image:
-      'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBqmKAPKzgxTHrkRXHuuSttu1eMiiX0pShdly6ouHLFivvniWPhkny8f61Ts2e-78v1ZPZxHiGF6xO9VoEE_w1NlMOURC9uMZ24vXnR_7jvC12icZbRpv_4sZXtvRzcslbWDNInp27Tea0L0oYSUXIbaPeBJK1zlEmPxQar65qOsEydSk8Vm9UpcQuWcYOJ-gPhaE_9jAqaNb10NbiHVNnVlc-RZnhoLwNiRtwoXgXaBhDd2lIHvhAfJQNqhD53qUizEWBOt6HH-HU")',
-  },
-];
+
 
 const reviewItems = [
   {
@@ -94,6 +77,7 @@ function TeachersContent() {
   );
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<PublicTeacherProfile | null>(null);
+  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -127,6 +111,19 @@ function TeachersContent() {
           setError(null);
         }
       }
+
+      // Fetch portfolios
+      const { data: portfolioData } = await supabase
+        .from("portfolios")
+        .select("*, teacher_info!inner(teacher_code)")
+        .eq("teacher_info.teacher_code", teacherCode)
+        .eq("status", "published")
+        .order("created_at", { ascending: false });
+
+      if (portfolioData) {
+        setPortfolios(portfolioData as any[]);
+      }
+
       setLoading(false);
     };
 
@@ -196,13 +193,13 @@ function TeachersContent() {
       : null;
   const educationSummary = primaryEducation
     ? [
-        primaryEducation.school_name,
-        primaryEducation.department,
-        degreeLabel,
-        studyYearLabel,
-      ]
-        .filter(Boolean)
-        .join(" · ")
+      primaryEducation.school_name,
+      primaryEducation.department,
+      degreeLabel,
+      studyYearLabel,
+    ]
+      .filter(Boolean)
+      .join(" · ")
     : null;
 
   return (
@@ -222,36 +219,7 @@ function TeachersContent() {
               TimeCarve 刻時
             </h2>
           </div>
-          <nav className="hidden md:flex items-center gap-10">
-            <a
-              className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors relative group"
-              href="#"
-            >
-              首頁
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
-            </a>
-            <a
-              className="text-sm font-medium text-primary dark:text-primary transition-colors relative group"
-              href="#"
-            >
-              師資介紹
-              <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-primary transition-all"></span>
-            </a>
-            <a
-              className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors relative group"
-              href="#portfolio"
-            >
-              精選作品
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
-            </a>
-            <a
-              className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors relative group"
-              href="#reviews"
-            >
-              學員評價
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
-            </a>
-          </nav>
+
           <div className="hidden md:flex items-center gap-4">
             <button className="flex h-10 cursor-pointer items-center justify-center rounded-full bg-primary px-6 text-white text-sm font-bold shadow-glow hover:bg-primary-dark hover:shadow-lg hover:-translate-y-0.5 transition-all active:scale-95">
               <span className="truncate">預約諮詢</span>
@@ -264,21 +232,7 @@ function TeachersContent() {
       </header>
 
       <main className="flex-1 w-full flex flex-col items-center">
-        <div className="w-full bg-white dark:bg-[#15262d] border-b border-gray-100 dark:border-gray-800">
-          <div className="max-w-[1024px] mx-auto px-6 sm:px-10 py-3">
-            <nav className="flex text-sm font-medium text-gray-500 dark:text-gray-400 space-x-2">
-              <a className="hover:text-primary transition-colors" href="#">
-                首頁
-              </a>
-              <span>/</span>
-              <a className="hover:text-primary transition-colors" href="#">
-                師資團隊
-              </a>
-              <span>/</span>
-              <span className="text-primary font-semibold">{name}</span>
-            </nav>
-          </div>
-        </div>
+
 
         <div className="flex flex-col max-w-[1024px] w-full px-6 sm:px-10">
           <section className="py-12 sm:py-20 relative overflow-visible">
@@ -334,35 +288,12 @@ function TeachersContent() {
                     </span>
                   )}
                 </div>
-                <div className="flex flex-wrap gap-4 pt-4 mt-auto">
-                  <button className="flex h-12 flex-1 sm:flex-none sm:min-w-[160px] cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-8 text-white text-base font-bold shadow-lg shadow-primary/30 hover:bg-primary-dark hover:-translate-y-1 transition-all duration-300">
-                    預約課程諮詢
-                    <span className="material-symbols-outlined text-sm">
-                      arrow_forward
-                    </span>
-                  </button>
-                  <div className="flex gap-2">
-                    <a
-                      className="flex h-12 w-12 items-center justify-center rounded-full border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-white hover:bg-[#1877F2] hover:border-[#1877F2] transition-colors"
-                      href="#"
-                    >
-                      <span className="material-symbols-outlined">share</span>
-                    </a>
-                    <a
-                      className="flex h-12 w-12 items-center justify-center rounded-full border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-white hover:bg-[#E4405F] hover:border-[#E4405F] transition-colors"
-                      href={`?teacher_code=${encodeURIComponent(
-                        profile.teacher_code
-                      )}`}
-                    >
-                      <span className="material-symbols-outlined">link</span>
-                    </a>
-                  </div>
-                </div>
+
               </div>
             </div>
           </section>
 
-          <section className="grid grid-cols-2 md:grid-cols-4 gap-6 py-10 border-y border-gray-100 dark:border-gray-800">
+          <section className="grid grid-cols-2 md:grid-cols-2 gap-6 py-10 border-y border-gray-100 dark:border-gray-800">
             <div className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-[#1a2c32] rounded-2xl">
               <span className="text-3xl font-black text-primary">
                 {experienceYears}+
@@ -375,18 +306,6 @@ function TeachersContent() {
               <span className="text-3xl font-black text-primary">--</span>
               <span className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-1">
                 指導學生
-              </span>
-            </div>
-            <div className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-[#1a2c32] rounded-2xl">
-              <span className="text-3xl font-black text-primary">--</span>
-              <span className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-1">
-                課程滿意度
-              </span>
-            </div>
-            <div className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-[#1a2c32] rounded-2xl">
-              <span className="text-3xl font-black text-primary">--</span>
-              <span className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-1">
-                專題講座
               </span>
             </div>
           </section>
@@ -435,12 +354,12 @@ function TeachersContent() {
                               {exp.is_current
                                 ? "Present"
                                 : exp.end_date
-                                ? `${new Date(exp.end_date).getFullYear()}.${(
+                                  ? `${new Date(exp.end_date).getFullYear()}.${(
                                     new Date(exp.end_date).getMonth() + 1
                                   )
                                     .toString()
                                     .padStart(2, "0")}`
-                                : ""}
+                                  : ""}
                             </div>
                             {exp.description && (
                               <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-sm">
@@ -538,7 +457,7 @@ function TeachersContent() {
                   Selected Works
                 </span>
                 <h2 className="text-3xl sm:text-4xl font-black text-[#111618] dark:text-white tracking-tight">
-                  精選雕刻作品
+                  精選作品集
                 </h2>
               </div>
               <a
@@ -552,83 +471,49 @@ function TeachersContent() {
               </a>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {portfolioItems.map((item) => (
-                <div
-                  key={item.title}
-                  className="group cursor-pointer flex flex-col gap-4"
-                >
-                  <div className="relative overflow-hidden rounded-2xl aspect-square bg-gray-100 dark:bg-gray-800 shadow-sm group-hover:shadow-lg transition-all duration-500">
-                    <div
-                      className="w-full h-full bg-center bg-cover transition-transform duration-700 group-hover:scale-110"
-                      style={{ backgroundImage: item.image }}
-                    ></div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                      <p className="text-white text-sm font-bold">查看詳情</p>
+              {portfolios.length > 0 ? (
+                portfolios.map((portfolio) => (
+                  <Link
+                    key={portfolio.id}
+                    className="group cursor-pointer flex flex-col gap-4"
+                    href={`/portfolio/${portfolio.id}`}
+                  >
+                    <div className="relative overflow-hidden rounded-2xl aspect-square bg-gray-100 dark:bg-gray-800 shadow-sm group-hover:shadow-lg transition-all duration-500">
+                      {portfolio.cover_image_url ? (
+                        <div
+                          className="w-full h-full bg-center bg-cover transition-transform duration-700 group-hover:scale-110"
+                          style={{ backgroundImage: `url("${portfolio.cover_image_url}")` }}
+                        ></div>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-400">
+                          <span className="material-symbols-outlined text-4xl">
+                            image
+                          </span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                        <p className="text-white text-sm font-bold">查看詳情</p>
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <h3 className="text-[#111618] dark:text-white text-lg font-bold group-hover:text-primary transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-                      {item.description}
-                    </p>
-                  </div>
+                    <div>
+                      <h3 className="text-[#111618] dark:text-white text-lg font-bold group-hover:text-primary transition-colors line-clamp-1">
+                        {portfolio.title}
+                      </h3>
+                      <p className="text-gray-500 dark:text-gray-400 text-sm mt-1 line-clamp-2">
+                        {portfolio.description || "暫無描述"}
+                      </p>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="col-span-full py-12 text-center text-gray-500 dark:text-gray-400">
+                  <p>這位老師尚未發布作品。</p>
                 </div>
-              ))}
+              )}
             </div>
           </section>
 
-          <section
-            className="py-16 bg-primary/5 rounded-3xl mb-16 px-8 sm:px-12"
-            id="reviews"
-          >
-            <div className="text-center mb-12">
-              <span className="text-primary font-bold tracking-wider text-xs uppercase">
-                Reviews
-              </span>
-              <h2 className="text-3xl font-black text-[#111618] dark:text-white mt-2">
-                學員真實回饋
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {reviewItems.map((review) => (
-                <div
-                  key={review.name}
-                  className="bg-white dark:bg-[#15262d] p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 relative"
-                >
-                  <span className="absolute top-6 right-6 text-6xl text-primary/10 font-serif leading-none">
-                    "
-                  </span>
-                  <div className="flex items-center gap-4 mb-6">
-                    <div
-                      className="w-12 h-12 rounded-full bg-gray-200 bg-cover bg-center"
-                      style={{ backgroundImage: review.avatar }}
-                    ></div>
-                    <div>
-                      <h4 className="font-bold text-[#111618] dark:text-white">
-                        {review.name}
-                      </h4>
-                      <p className="text-xs text-gray-500">{review.role}</p>
-                    </div>
-                    <div className="ml-auto flex text-yellow-400 text-sm">
-                      {Array.from({ length: 5 }).map((_, index) => (
-                        <span
-                          key={index}
-                          className="material-symbols-outlined filled"
-                        >
-                          star
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-                    {review.content}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
+
         </div>
       </main>
     </div>

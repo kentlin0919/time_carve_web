@@ -27,11 +27,10 @@ const MenuBar = ({ editor }: { editor: any }) => {
       }}
       disabled={disabled}
       title={title}
-      className={`p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors ${
-        isActive
-          ? "bg-primary/10 text-primary"
-          : "text-slate-600 dark:text-slate-300"
-      } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+      className={`p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors ${isActive
+        ? "bg-primary/10 text-primary"
+        : "text-slate-600 dark:text-slate-300"
+        } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
     >
       {children}
     </button>
@@ -137,10 +136,17 @@ export default function RichTextEditor({
 }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        // 停用 StarterKit 內建的 Link (TipTap v3+)，使用自訂配置
+        link: false,
+      }),
       Image,
       Link.configure({
         openOnClick: false,
+        autolink: true,
+        HTMLAttributes: {
+          class: 'text-primary hover:underline',
+        },
       }),
       Placeholder.configure({
         placeholder: "開始撰寫精彩的內容...",

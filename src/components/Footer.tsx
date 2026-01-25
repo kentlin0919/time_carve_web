@@ -59,7 +59,7 @@ export default function Footer() {
             </div>
           )}
         </div>
-        
+
         <div className="flex flex-col items-end gap-4">
           <div className="flex gap-6">
             <Link
@@ -81,7 +81,7 @@ export default function Footer() {
               常見問題
             </Link>
           </div>
-          
+
           {settings && (
             <div className="flex gap-4">
               {settings.facebook_url && (

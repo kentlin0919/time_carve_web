@@ -1,13 +1,19 @@
 import { createClient } from '@/lib/supabase/client';
+
 import { Portfolio, PortfolioMedia } from '@/lib/domain/portfolio/entity';
 import { PortfolioRepository } from '@/lib/domain/portfolio/repository';
 import { Database } from '@/types/database.types';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export class SupabasePortfolioRepository implements PortfolioRepository {
-  private supabase = createClient();
+  private client: SupabaseClient<Database>;
+
+  constructor(client: SupabaseClient<Database>) {
+    this.client = client;
+  }
 
   async getById(id: string): Promise<Portfolio | null> {
-    const { data, error } = await this.supabase
+    const { data, error } = await this.client
       .from('portfolios')
       .select(`
         *,
@@ -30,7 +36,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
   }
 
   async getByTeacherId(teacherId: string): Promise<Portfolio[]> {
-    const { data, error } = await this.supabase
+    const { data, error } = await this.client
       .from('portfolios')
       .select('*')
       .eq('teacher_id', teacherId)
@@ -40,11 +46,11 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
       throw error;
     }
 
-    return data.map(item => this.mapToEntity(item));
+    return data.map((item: any) => this.mapToEntity(item));
   }
 
   async getPublishedPortfolios(limit: number = 10): Promise<Portfolio[]> {
-    const { data, error } = await this.supabase
+    const { data, error } = await this.client
       .from('portfolios')
       .select(`
         *,
@@ -59,21 +65,21 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
       .limit(limit);
 
     if (error) {
-       console.error(error);
-       return [];
+      console.error(error);
+      return [];
     }
 
-    return data.map(item => this.mapToEntity(item));
+    return data.map((item: any) => this.mapToEntity(item));
   }
 
   async create(data: Partial<Portfolio>): Promise<Portfolio> {
     // Exclude virtual fields and undefined values
     const { media, tags, ...dbData } = data;
-    
+
     // Ensure strict type for insert
     const insertData: any = { ...dbData };
 
-    const { data: result, error } = await this.supabase
+    const { data: result, error } = await this.client
       .from('portfolios')
       .insert(insertData)
       .select()
@@ -84,22 +90,41 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
   }
 
   async update(id: string, data: Partial<Portfolio>): Promise<Portfolio> {
+    console.log('[Repo] Updating portfolio:', id);
     const { media, tags, ...dbData } = data;
-     const updateData: any = { ...dbData };
 
-    const { data: result, error } = await this.supabase
+    // Filter out fields that should not be updated directly or are join relations
+    const {
+      id: _id,
+      teacher_id,
+      created_at,
+      updated_at,
+      views_count,
+      likes_count,
+      portfolio_media, // Join field to exclude
+      portfolio_tags,  // Join field to exclude
+      ...editableFields
+    } = dbData as any;
+
+    const updateData = { ...editableFields };
+    console.log('[Repo] Update payload:', JSON.stringify(updateData, null, 2));
+
+    const { data: result, error } = await this.client
       .from('portfolios')
       .update(updateData)
       .eq('id', id)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('[Repo] Update error:', error);
+      throw error;
+    }
     return this.mapToEntity(result);
   }
 
   async delete(id: string): Promise<void> {
-    const { error } = await this.supabase
+    const { error } = await this.client
       .from('portfolios')
       .delete()
       .eq('id', id);
@@ -108,7 +133,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
   }
 
   async addMedia(data: Partial<PortfolioMedia>): Promise<PortfolioMedia> {
-    const { data: result, error } = await this.supabase
+    const { data: result, error } = await this.client
       .from('portfolio_media')
       .insert(data as any)
       .select()
@@ -119,7 +144,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
   }
 
   async deleteMedia(id: string): Promise<void> {
-    const { error } = await this.supabase
+    const { error } = await this.client
       .from('portfolio_media')
       .delete()
       .eq('id', id);
@@ -128,7 +153,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
   }
 
   async updateMediaOrder(id: string, order: number): Promise<void> {
-    const { error } = await this.supabase
+    const { error } = await this.client
       .from('portfolio_media')
       .update({ sort_order: order })
       .eq('id', id);
@@ -138,7 +163,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
 
   async updateTags(portfolioId: string, tagIds: string[]): Promise<void> {
     // 1. Delete existing tags
-    await this.supabase
+    await this.client
       .from('portfolio_tags')
       .delete()
       .eq('portfolio_id', portfolioId);
@@ -146,7 +171,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
     if (tagIds.length === 0) return;
 
     // 2. Insert new tags
-    const { error } = await this.supabase
+    const { error } = await this.client
       .from('portfolio_tags')
       .insert(
         tagIds.map(tagId => ({

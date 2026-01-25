@@ -28,6 +28,13 @@ export default function PortfolioEditForm({
 }: PortfolioEditFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [origin, setOrigin] = useState("");
+
+  React.useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+
   const [formData, setFormData] = useState<Partial<Portfolio>>(
     initialData || {
       title: "",
@@ -85,8 +92,8 @@ export default function PortfolioEditForm({
           await uploadPortfolioMedia(formData);
         })
       );
-      
-      router.refresh(); 
+
+      router.refresh();
     } catch (error) {
       console.error("Upload failed:", error);
       alert("部分檔案上傳失敗");
@@ -99,7 +106,7 @@ export default function PortfolioEditForm({
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
-    
+
     const file = e.target.files[0];
     const uploadFormData = new FormData();
     uploadFormData.append("file", file);
@@ -245,12 +252,12 @@ export default function PortfolioEditForm({
               )}
             </div>
           )}
-           
+
           {isCreating && (
-             <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-sm flex items-center gap-3">
-               <span className="material-symbols-outlined">info</span>
-               建立作品後，即可上傳更多詳細圖片到媒體庫。
-             </div>
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-sm flex items-center gap-3">
+              <span className="material-symbols-outlined">info</span>
+              建立作品後，即可上傳更多詳細圖片到媒體庫。
+            </div>
           )}
         </div>
 
@@ -298,18 +305,18 @@ export default function PortfolioEditForm({
               <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">
                 封面圖片
               </label>
-              
+
               {!formData.cover_image_url ? (
                 <label className="flex flex-col items-center justify-center w-full aspect-video rounded-xl border-2 border-dashed border-border-light dark:border-border-dark hover:border-primary/50 bg-slate-50 dark:bg-slate-800/50 cursor-pointer transition-colors group">
-                    <span className="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors text-3xl mb-2">add_photo_alternate</span>
-                    <span className="text-sm text-slate-500 group-hover:text-primary transition-colors">點擊上傳封面</span>
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      className="hidden" 
-                      onChange={handleCoverUpload}
-                      disabled={loading}
-                    />
+                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors text-3xl mb-2">add_photo_alternate</span>
+                  <span className="text-sm text-slate-500 group-hover:text-primary transition-colors">點擊上傳封面</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleCoverUpload}
+                    disabled={loading}
+                  />
                 </label>
               ) : (
                 <div className="relative group rounded-xl overflow-hidden aspect-video bg-slate-100">
@@ -319,23 +326,23 @@ export default function PortfolioEditForm({
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                     <label className="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white cursor-pointer backdrop-blur-sm transition-colors">
-                        <span className="material-symbols-outlined text-xl">edit</span>
-                        <input 
-                            type="file" 
-                            accept="image/*" 
-                            className="hidden" 
-                            onChange={handleCoverUpload}
-                            disabled={loading}
-                        />
-                     </label>
-                     <button
-                        type="button"
-                        onClick={() => setFormData({...formData, cover_image_url: null})}
-                        className="p-2 bg-white/20 hover:bg-red-500/80 rounded-full text-white backdrop-blur-sm transition-colors"
-                     >
-                        <span className="material-symbols-outlined text-xl">delete</span>
-                     </button>
+                    <label className="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white cursor-pointer backdrop-blur-sm transition-colors">
+                      <span className="material-symbols-outlined text-xl">edit</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleCoverUpload}
+                        disabled={loading}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, cover_image_url: null })}
+                      className="p-2 bg-white/20 hover:bg-red-500/80 rounded-full text-white backdrop-blur-sm transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-xl">delete</span>
+                    </button>
                   </div>
                 </div>
               )}
@@ -360,25 +367,59 @@ export default function PortfolioEditForm({
             </div>
           </div>
 
-            {/* Form Actions */}
-            <div className="bg-white dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-sm">
-                <h4 className="font-bold mb-4 text-slate-800 dark:text-white">
-                  預覽
-                </h4>
-                <button
-                  type="button"
-                  disabled={isCreating}
-                  onClick={() =>
-                   initialData?.id && router.push(`/teacher/portfolio/${initialData.id}/preview`)
-                  }
-                  className="w-full py-2.5 rounded-lg border border-primary text-primary hover:bg-primary/5 transition-colors font-bold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <span className="material-symbols-outlined text-[20px]">
-                    visibility
-                  </span>
-                  {isCreating ? "儲存後即可預覽" : "預覽公開頁面"}
-                </button>
-            </div>
+          {/* Form Actions */}
+          <div className="bg-white dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-sm">
+            <h4 className="font-bold mb-4 text-slate-800 dark:text-white">
+              公開與分享
+            </h4>
+
+            {!isCreating && initialData?.id && (
+              <div className="mb-4 space-y-2">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  公開連結
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    readOnly
+                    value={`${origin}/portfolio/${initialData.id}`}
+                    className="flex-1 min-w-0 px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-600 dark:text-slate-300 outline-none"
+                    onClick={(e) => e.currentTarget.select()}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = `${origin}/portfolio/${initialData.id}`;
+                      navigator.clipboard.writeText(url);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    }}
+                    className={`px-3 py-2 rounded-lg border transition-all flex items-center justify-center ${copied
+                      ? "bg-green-50 border-green-200 text-green-600"
+                      : "border-border-light dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600"
+                      }`}
+                    title="複製連結"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">
+                      {copied ? "check" : "content_copy"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <button
+              type="button"
+              disabled={isCreating}
+              onClick={() =>
+                initialData?.id && window.open(`/teacher/portfolio/${initialData.id}/preview`, '_blank')
+              }
+              className="w-full py-2.5 rounded-lg border border-primary text-primary hover:bg-primary/5 transition-colors font-bold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span className="material-symbols-outlined text-[20px]">
+                visibility
+              </span>
+              {isCreating ? "儲存後即可預覽" : "預覽公開頁面"}
+            </button>
           </div>
         </div>
       </div>

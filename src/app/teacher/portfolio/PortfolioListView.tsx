@@ -63,6 +63,8 @@ export default function PortfolioListView({
                   </Link>
                   <Link
                     href={`/teacher/portfolio/${work.id}/preview`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="p-2 bg-white/90 dark:bg-slate-800/90 text-slate-800 dark:text-white rounded-full hover:bg-primary hover:text-white transition-colors shadow-lg"
                     title="預覽"
                   >
@@ -73,19 +75,18 @@ export default function PortfolioListView({
                 </div>
                 <div className="absolute top-3 right-3">
                   <span
-                    className={`px-2 py-1 rounded text-[10px] font-bold backdrop-blur-sm border ${
-                      work.status === "published"
+                    className={`px-2 py-1 rounded text-[10px] font-bold backdrop-blur-sm border ${work.status === "published"
                         ? "bg-green-100 text-green-700 border-green-200"
                         : work.status === "draft"
-                        ? "bg-amber-100 text-amber-700 border-amber-200"
-                        : "bg-slate-200 text-slate-700 border-slate-300"
-                    }`}
+                          ? "bg-amber-100 text-amber-700 border-amber-200"
+                          : "bg-slate-200 text-slate-700 border-slate-300"
+                      }`}
                   >
                     {work.status === "published"
                       ? "已發布"
                       : work.status === "draft"
-                      ? "草稿"
-                      : "封存"}
+                        ? "草稿"
+                        : "封存"}
                   </span>
                 </div>
               </div>

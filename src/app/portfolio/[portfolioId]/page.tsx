@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Portfolio } from "@/lib/domain/portfolio/entity";
+import Footer from "@/components/Footer";
 
 interface PublicPortfolioPageProps {
   params: Promise<{
@@ -27,6 +28,7 @@ async function getPortfolio(id: string) {
         teacher:teacher_info(
            id,
            title,
+           teacher_code,
            user:user_info(name, avatar_url)
         ),
         portfolio_media(*),
@@ -77,52 +79,33 @@ export default async function PublicPortfolioPage({
     ) || [];
 
   return (
-    <div className="bg-background-light min-h-screen font-sans selection:bg-primary/20 pb-24">
+    <div className="bg-background-light min-h-screen font-sans selection:bg-primary/20 flex flex-col">
       {/* Header - Transparent/Glass */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-md border border-white/20 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
-              <span className="material-symbols-outlined text-2xl font-light">
-                waves
-              </span>
+            <div className="relative w-10 h-10">
+              <Image
+                src="/logo.svg"
+                alt="TimeCarve Logo"
+                fill
+                className="object-contain"
+              />
             </div>
             <div className="flex flex-col leading-tight">
               <span className="text-xl font-bold tracking-tight text-slate-800">
                 TimeCarve <span className="text-primary font-medium">刻時</span>
               </span>
-              <span className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-medium">
+              <span className="text-sm font-bold tracking-[0.2em] font-medium text-slate-500 uppercase">
                 Art & Handcraft
               </span>
             </div>
           </Link>
-          <nav className="hidden md:flex items-center gap-8">
-            <Link
-              href="/courses"
-              className="text-sm font-medium text-slate-700 hover:text-primary transition-colors"
-            >
-              最新課程
-            </Link>
-            <Link
-              href="/portfolio"
-              className="text-sm font-medium text-slate-700 hover:text-primary transition-colors"
-            >
-              作品集
-            </Link>
-            <Link
-              href="/about"
-              className="text-sm font-medium text-slate-700 hover:text-primary transition-colors"
-            >
-              品牌故事
-            </Link>
-            <button className="bg-primary hover:bg-primary-dark text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all shadow-lg shadow-primary/25 hover:-translate-y-0.5">
-              預約諮詢
-            </button>
-          </nav>
+
         </div>
       </header>
 
-      <main className="pt-32">
+      <main className="pt-32 flex-1">
         <div className="max-w-7xl mx-auto px-6">
           {/* Title Section */}
           <div className="mb-12 text-center">
@@ -198,7 +181,7 @@ export default async function PublicPortfolioPage({
               </div>
 
               {/* Rich Content Body */}
-              <div className="bg-white p-8 md:p-12 rounded-2xl border border-slate-100 shadow-lg shadow-slate-200/50 prose prose-slate max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:flex prose-h2:items-center prose-h2:gap-3 prose-p:text-slate-600 prose-p:leading-relaxed prose-img:rounded-xl prose-img:shadow-md">
+              <div className="bg-white p-8 md:p-12 rounded-2xl border border-slate-100 shadow-lg shadow-slate-200/50 prose prose-slate max-w-none text-slate-800 prose-headings:font-bold prose-headings:text-slate-900 prose-h2:text-2xl prose-h2:flex prose-h2:items-center prose-h2:gap-3 prose-p:text-slate-700 prose-p:leading-relaxed prose-li:text-slate-700 prose-img:rounded-xl prose-img:shadow-md [&_*]:text-slate-800">
                 <div
                   dangerouslySetInnerHTML={{ __html: portfolio.content || "" }}
                 />
@@ -206,120 +189,91 @@ export default async function PublicPortfolioPage({
             </div>
 
             {/* Right Column: Author Profile & Actions */}
-            <div className="lg:col-span-4 space-y-6">
-              <div className="bg-white rounded-2xl border border-slate-100 p-8 shadow-lg shadow-slate-200/50 sticky top-28">
-                <div className="flex flex-col items-center text-center mb-6">
-                  <div className="size-24 rounded-full p-1 border-2 border-primary mb-4">
-                    <div className="size-full rounded-full bg-slate-200 overflow-hidden relative">
-                      {teacherAvatar ? (
-                        <img
-                          src={teacherAvatar}
-                          alt={teacherName}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-slate-300 text-slate-500">
-                          <span className="material-symbols-outlined text-4xl">
-                            person
-                          </span>
-                        </div>
-                      )}
+            <div className="lg:col-span-4 relative">
+              <div className="sticky top-28 space-y-6">
+                <div className="bg-white rounded-2xl border border-slate-100 p-8 shadow-lg shadow-slate-200/50">
+                  <div className="flex flex-col items-center text-center mb-6">
+                    <div className="size-24 rounded-full p-1 border-2 border-primary mb-4">
+                      <div className="size-full rounded-full bg-slate-200 overflow-hidden relative">
+                        {teacherAvatar ? (
+                          <img
+                            src={teacherAvatar}
+                            alt={teacherName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-slate-300 text-slate-500">
+                            <span className="material-symbols-outlined text-4xl">
+                              person
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-800">
+                      {teacherName}
+                    </h3>
+                    <p className="text-primary text-sm font-medium mt-1">
+                      {teacherTitle}
+                    </p>
+                  </div>
+
+                  <p className="text-sm text-slate-500 leading-relaxed mb-8 border-t border-slate-50 pt-6">
+                    致力於推廣「惜物、愛物」的藝術生活觀。在 TimeCarve
+                    刻時，我希望帶領學員透過手作的溫度，在繁忙的日常中找回內心的平靜。
+                  </p>
+
+                  <div className="space-y-3">
+                    <a
+                      href={
+                        portfolio.teacher?.teacher_code
+                          ? `/teachers?teacher_code=${encodeURIComponent(portfolio.teacher.teacher_code)}`
+                          : '#'
+                      }
+                      className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:-translate-y-0.5"
+                    >
+                      <span className="material-symbols-outlined text-xl">
+                        person
+                      </span>
+                      教師個人檔案
+                    </a>
+                    <button className="w-full border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                      <span className="material-symbols-outlined text-xl">
+                        collections
+                      </span>
+                      查看更多作品
+                    </button>
+                  </div>
+
+
+                </div>
+
+                <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xl overflow-hidden relative group cursor-pointer hover:shadow-2xl transition-all">
+                  <div className="relative z-10">
+                    <h4 className="font-bold mb-2 text-lg">
+                      想體驗手作的魅力嗎？
+                    </h4>
+                    <p className="text-xs text-slate-400 mb-4 font-light">
+                      加入我們的週末工藝坊，打造屬於你的藝術品。
+                    </p>
+                    <div className="inline-flex items-center gap-1 text-primary text-sm font-bold group-hover:gap-2 transition-all">
+                      了解近期工作坊{" "}
+                      <span className="material-symbols-outlined text-sm">
+                        arrow_forward
+                      </span>
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold text-slate-800">
-                    {teacherName}
-                  </h3>
-                  <p className="text-primary text-sm font-medium mt-1">
-                    {teacherTitle}
-                  </p>
+                  <span className="material-symbols-outlined absolute -bottom-4 -right-4 text-7xl text-white/5 rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                    local_florist
+                  </span>
                 </div>
-
-                <p className="text-sm text-slate-500 leading-relaxed mb-8 border-t border-slate-50 pt-6">
-                  致力於推廣「惜物、愛物」的藝術生活觀。在 TimeCarve
-                  刻時，我希望帶領學員透過手作的溫度，在繁忙的日常中找回內心的平靜。
-                </p>
-
-                <div className="space-y-3">
-                  <button className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:-translate-y-0.5">
-                    <span className="material-symbols-outlined text-xl">
-                      calendar_add_on
-                    </span>
-                    預約此課程
-                  </button>
-                  <button className="w-full border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
-                    <span className="material-symbols-outlined text-xl">
-                      collections
-                    </span>
-                    查看更多作品
-                  </button>
-                </div>
-
-                <div className="mt-8 flex justify-center gap-4 text-slate-400">
-                  <button className="hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined">share</span>
-                  </button>
-                  <button className="hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined">favorite</span>
-                  </button>
-                  <button className="hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined">bookmark</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xl overflow-hidden relative group cursor-pointer hover:shadow-2xl transition-all">
-                <div className="relative z-10">
-                  <h4 className="font-bold mb-2 text-lg">
-                    想體驗手作的魅力嗎？
-                  </h4>
-                  <p className="text-xs text-slate-400 mb-4 font-light">
-                    加入我們的週末工藝坊，打造屬於你的藝術品。
-                  </p>
-                  <div className="inline-flex items-center gap-1 text-primary text-sm font-bold group-hover:gap-2 transition-all">
-                    了解近期工作坊{" "}
-                    <span className="material-symbols-outlined text-sm">
-                      arrow_forward
-                    </span>
-                  </div>
-                </div>
-                <span className="material-symbols-outlined absolute -bottom-4 -right-4 text-7xl text-white/5 rotate-12 group-hover:rotate-0 transition-transform duration-500">
-                  local_florist
-                </span>
               </div>
             </div>
           </div>
         </div>
       </main>
 
-      <footer className="bg-white border-t border-slate-100 py-12 mt-12">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2 opacity-60 grayscale hover:grayscale-0 transition-all">
-            <div className="w-6 h-6 bg-primary rounded-md flex items-center justify-center text-white">
-              <span className="material-symbols-outlined text-sm">waves</span>
-            </div>
-            <span className="text-sm font-bold tracking-tight text-slate-700">
-              TimeCarve 刻時
-            </span>
-          </div>
-          <div className="text-slate-400 text-xs font-light">
-            © 2024 TimeCarve 刻時. 手作藝術與身心美學. 版權所有
-          </div>
-          <div className="flex gap-6">
-            <Link
-              href="#"
-              className="text-xs text-slate-500 hover:text-primary"
-            >
-              服務條款
-            </Link>
-            <Link
-              href="#"
-              className="text-xs text-slate-500 hover:text-primary"
-            >
-              隱私政策
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

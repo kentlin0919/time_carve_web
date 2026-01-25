@@ -114,9 +114,8 @@ export default function AppSidebar({
     <>
       {/* Mobile Overlay */}
       <div
-        className={`fixed inset-0 bg-black/50 z-20 md:hidden transition-opacity duration-300 ${
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 bg-black/50 z-20 md:hidden transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
         onClick={onClose}
       />
 
@@ -158,8 +157,8 @@ export default function AppSidebar({
               {userRole === "student"
                 ? "學生"
                 : userRole === "teacher"
-                ? "教師"
-                : "訪客"}
+                  ? "教師"
+                  : "訪客"}
               )
             </div>
 
@@ -172,10 +171,9 @@ export default function AppSidebar({
                   onClick={() => onClose()} // Close on mobile click
                   className={`
                     flex items-center gap-3 px-4 py-3 rounded-xl transition-all group relative overflow-hidden
-                    ${
-                      isActive
-                        ? "bg-teal-500/10 text-teal-600 dark:text-teal-400 font-bold"
-                        : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 font-medium"
+                    ${isActive
+                      ? "bg-teal-500/10 text-teal-600 dark:text-teal-400 font-bold"
+                      : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 font-medium"
                     }
                   `}
                 >
@@ -183,9 +181,8 @@ export default function AppSidebar({
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-teal-500 rounded-r-full"></div>
                   )}
                   <span
-                    className={`material-symbols-outlined text-[22px] ${
-                      !isActive && "group-hover:scale-110 transition-transform"
-                    }`}
+                    className={`material-symbols-outlined text-[22px] ${!isActive && "group-hover:scale-110 transition-transform"
+                      }`}
                   >
                     {item.icon}
                   </span>
