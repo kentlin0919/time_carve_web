@@ -10,6 +10,7 @@ import {
   subMonths,
 } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { useModal } from "@/components/providers/ModalContext";
 
 export default function AdminBookingsPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -29,6 +30,7 @@ export default function AdminBookingsPage() {
     }[];
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const { showModal } = useModal();
 
   useEffect(() => {
     async function loadStats() {
@@ -40,7 +42,7 @@ export default function AdminBookingsPage() {
         setStats(data);
       } catch (error) {
         console.error("Failed to load admin stats", error);
-        alert("載入數據失敗");
+        showModal({ type: "error", title: "載入失敗", description: "無法載入數據", confirmText: "確定" });
       } finally {
         setLoading(false);
       }

@@ -3,6 +3,7 @@ import {
   CreateTeacherExperienceDTO,
   TeacherExperience,
 } from "@/lib/domain/teacher/experience";
+import { useModal } from "@/components/providers/ModalContext";
 
 interface Props {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export function ExperienceFormModal({
   onSubmit,
   initialData,
 }: Props) {
+  const { showModal } = useModal();
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(false);
   const [formData, setFormData] = useState<CreateTeacherExperienceDTO>({
@@ -68,7 +70,7 @@ export function ExperienceFormModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.organization || !formData.start_date) {
-      alert("請填寫必填欄位");
+      showModal({ type: "error", title: "資料不完整", description: "請填寫必填欄位", confirmText: "確定" });
       return;
     }
 
@@ -78,7 +80,7 @@ export function ExperienceFormModal({
       onClose();
     } catch (error) {
       console.error(error);
-      alert("儲存失敗");
+      showModal({ type: "error", title: "儲存失敗", description: "請稍後再試", confirmText: "確定" });
     } finally {
       setLoading(false);
     }
@@ -88,18 +90,16 @@ export function ExperienceFormModal({
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex items-center justify-center px-4 sm:px-6 transition-opacity duration-300 ${
-        isOpen ? "opacity-100" : "opacity-0"
-      }`}
+      className={`fixed inset-0 z-[100] flex items-center justify-center px-4 sm:px-6 transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0"
+        }`}
     >
       <div
         className="absolute inset-0 bg-slate-900/40 backdrop-blur-[6px]"
         onClick={onClose}
       ></div>
       <div
-        className={`relative w-full max-w-[500px] transform rounded-[32px] bg-white dark:bg-gray-800 p-8 text-left shadow-2xl transition-all duration-300 border border-slate-100 dark:border-gray-700 ${
-          isOpen ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
-        }`}
+        className={`relative w-full max-w-[500px] transform rounded-[32px] bg-white dark:bg-gray-800 p-8 text-left shadow-2xl transition-all duration-300 border border-slate-100 dark:border-gray-700 ${isOpen ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
+          }`}
       >
         <div className="flex flex-col items-center justify-center mb-6">
           <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">

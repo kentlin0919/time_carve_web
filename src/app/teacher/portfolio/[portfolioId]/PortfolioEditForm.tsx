@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Portfolio } from "@/lib/domain/portfolio/entity";
+import { useModal } from "@/components/providers/ModalContext";
 import dynamic from "next/dynamic";
 
 const RichTextEditor = dynamic(() => import("@/components/ui/RichTextEditor"), {
@@ -12,8 +13,10 @@ import {
   updatePortfolio,
   createPortfolio,
   uploadPortfolioMedia,
+  getPortfolioTypes,
 } from "@/app/actions/portfolio";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface PortfolioEditFormProps {
   initialData?: Portfolio;
@@ -27,6 +30,7 @@ export default function PortfolioEditForm({
   isCreating = false,
 }: PortfolioEditFormProps) {
   const router = useRouter();
+  const { showModal } = useModal();
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [origin, setOrigin] = useState("");
@@ -46,14 +50,32 @@ export default function PortfolioEditForm({
     }
   );
 
-  const categories = [
-    "活動假牙",
-    "全口假牙",
-    "牙體形態學",
-    "固定假牙",
-    "陶瓷修復",
-    "其他",
-  ];
+  // Load types
+  const [types, setTypes] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    getPortfolioTypes().then((data) => {
+      setTypes(data);
+      // Auto-set type_id if not set but category matches (migration helper)
+      if (!initialData?.type_id && initialData?.category) {
+        const match = data.find((t: any) => t.name === initialData.category);
+        if (match) {
+          setFormData(prev => ({ ...prev, type_id: match.id }));
+        }
+      }
+    });
+  }, [initialData]);
+
+  // Handle type change
+  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const typeId = e.target.value;
+    const type = types.find(t => t.id === typeId);
+    setFormData(prev => ({
+      ...prev,
+      type_id: typeId,
+      category: type?.name || "" // Sync category name for backward compatibility if needed, or just for display
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,14 +84,16 @@ export default function PortfolioEditForm({
     try {
       if (isCreating) {
         const newPortfolio = await createPortfolio(formData);
+        showModal({ type: "success", title: "建立成功", description: "作品集已成功建立", confirmText: "確定" });
         router.push(`/teacher/portfolio/${newPortfolio.id}`);
       } else if (initialData?.id) {
         await updatePortfolio(initialData.id, formData);
+        showModal({ type: "success", title: "儲存成功", description: "作品集已成功更新", confirmText: "確定" });
         router.refresh();
       }
     } catch (error) {
       console.error("Error saving portfolio:", error);
-      alert("儲存失敗，請重試");
+      showModal({ type: "error", title: "儲存失敗", description: "請稍後重試", confirmText: "確定" });
     } finally {
       setLoading(false);
     }
@@ -96,7 +120,7 @@ export default function PortfolioEditForm({
       router.refresh();
     } catch (error) {
       console.error("Upload failed:", error);
-      alert("部分檔案上傳失敗");
+      showModal({ type: "error", title: "上傳失敗", description: "部分檔案上傳失敗，請重試", confirmText: "確定" });
     } finally {
       // Clear input value to allow re-uploading same file if needed
       e.target.value = '';
@@ -118,7 +142,7 @@ export default function PortfolioEditForm({
       setFormData({ ...formData, cover_image_url: url });
     } catch (error) {
       console.error("Cover upload failed:", error);
-      alert("封面圖片上傳失敗");
+      showModal({ type: "error", title: "上傳失敗", description: "封面圖片上傳失敗", confirmText: "確定" });
     } finally {
       setLoading(false);
     }
@@ -282,23 +306,41 @@ export default function PortfolioEditForm({
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">
-                分類
-              </label>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">
+                  分類
+                </label>
+                <Link
+                  href="/teacher/portfolio/types"
+                  target="_blank"
+                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                >
+                  <span className="material-symbols-outlined text-[14px]">settings</span>
+                  管理分類
+                </Link>
+              </div>
               <select
-                value={formData.category || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, category: e.target.value })
-                }
+                value={formData.type_id || ""}
+                onChange={handleTypeChange}
                 className="w-full px-4 py-2 rounded-lg border border-border-light dark:border-border-dark bg-slate-50 dark:bg-slate-800/50"
               >
                 <option value="">選擇分類...</option>
-                {categories.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
+                {types.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
                   </option>
                 ))}
               </select>
+              <div className="mt-1 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => getPortfolioTypes().then(setTypes)}
+                  className="text-xs text-slate-500 hover:text-primary flex items-center gap-1"
+                >
+                  <span className="material-symbols-outlined text-[14px]">refresh</span>
+                  刷新列表
+                </button>
+              </div>
             </div>
 
             <div className="space-y-2">

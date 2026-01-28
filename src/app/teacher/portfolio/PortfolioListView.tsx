@@ -76,10 +76,10 @@ export default function PortfolioListView({
                 <div className="absolute top-3 right-3">
                   <span
                     className={`px-2 py-1 rounded text-[10px] font-bold backdrop-blur-sm border ${work.status === "published"
-                        ? "bg-green-100 text-green-700 border-green-200"
-                        : work.status === "draft"
-                          ? "bg-amber-100 text-amber-700 border-amber-200"
-                          : "bg-slate-200 text-slate-700 border-slate-300"
+                      ? "bg-green-100 text-green-700 border-green-200"
+                      : work.status === "draft"
+                        ? "bg-amber-100 text-amber-700 border-amber-200"
+                        : "bg-slate-200 text-slate-700 border-slate-300"
                       }`}
                   >
                     {work.status === "published"
@@ -93,7 +93,7 @@ export default function PortfolioListView({
               <div className="p-5 flex-1 flex flex-col">
                 <div className="flex items-start justify-between mb-2">
                   <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-                    {work.category || "未分類"}
+                    {work.type?.name || work.category || "未分類"}
                   </span>
                   <span className="text-xs text-text-sub">
                     {new Date(work.created_at).toLocaleDateString()}

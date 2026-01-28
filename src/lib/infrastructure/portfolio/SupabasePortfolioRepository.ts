@@ -1,6 +1,4 @@
-import { createClient } from '@/lib/supabase/client';
-
-import { Portfolio, PortfolioMedia } from '@/lib/domain/portfolio/entity';
+import { Portfolio, PortfolioMedia, PortfolioType } from '@/lib/domain/portfolio/entity';
 import { PortfolioRepository } from '@/lib/domain/portfolio/repository';
 import { Database } from '@/types/database.types';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -20,8 +18,10 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
         portfolio_media (*),
         portfolio_tags (
           tags (name)
-        )
-      `)
+        ),
+        type:portfolio_types (*)
+      `) // Added portfolio_types join
+
       .eq('id', id)
       .single();
 
@@ -74,7 +74,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
 
   async create(data: Partial<Portfolio>): Promise<Portfolio> {
     // Exclude virtual fields and undefined values
-    const { media, tags, ...dbData } = data;
+    const { media, tags, type, ...dbData } = data;
 
     // Ensure strict type for insert
     const insertData: any = { ...dbData };
@@ -103,6 +103,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
       likes_count,
       portfolio_media, // Join field to exclude
       portfolio_tags,  // Join field to exclude
+      type,            // Join field to exclude
       ...editableFields
     } = dbData as any;
 
@@ -183,12 +184,58 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
     if (error) throw error;
   }
 
+  // Types
+  async getTypesByTeacherId(teacherId: string): Promise<PortfolioType[]> {
+    const { data, error } = await this.client
+      .from('portfolio_types')
+      .select('*')
+      .eq('teacher_id', teacherId)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data as PortfolioType[] || [];
+  }
+
+  async createType(data: Partial<PortfolioType>): Promise<PortfolioType> {
+    const { data: result, error } = await this.client
+      .from('portfolio_types')
+      .insert(data as any)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return result as PortfolioType;
+  }
+
+  async updateType(id: string, data: Partial<PortfolioType>): Promise<PortfolioType> {
+    const { data: result, error } = await this.client
+      .from('portfolio_types')
+      .update(data as any)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return result as PortfolioType;
+  }
+
+  async deleteType(id: string): Promise<void> {
+    const { error } = await this.client
+      .from('portfolio_types')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  }
+
   private mapToEntity(data: any): Portfolio {
     return {
       ...data,
       status: data.status as any,
       tags: data.portfolio_tags?.map((pt: any) => pt.tags?.name).filter(Boolean) || [],
-      media: data.portfolio_media || []
+      media: data.portfolio_media || [],
+      type: data.type || null // Map joined type
     };
   }
 }

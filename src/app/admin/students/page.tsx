@@ -5,24 +5,26 @@ import { supabase } from "@/lib/supabase";
 import { Database } from "@/types/database.types";
 import { useModal } from "@/components/providers/ModalContext";
 
+
 // Define types for joined data
 type StudentWithDetails =
   Database["public"]["Tables"]["student_info"]["Row"] & {
     user_info: Database["public"]["Tables"]["user_info"]["Row"] | null;
     teacher_info:
-      | (Database["public"]["Tables"]["teacher_info"]["Row"] & {
-          user_info: Pick<
-            Database["public"]["Tables"]["user_info"]["Row"],
-            "name" | "email"
-          > | null;
-        })
-      | null;
+    | (Database["public"]["Tables"]["teacher_info"]["Row"] & {
+      user_info: Pick<
+        Database["public"]["Tables"]["user_info"]["Row"],
+        "name" | "email"
+      > | null;
+    })
+    | null;
   };
 
 export default function AdminStudentManagementPage() {
   const [loading, setLoading] = useState(true);
   const [students, setStudents] = useState<StudentWithDetails[]>([]);
   const { showModal } = useModal();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     "all" | "active" | "disabled"
@@ -326,31 +328,28 @@ export default function AdminStudentManagementPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setStatusFilter("all")}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-lg shadow-sm border transition-colors ${
-                      statusFilter === "all"
-                        ? "bg-white dark:bg-slate-700 text-slate-800 dark:text-white border-border-light dark:border-border-dark"
-                        : "text-text-sub hover:bg-white/50"
-                    }`}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-lg shadow-sm border transition-colors ${statusFilter === "all"
+                      ? "bg-white dark:bg-slate-700 text-slate-800 dark:text-white border-border-light dark:border-border-dark"
+                      : "text-text-sub hover:bg-white/50"
+                      }`}
                   >
                     全部
                   </button>
                   <button
                     onClick={() => setStatusFilter("active")}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-lg shadow-sm border transition-colors ${
-                      statusFilter === "active"
-                        ? "bg-emerald-50 text-emerald-600 border-emerald-200"
-                        : "text-text-sub hover:bg-white/50 border-transparent"
-                    }`}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-lg shadow-sm border transition-colors ${statusFilter === "active"
+                      ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                      : "text-text-sub hover:bg-white/50 border-transparent"
+                      }`}
                   >
                     啟用中
                   </button>
                   <button
                     onClick={() => setStatusFilter("disabled")}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-lg shadow-sm border transition-colors ${
-                      statusFilter === "disabled"
-                        ? "bg-gray-100 text-gray-500 border-gray-200"
-                        : "text-text-sub hover:bg-white/50 border-transparent"
-                    }`}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-lg shadow-sm border transition-colors ${statusFilter === "disabled"
+                      ? "bg-gray-100 text-gray-500 border-gray-200"
+                      : "text-text-sub hover:bg-white/50 border-transparent"
+                      }`}
                   >
                     已停用
                   </button>
@@ -403,11 +402,10 @@ export default function AdminStudentManagementPage() {
                       <div
                         key={student.id}
                         onClick={() => setSelectedStudentId(student.id)}
-                        className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors border-l-4 ${
-                          isSelected
-                            ? "border-primary bg-blue-50/50 dark:bg-blue-900/10"
-                            : "border-transparent"
-                        }`}
+                        className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors border-l-4 ${isSelected
+                          ? "border-primary bg-blue-50/50 dark:bg-blue-900/10"
+                          : "border-transparent"
+                          }`}
                       >
                         <div className="flex items-center gap-3">
                           <div className="relative">
@@ -420,11 +418,10 @@ export default function AdminStudentManagementPage() {
                               ></div>
                             ) : (
                               <div
-                                className={`size-12 rounded-full flex items-center justify-center font-bold text-lg ring-2 ring-white dark:ring-slate-800 shadow-sm ${
-                                  isInvalid
-                                    ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-                                    : "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
-                                }`}
+                                className={`size-12 rounded-full flex items-center justify-center font-bold text-lg ring-2 ring-white dark:ring-slate-800 shadow-sm ${isInvalid
+                                  ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                                  : "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                                  }`}
                               >
                                 {isInvalid
                                   ? "!"
@@ -444,13 +441,12 @@ export default function AdminStudentManagementPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <h4
-                              className={`text-sm font-bold truncate ${
-                                isInvalid
-                                  ? "text-red-600 dark:text-red-400 italic"
-                                  : userInfo!.is_active
+                              className={`text-sm font-bold truncate ${isInvalid
+                                ? "text-red-600 dark:text-red-400 italic"
+                                : userInfo!.is_active
                                   ? "text-slate-800 dark:text-white"
                                   : "text-gray-400 dark:text-gray-500"
-                              }`}
+                                }`}
                             >
                               {isInvalid
                                 ? "資料異常 (User Missing)"
@@ -536,7 +532,7 @@ export default function AdminStudentManagementPage() {
                               );
                             } catch (e: any) {
                               console.error(e);
-                              alert("刪除失敗: " + e.message);
+                              showModal({ type: "error", title: "刪除失敗", description: e.message, confirmText: "確定" });
                             }
                           },
                         });
@@ -608,11 +604,10 @@ export default function AdminStudentManagementPage() {
                                 />
                                 <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
                                 <span
-                                  className={`ml-2 text-sm font-bold ${
-                                    editForm.isActive
-                                      ? "text-primary"
-                                      : "text-slate-400"
-                                  }`}
+                                  className={`ml-2 text-sm font-bold ${editForm.isActive
+                                    ? "text-primary"
+                                    : "text-slate-400"
+                                    }`}
                                 >
                                   {editForm.isActive ? "啟用中" : "已停用"}
                                 </span>
@@ -875,8 +870,8 @@ export default function AdminStudentManagementPage() {
                                   加入時間:{" "}
                                   {selectedStudent.created_at
                                     ? new Date(
-                                        selectedStudent.created_at
-                                      ).toLocaleDateString()
+                                      selectedStudent.created_at
+                                    ).toLocaleDateString()
                                     : "N/A"}
                                 </span>
                               </p>

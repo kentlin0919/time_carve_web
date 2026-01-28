@@ -14,7 +14,7 @@ export default async function PreviewPage({ params }: PreviewPageProps) {
   return (
     <>
       {/* Preview Banner */}
-      <div className="fixed top-20 left-0 right-0 z-[60] bg-amber-500 text-white px-4 py-3 shadow-md flex items-center justify-between">
+      <div className="fixed top-0 left-0 right-0 z-[60] bg-amber-500 text-white px-4 py-3 shadow-md flex items-center justify-between">
         <div className="flex items-center gap-2 max-w-7xl mx-auto w-full px-6">
           <span className="material-symbols-outlined">visibility</span>
           <span className="font-bold">預覽模式</span>

@@ -29,4 +29,14 @@ export interface Portfolio {
   // Virtual/Joined fields
   media?: PortfolioMedia[];
   tags?: string[]; // Simplified tag names
+  type_id?: string | null;
+  type?: PortfolioType | null;
+}
+
+export interface PortfolioType {
+  id: string;
+  teacher_id: string;
+  name: string;
+  sort_order: number;
+  created_at: string;
 }

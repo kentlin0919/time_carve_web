@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { updateBookingStatus } from "@/app/actions/booking"; // We might need to implement this
 import { Booking } from "@/lib/domain/booking/entity";
 import { useRouter } from "next/navigation";
+import { useModal } from "@/components/providers/ModalContext";
 
 interface EditBookingDialogProps {
   booking: Booking | null;
@@ -29,6 +30,7 @@ export function EditBookingDialog({
   onSuccess,
 }: EditBookingDialogProps) {
   const router = useRouter();
+  const { showModal } = useModal();
   const [status, setStatus] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
@@ -60,7 +62,7 @@ export function EditBookingDialog({
       router.refresh();
     } catch (error) {
       console.error("Failed to update booking", error);
-      alert("更新失敗，請稍後再試。");
+      showModal({ type: "error", title: "更新失敗", description: "請稍後再試", confirmText: "確定" });
     } finally {
       setLoading(false);
     }

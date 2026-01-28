@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { useSystemModules } from "@/hooks/useSystemModules";
 import { supabase } from "@/lib/supabase";
+import { useModal } from "@/components/providers/ModalContext";
 
 export default function AdminModulesPage() {
   const { modules, loading, getModulesByIdentity, updateModule } =
     useSystemModules();
+  const { showModal } = useModal();
   const [toggling, setToggling] = useState<string | null>(null);
 
   // Edit State
@@ -29,7 +31,7 @@ export default function AdminModulesPage() {
       if (error) throw error;
     } catch (error) {
       console.error("Error toggling module:", error);
-      alert("Failed to update module status");
+      showModal({ type: "error", title: "更新失敗", description: "無法更新模組狀態", confirmText: "確定" });
       // 2. Rollback on error
       updateModule(id, { is_active: currentState });
     } finally {
@@ -66,7 +68,7 @@ export default function AdminModulesPage() {
       setEditingId(null);
     } catch (err) {
       console.error("Error updating module:", err);
-      alert("Failed to update module details");
+      showModal({ type: "error", title: "更新失敗", description: "無法更新模組詳情", confirmText: "確定" });
     }
   };
 
@@ -120,11 +122,10 @@ export default function AdminModulesPage() {
                   <div className="flex items-start gap-4 flex-1">
                     {/* Icon Preview */}
                     <div
-                      className={`p-2 rounded-lg flex-shrink-0 mt-1 ${
-                        module.is_active
-                          ? "bg-sky-50 text-sky-600 dark:bg-sky-900/20 dark:text-sky-400"
-                          : "bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500"
-                      }`}
+                      className={`p-2 rounded-lg flex-shrink-0 mt-1 ${module.is_active
+                        ? "bg-sky-50 text-sky-600 dark:bg-sky-900/20 dark:text-sky-400"
+                        : "bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500"
+                        }`}
                     >
                       <span className="material-symbols-outlined text-xl">
                         {editingId === module.id
@@ -248,15 +249,13 @@ export default function AdminModulesPage() {
                       disabled={toggling === module.id}
                       className={`
                         relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 ml-2 mt-1
-                        ${
-                          module.is_active
-                            ? "bg-sky-500"
-                            : "bg-gray-200 dark:bg-gray-700"
+                        ${module.is_active
+                          ? "bg-sky-500"
+                          : "bg-gray-200 dark:bg-gray-700"
                         }
-                        ${
-                          toggling === module.id
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
+                        ${toggling === module.id
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
                         }
                       `}
                       role="switch"
@@ -266,8 +265,7 @@ export default function AdminModulesPage() {
                         aria-hidden="true"
                         className={`
                           pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out
-                          ${
-                            module.is_active ? "translate-x-5" : "translate-x-0"
+                          ${module.is_active ? "translate-x-5" : "translate-x-0"
                           }
                         `}
                       />

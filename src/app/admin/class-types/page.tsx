@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
+import { useModal } from "@/components/providers/ModalContext";
 
 interface CourseType {
   class_type_id: number;
@@ -23,6 +24,7 @@ export default function CourseTypesPage() {
     "all"
   );
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const { showModal } = useModal();
 
   useEffect(() => {
     fetchTypes();
@@ -127,7 +129,7 @@ export default function CourseTypesPage() {
       .delete()
       .eq("class_type_id", id);
     if (error) {
-      alert("刪除失敗：" + error.message);
+      showModal({ type: "error", title: "刪除失敗", description: error.message, confirmText: "確定" });
     } else {
       fetchTypes();
     }
@@ -142,8 +144,8 @@ export default function CourseTypesPage() {
         statusFilter === "all"
           ? true
           : statusFilter === "active"
-          ? type.is_active
-          : !type.is_active;
+            ? type.is_active
+            : !type.is_active;
       return matchesQuery && matchesStatus;
     });
   }, [types, searchQuery, statusFilter]);
@@ -246,11 +248,10 @@ export default function CourseTypesPage() {
                   </td>
                   <td className="px-6 py-4">
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        type.is_active
-                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                          : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400"
-                      }`}
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${type.is_active
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                        : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400"
+                        }`}
                     >
                       {type.is_active ? "啟用" : "停用"}
                     </span>

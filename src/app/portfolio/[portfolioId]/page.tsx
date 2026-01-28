@@ -227,7 +227,7 @@ export default async function PublicPortfolioPage({
                     <a
                       href={
                         portfolio.teacher?.teacher_code
-                          ? `/teachers?teacher_code=${encodeURIComponent(portfolio.teacher.teacher_code)}`
+                          ? `/teachers/${encodeURIComponent(portfolio.teacher.teacher_code)}`
                           : '#'
                       }
                       className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:-translate-y-0.5"
@@ -237,36 +237,25 @@ export default async function PublicPortfolioPage({
                       </span>
                       教師個人檔案
                     </a>
-                    <button className="w-full border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                    <a
+                      href={
+                        portfolio.teacher?.teacher_code
+                          ? `/teachers/${encodeURIComponent(portfolio.teacher.teacher_code)}/portfolio`
+                          : '#'
+                      }
+                      className="w-full border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                    >
                       <span className="material-symbols-outlined text-xl">
                         collections
                       </span>
                       查看更多作品
-                    </button>
+                    </a>
                   </div>
 
 
                 </div>
 
-                <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xl overflow-hidden relative group cursor-pointer hover:shadow-2xl transition-all">
-                  <div className="relative z-10">
-                    <h4 className="font-bold mb-2 text-lg">
-                      想體驗手作的魅力嗎？
-                    </h4>
-                    <p className="text-xs text-slate-400 mb-4 font-light">
-                      加入我們的週末工藝坊，打造屬於你的藝術品。
-                    </p>
-                    <div className="inline-flex items-center gap-1 text-primary text-sm font-bold group-hover:gap-2 transition-all">
-                      了解近期工作坊{" "}
-                      <span className="material-symbols-outlined text-sm">
-                        arrow_forward
-                      </span>
-                    </div>
-                  </div>
-                  <span className="material-symbols-outlined absolute -bottom-4 -right-4 text-7xl text-white/5 rotate-12 group-hover:rotate-0 transition-transform duration-500">
-                    local_florist
-                  </span>
-                </div>
+
               </div>
             </div>
           </div>

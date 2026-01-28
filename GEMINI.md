@@ -72,6 +72,20 @@ TimeCarve 是一個現代化的家教預約與媒合平台，專注於提供高�
 -   支援 **Dark Mode** (class strategy)。
 -   保持 UI 一致性，參考現有組件 (`src/components/ui`).
 
+### UI Notifications
+-   **禁止使用 `toast()`**：所有使用者通知必須使用 `showModal()` (來自 `useModal` hook)。
+-   **用法**：
+    ```tsx
+    import { useModal } from "@/components/providers/ModalContext";
+    const { showModal } = useModal();
+    
+    // 成功訊息
+    showModal({ type: "success", title: "儲存成功", description: "資料已更新", confirmText: "確定" });
+    
+    // 錯誤訊息
+    showModal({ type: "error", title: "操作失敗", description: "請稍後再試", confirmText: "確定" });
+    ```
+
 ## 5. 功能盤點（PM 視角）
 
 ### 產品概覽
@@ -138,6 +152,9 @@ TimeCarve 是一個現代化的家教預約與媒合平台，專注於提供高�
     -   使用 `pnpm` 進行套件管理。
     -   目前正在開發「教師個人檔案編輯」與「課程管理」功能。
     -   DB Schema 包含 `user_info` (通用), `teacher_info` (教師詳情), `student_info`, `courses`, `bookings`.
+    -   **Test Credentials**:
+        -   Account: `teacher@test.com`
+        -   Password: `Kent0919`
 
 ## 7. Agent 行為準則 (Agent Directives)
 1.  **優先使用 Context7**: 回答複雜問題前，先查詢相關文檔。

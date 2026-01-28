@@ -456,6 +456,41 @@ export type Database = {
           },
         ]
       }
+      portfolio_types: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          sort_order: number | null
+          teacher_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          sort_order?: number | null
+          teacher_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          sort_order?: number | null
+          teacher_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_types_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       portfolios: {
         Row: {
           allow_comments: boolean | null
@@ -470,6 +505,7 @@ export type Database = {
           status: string | null
           teacher_id: string
           title: string
+          type_id: string | null
           updated_at: string | null
           views_count: number | null
         }
@@ -486,6 +522,7 @@ export type Database = {
           status?: string | null
           teacher_id: string
           title: string
+          type_id?: string | null
           updated_at?: string | null
           views_count?: number | null
         }
@@ -502,6 +539,7 @@ export type Database = {
           status?: string | null
           teacher_id?: string
           title?: string
+          type_id?: string | null
           updated_at?: string | null
           views_count?: number | null
         }
@@ -511,6 +549,13 @@ export type Database = {
             columns: ["teacher_id"]
             isOneToOne: false
             referencedRelation: "teacher_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portfolios_type_id_fkey"
+            columns: ["type_id"]
+            isOneToOne: false
+            referencedRelation: "portfolio_types"
             referencedColumns: ["id"]
           },
         ]

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { TeacherProfile, TeacherEducation } from "@/lib/domain/teacher/entity";
+import { useModal } from "@/components/providers/ModalContext";
 import Image from "next/image";
 import { updateUserAvatar } from "@/lib/avatar";
 import { ExperienceSection } from "./components/ExperienceSection";
@@ -108,14 +109,16 @@ export default function TeacherProfileForm({
     setProfile((prev) => ({ ...prev, [field]: value }));
   };
 
+  const { showModal } = useModal();
+
   const handleSave = async () => {
     setSaving(true);
     try {
       await onSave(profile);
-      alert("儲存成功！");
+      showModal({ type: "success", title: "儲存成功", description: "個人檔案已成功更新", confirmText: "確定" });
     } catch (e) {
       console.error(e);
-      alert(`儲存失敗：${(e as Error).message || "請稍後再試"}`);
+      showModal({ type: "error", title: "儲存失敗", description: (e as Error).message || "請稍後再試", confirmText: "確定" });
     } finally {
       setSaving(false);
     }
@@ -123,7 +126,7 @@ export default function TeacherProfileForm({
 
   const handleAddEducationSubmit = async () => {
     if (!newEdu.schoolName || !newEdu.startYear) {
-      alert("請填寫學校名稱與入學年份");
+      showModal({ type: "error", title: "資料不完整", description: "請填寫學校名稱與入學年份", confirmText: "確定" });
       return;
     }
 
@@ -179,7 +182,7 @@ export default function TeacherProfileForm({
       }
     } catch (err: any) {
       console.error(err);
-      alert("新增學歷失敗：" + err.message);
+      showModal({ type: "error", title: "新增學歷失敗", description: err.message, confirmText: "確定" });
     } finally {
       setAddingEduLoading(false);
     }
@@ -209,10 +212,10 @@ export default function TeacherProfileForm({
     if (!publicUrl) return;
     try {
       await navigator.clipboard.writeText(publicUrl);
-      alert("公開個人頁網址已複製！");
+      showModal({ type: "success", title: "複製成功", description: "公開個人頁網址已複製到剪貼簿", confirmText: "確定" });
     } catch (error) {
       console.error(error);
-      alert("複製失敗，請手動複製。");
+      showModal({ type: "error", title: "複製失敗", description: "請手動複製網址", confirmText: "確定" });
     }
   };
 
@@ -231,10 +234,10 @@ export default function TeacherProfileForm({
       });
       setProfile((prev) => ({ ...prev, avatarUrl: publicAvatarUrl }));
       await onSave({ avatarUrl: publicAvatarUrl });
-      alert("頭像更新成功！");
+      showModal({ type: "success", title: "頭像更新成功", description: "您的大頭貼已成功更新", confirmText: "確定" });
     } catch (error: any) {
       console.error(error);
-      alert(`頭像上傳失敗：${error.message || "請稍後再試"}`);
+      showModal({ type: "error", title: "頭像上傳失敗", description: error.message || "請稍後再試", confirmText: "確定" });
     } finally {
       setUploadingAvatar(false);
     }

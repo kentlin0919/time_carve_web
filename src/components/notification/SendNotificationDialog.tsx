@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea"; // Assuming textarea exists
 import { sendNotification } from "@/app/actions/notification";
 import { Loader2, Send } from "lucide-react";
 import { NotificationType } from "@/lib/domain/notification/entity";
+import { useModal } from "@/components/providers/ModalContext";
 
 interface SendNotificationDialogProps {
   recipientId: string;
@@ -32,6 +33,7 @@ export function SendNotificationDialog({
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const { showModal } = useModal();
 
   const handleSend = async () => {
     if (!title.trim() || !content.trim()) return;
@@ -43,11 +45,10 @@ export function SendNotificationDialog({
       setOpen(false);
       setTitle("");
       setContent("");
-      // Toast success (if available)
-      alert(`已發送通知給 ${recipientName}`);
+      showModal({ type: "success", title: "發送成功", description: `已發送通知給 ${recipientName}`, confirmText: "確定" });
     } catch (error) {
       console.error("Failed to send notification:", error);
-      alert("發送失敗，請稍後再試");
+      showModal({ type: "error", title: "發送失敗", description: "請稍後再試", confirmText: "確定" });
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useModal } from "@/components/providers/ModalContext";
 import { zhTW } from "date-fns/locale";
 import {
   format,
@@ -36,6 +37,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link"; // Added Link import
 
 export default function AvailabilityPage() {
+  const { showModal } = useModal();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [availability, setAvailability] = useState<any[]>([]);
@@ -135,7 +137,7 @@ export default function AvailabilityPage() {
         },
       ]);
       if (!result.success) {
-        alert("儲存失敗: " + result.error);
+        showModal({ type: "error", title: "儲存失敗", description: result.error, confirmText: "確定" });
         return;
       }
     } else {
@@ -152,12 +154,12 @@ export default function AvailabilityPage() {
         overrides
       );
       if (!result.success) {
-        alert("儲存失敗: " + result.error);
+        showModal({ type: "error", title: "儲存失敗", description: result.error, confirmText: "確定" });
         return;
       }
     }
 
-    alert("設定已儲存！");
+    showModal({ type: "success", title: "設定已儲存", description: "預約時段設定已成功更新", confirmText: "確定" });
 
     // Refresh
     const start = format(startOfMonth(currentDate), "yyyy-MM-dd");
@@ -410,11 +412,11 @@ export default function AvailabilityPage() {
                             ? "bg-primary text-white shadow-glow ring-4 ring-primary/20 scale-105 z-10"
                             : "hover:bg-primary/10 hover:text-primary hover:scale-105 text-slate-600 dark:text-slate-400 bg-transparent",
                           isUnavailable &&
-                            !isSelected &&
-                            "opacity-50 line-through text-red-400 decoration-red-400",
+                          !isSelected &&
+                          "opacity-50 line-through text-red-400 decoration-red-400",
                           hasSlots &&
-                            !isSelected &&
-                            "font-bold text-slate-800 dark:text-white"
+                          !isSelected &&
+                          "font-bold text-slate-800 dark:text-white"
                         )}
                       >
                         <span className="text-sm font-medium">{d.day}</span>

@@ -114,3 +114,44 @@ export async function uploadPortfolioCoverImage(formData: FormData) {
 
   return publicUrl;
 }
+
+// Portfolio Types Actions
+export async function getPortfolioTypes() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Unauthorized');
+
+  const repository = await getRepository();
+  // Assuming teacher_id is same as user.id as per schema
+  return await repository.getTypesByTeacherId(user.id);
+}
+
+export async function createPortfolioType(data: { name: string, sort_order?: number }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Unauthorized');
+
+  const repository = await getRepository();
+  const result = await repository.createType({
+    ...data,
+    teacher_id: user.id
+  });
+  revalidatePath('/teacher/portfolio/types');
+  revalidatePath('/teacher/portfolio'); // Also revalidate main list/edit forms likely to use this
+  return result;
+}
+
+export async function updatePortfolioType(id: string, data: { name?: string, sort_order?: number }) {
+  const repository = await getRepository();
+  const result = await repository.updateType(id, data);
+  revalidatePath('/teacher/portfolio/types');
+  revalidatePath('/teacher/portfolio');
+  return result;
+}
+
+export async function deletePortfolioType(id: string) {
+  const repository = await getRepository();
+  await repository.deleteType(id);
+  revalidatePath('/teacher/portfolio/types');
+  revalidatePath('/teacher/portfolio');
+}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import Select from "@/components/ui/Select";
+import { useModal } from "@/components/providers/ModalContext";
 
 interface Tag {
   id: string;
@@ -28,6 +29,7 @@ export default function TagsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [currentTag, setCurrentTag] = useState<Partial<Tag>>({});
   const [error, setError] = useState<string | null>(null);
+  const { showModal } = useModal();
 
   useEffect(() => {
     fetchTags();
@@ -43,7 +45,7 @@ export default function TagsPage() {
           name
         )
       `);
-    
+
     if (error) {
       console.error("Error fetching teachers:", error);
     } else {
@@ -118,7 +120,7 @@ export default function TagsPage() {
 
     const { error } = await supabase.from("tags").delete().eq("id", id);
     if (error) {
-      alert("刪除失敗：" + error.message);
+      showModal({ type: "error", title: "刪除失敗", description: error.message, confirmText: "確定" });
     } else {
       fetchTags();
     }

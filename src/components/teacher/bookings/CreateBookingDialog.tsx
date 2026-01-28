@@ -16,7 +16,7 @@ import { getTeacherStudents } from "@/app/actions/student";
 import { getTeacherCourses } from "@/app/actions/teacher";
 import { useRouter } from "next/navigation";
 import { Course } from "@/lib/domain/course/entity";
-import { useToast } from "@/hooks/use-toast";
+import { useModal } from "@/components/providers/ModalContext";
 import { TimeSlotSelector, TimeRange } from "../availability/TimeSlotSelector";
 import { DatePicker } from "@/components/ui/date-picker";
 import { format } from "date-fns";
@@ -35,7 +35,7 @@ export function CreateBookingDialog({
   teacherId,
 }: CreateBookingDialogProps) {
   const router = useRouter();
-  const { toast } = useToast();
+  const { showModal } = useModal();
 
   const [loading, setLoading] = useState(false);
   const [students, setStudents] = useState<
@@ -67,16 +67,17 @@ export function CreateBookingDialog({
           setCourses(coursesData);
         } catch (error) {
           console.error("Failed to fetch initial data:", error);
-          toast({
-            variant: "destructive",
+          showModal({
+            type: "error",
             title: "載入失敗",
             description: "無法載入學生或課程列表",
+            confirmText: "確定",
           });
         }
       };
       fetchData();
     }
-  }, [open, teacherId, toast]);
+  }, [open, teacherId]);
 
   const handleSubmit = async () => {
     if (
@@ -86,10 +87,11 @@ export function CreateBookingDialog({
       !startTime ||
       !endTime
     ) {
-      toast({
-        variant: "destructive",
+      showModal({
+        type: "error",
         title: "資料不完整",
         description: "請填寫所有必填欄位",
+        confirmText: "確定",
       });
       return;
     }
@@ -106,9 +108,11 @@ export function CreateBookingDialog({
         notes,
       });
 
-      toast({
+      showModal({
+        type: "success",
         title: "預約建立成功",
         description: "已成功為學生建立預約",
+        confirmText: "確定",
       });
 
       onOpenChange(false);
@@ -117,10 +121,11 @@ export function CreateBookingDialog({
       router.refresh();
     } catch (error) {
       console.error("Failed to create booking:", error);
-      toast({
-        variant: "destructive",
+      showModal({
+        type: "error",
         title: "預約建立失敗",
         description: error instanceof Error ? error.message : "請稍後再試",
+        confirmText: "確定",
       });
     } finally {
       setLoading(false);
