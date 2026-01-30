@@ -269,6 +269,25 @@ TimeCarve 是一個現代化的家教預約與媒合平台，專注於提供高�
 - 使用 Google Calendar API 的 `conferenceData` 欄位來生成 Google Meet。
 - 儲存 `google_event_id` 於 `bookings` 表中以便追蹤與異動。
 
+### 5.5 個人資料與學歷規範 (Profile & Education Standards)
+
+不論是教師或學生，在個人資料（Profile）設定中關於「學歷」的部分必須包含以下欄位與功能：
+
+#### 1. 學校資訊
+- **就讀學校**: 必須提供搜尋或選擇功能，讓使用者填寫目前或最高學歷之學校。
+
+#### 2. 學位等級 (Degree Level)
+- 使用者必須能從以下選項中選擇：
+    - **學士 (Bachelor's)**
+    - **碩士 (Master's)**
+    - **博士 (Doctorate)**
+
+#### 3. 就學狀態 (Enrollment Status)
+- 使用者必須能從以下選項中選擇：
+    - **就讀中 (Currently studying)**
+    - **已畢業 (Graduated)**
+    - **肄業 (Dropped out)**
+
 ### 主要用戶流程
 -   **教師**：註冊 → 建立個人品牌 → 上架課程 → 設定可預約時段 → 接收預約 → 授課 → 記錄學員/收入。
 -   **學生**：瀏覽教師/課程 → 選擇時段 → 預約 → 上課 → 查看學習紀錄。
