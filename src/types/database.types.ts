@@ -590,6 +590,70 @@ export type Database = {
         }
         Relationships: []
       }
+      student_course_progress: {
+        Row: {
+          completed_section_ids: Json | null
+          course_id: string
+          created_at: string
+          current_section_id: string | null
+          id: string
+          progress_percentage: number | null
+          status: string
+          student_id: string
+          teacher_id: string
+          teacher_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          completed_section_ids?: Json | null
+          course_id: string
+          created_at?: string
+          current_section_id?: string | null
+          id?: string
+          progress_percentage?: number | null
+          status?: string
+          student_id: string
+          teacher_id: string
+          teacher_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          completed_section_ids?: Json | null
+          course_id?: string
+          created_at?: string
+          current_section_id?: string | null
+          id?: string
+          progress_percentage?: number | null
+          status?: string
+          student_id?: string
+          teacher_id?: string
+          teacher_notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_course_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_course_progress_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student_info"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_course_progress_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_info"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_education: {
         Row: {
           created_at: string | null

@@ -44,6 +44,10 @@ export default function TeacherSettingsPage() {
     line: false,
   });
 
+  // New Reminder Config
+  const [reminderEmailEnabled, setReminderEmailEnabled] = useState(false);
+  const [reminderMinutes, setReminderMinutes] = useState(30);
+
   // Integration State
   const [googleEnabled, setGoogleEnabled] = useState(false);
   const [lineEnabled, setLineEnabled] = useState(false);
@@ -75,7 +79,7 @@ export default function TeacherSettingsPage() {
         setEmail(userData.email || "");
         setAvatarUrl(
           userData.avatar_url ||
-            "https://ui-avatars.com/api/?name=" + (userData.name || "User")
+          "https://ui-avatars.com/api/?name=" + (userData.name || "User")
         );
       }
 
@@ -99,6 +103,11 @@ export default function TeacherSettingsPage() {
         if (notifSettings.reminder) setNotifReminder(notifSettings.reminder);
         if (notifSettings.cancel) setNotifCancel(notifSettings.cancel);
         if (notifSettings.system) setNotifSystem(notifSettings.system);
+
+        // Reminder settings (top-level fields)
+        const td = teacherData as any;
+        setReminderEmailEnabled(td.enable_email_reminders || false);
+        setReminderMinutes(td.reminder_minutes || 30);
 
         setGoogleEnabled(teacherData.google_calendar_enabled || false);
         setLineEnabled(teacherData.line_notify_enabled || false);
@@ -138,6 +147,8 @@ export default function TeacherSettingsPage() {
             cancel: notifCancel,
             system: notifSystem,
           },
+          enable_email_reminders: reminderEmailEnabled,
+          reminder_minutes: reminderMinutes,
           google_calendar_enabled: googleEnabled,
           line_notify_enabled: lineEnabled,
           line_notify_token: lineToken,
@@ -470,6 +481,21 @@ export default function TeacherSettingsPage() {
                           <span className="text-xs text-text-sub">
                             課程開始前 2 小時
                           </span>
+                          {/* Specific Reminder Settings */}
+                          <div className="mt-2 flex items-center gap-2">
+                            <label className="text-xs text-text-sub">自動發信與提醒：</label>
+                            <select
+                              value={reminderMinutes}
+                              onChange={e => setReminderMinutes(Number(e.target.value))}
+                              className="text-xs px-2 py-1 rounded border border-border-light dark:border-border-dark bg-slate-50 dark:bg-slate-700 outline-none"
+                            >
+                              <option value={15}>15 分鐘前</option>
+                              <option value={30}>30 分鐘前</option>
+                              <option value={60}>1 小時前</option>
+                              <option value={120}>2 小時前</option>
+                              <option value={1440}>24 小時前</option>
+                            </select>
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-center">

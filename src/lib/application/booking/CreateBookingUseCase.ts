@@ -8,11 +8,17 @@ export class CreateBookingUseCase {
     private bookingRepository: BookingRepository,
     private availabilityRepository: AvailabilityRepository,
     private notificationRepository?: NotificationRepository
-  ) {}
+  ) { }
 
   async execute(
     booking: Omit<Booking, "id" | "status" | "studentName" | "studentEmail" | "courseTitle">
   ): Promise<Booking> {
+    // 0. Check for Unpaid Bookings
+    const unpaidCount = await this.bookingRepository.getUnpaidBookingsCount(booking.studentId);
+    if (unpaidCount > 0) {
+      throw new Error("您有尚未付款的課程，請先完成付款後再預約新課程。");
+    }
+
     // 1. Validate Availability
     await this.validateAvailability(booking);
 
@@ -35,7 +41,7 @@ export class CreateBookingUseCase {
 
   private async validateAvailability(booking: Omit<Booking, "id" | "status" | "studentName" | "studentEmail" | "courseTitle">) {
     const { teacherId, bookingDate, startTime, endTime } = booking;
-    
+
     // Fetch availability for this specific day
     const [weekly, overrides] = await Promise.all([
       this.availabilityRepository.getWeeklyAvailability(teacherId),
@@ -43,8 +49,8 @@ export class CreateBookingUseCase {
     ]);
 
     // Check Overrides first
-    const dayOverride = overrides.find((o:any) => o.date === bookingDate);
-    
+    const dayOverride = overrides.find((o: any) => o.date === bookingDate);
+
     let allowedRanges: { start: string, end: string }[] = [];
 
     if (dayOverride) {
@@ -52,21 +58,21 @@ export class CreateBookingUseCase {
         throw new Error("Selected date is marked as unavailable by the teacher.");
       }
       if (dayOverride.startTime && dayOverride.endTime) {
-         allowedRanges.push({ start: dayOverride.startTime, end: dayOverride.endTime });
+        allowedRanges.push({ start: dayOverride.startTime, end: dayOverride.endTime });
       }
     } else {
       // Fallback to weekly schedule
       const dateObj = new Date(bookingDate);
       const dayOfWeek = dateObj.getDay(); // 0=Sun, 1=Mon...
-      
-      const weeklyRules = weekly.filter((w:any) => w.dayOfWeek === dayOfWeek);
-      weeklyRules.forEach((w:any) => {
-         allowedRanges.push({ start: w.startTime, end: w.endTime });
+
+      const weeklyRules = weekly.filter((w: any) => w.dayOfWeek === dayOfWeek);
+      weeklyRules.forEach((w: any) => {
+        allowedRanges.push({ start: w.startTime, end: w.endTime });
       });
     }
 
     if (allowedRanges.length === 0) {
-       throw new Error("Teacher is not available on this day.");
+      throw new Error("Teacher is not available on this day.");
     }
 
     // Convert time to minutes for comparison
@@ -80,9 +86,9 @@ export class CreateBookingUseCase {
 
     // Check if booking fits completely within ANY of the allowed ranges
     const isWithinRange = allowedRanges.some(range => {
-       const rangeStart = toMinutes(range.start);
-       const rangeEnd = toMinutes(range.end);
-       return bookingStart >= rangeStart && bookingEnd <= rangeEnd;
+      const rangeStart = toMinutes(range.start);
+      const rangeEnd = toMinutes(range.end);
+      return bookingStart >= rangeStart && bookingEnd <= rangeEnd;
     });
 
     if (!isWithinRange) {

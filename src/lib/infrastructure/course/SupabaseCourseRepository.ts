@@ -38,6 +38,22 @@ export class SupabaseCourseRepository implements CourseRepository {
     return this.mapToEntity(data);
   }
 
+  async getByIds(ids: string[]): Promise<Course[]> {
+    if (ids.length === 0) return [];
+
+    const { data, error } = await this.supabase
+      .from("courses")
+      .select("*, course_tags(tags(name))")
+      .in("id", ids);
+
+    if (error) {
+      console.error("Error fetching courses by IDs:", error);
+      return [];
+    }
+
+    return data.map(this.mapToEntity);
+  }
+
   async createCourse(course: Omit<Course, "id" | "createdAt" | "updatedAt">): Promise<Course | null> {
     const { data, error } = await this.supabase
       .from("courses")
@@ -102,10 +118,10 @@ export class SupabaseCourseRepository implements CourseRepository {
       // Need teacherId. Fallback to existing data's teacher_id if not in partial update
       let teacherId = course.teacherId;
       if (!teacherId && data) {
-         teacherId = data.teacher_id || undefined;
+        teacherId = data.teacher_id || undefined;
       }
       if (teacherId) {
-         await this.saveTags(id, teacherId, course.tags);
+        await this.saveTags(id, teacherId, course.tags);
       }
     }
 
@@ -115,7 +131,7 @@ export class SupabaseCourseRepository implements CourseRepository {
   private async saveTags(courseId: string, teacherId: string, tags: { text: string }[]) {
     // 1. Resolve Tag IDs (create if not exists)
     const tagIds: string[] = [];
-    
+
     for (const tag of tags) {
       const tagName = tag.text.trim();
       if (!tagName) continue;
@@ -138,7 +154,7 @@ export class SupabaseCourseRepository implements CourseRepository {
           .insert({ teacher_id: teacherId, name: tagName })
           .select("id")
           .single();
-        
+
         if (newTag) targetTagId = newTag.id;
         else if (error) console.error("Error creating tag:", error);
       }
@@ -191,10 +207,10 @@ export class SupabaseCourseRepository implements CourseRepository {
       status: data.is_active ? "active" : "draft",
       sections: (data.sections as CourseSection[]) || [],
       expectedLearningOutcomes: data.expected_learning_outcomes || [],
-      
+
       // Default UI fields
       icon: "school",
-      iconColor: "blue", 
+      iconColor: "blue",
       tags: mappedTags,
       priceUnit: "小時",
 

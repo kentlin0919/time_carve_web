@@ -1,7 +1,11 @@
 {
   "deno.enable": true,
   "deno.unstable": true,
-  "deno.enablePaths": ["supabase/functions"],
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "deno.enablePaths": [
+    "supabase/functions"
+  ],
   "cSpell.words": [
     "ABCDEFGHJKLMNPQRSTUVWXYZ",
     "fkey",

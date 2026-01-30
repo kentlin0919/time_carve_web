@@ -31,7 +31,7 @@ export class SupabaseBookingRepository implements BookingRepository {
         )
       `)
       .eq("teacher_id", teacherId)
-      .neq("booking_status.status_key", "cancelled") 
+      .neq("booking_status.status_key", "cancelled")
       .neq("booking_status.status_key", "rejected")
       .gte("booking_date", startDate)
       .lte("booking_date", endDate);
@@ -66,14 +66,14 @@ export class SupabaseBookingRepository implements BookingRepository {
       .select("id")
       .eq("status_key", "pending")
       .single();
-    
+
     if (statusError || !statusData) {
       throw new Error("Could not find 'pending' booking status");
     }
 
     const { data, error } = await this.client
       .from("bookings")
-        // @ts-ignore
+      // @ts-ignore
       .insert({
         teacher_id: booking.teacherId,
         student_id: booking.studentId,
@@ -162,5 +162,30 @@ export class SupabaseBookingRepository implements BookingRepository {
       courseType: item.course?.course_type || "",
       coursePrice: item.course?.price || 0,
     }));
+  }
+
+  async getUnpaidBookingsCount(studentId: string): Promise<number> {
+    // Get IDs for active statuses (pending, confirmed)
+    const { data: activeStatuses } = await this.client
+      .from("booking_statuses")
+      .select("id")
+      .in("status_key", ["pending", "confirmed"]);
+
+    if (!activeStatuses || activeStatuses.length === 0) return 0;
+    const activeIds = activeStatuses.map(s => s.id);
+
+    const { count, error } = await this.client
+      .from("bookings")
+      .select("*", { count: "exact", head: true })
+      .eq("student_id", studentId)
+      .is("paid_at", null)
+      .in("status_id", activeIds);
+
+    if (error) {
+      console.error("Error checking unpaid bookings:", error);
+      return 0;
+    }
+
+    return count || 0;
   }
 }

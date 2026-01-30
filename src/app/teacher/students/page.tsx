@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { Database } from "@/types/database.types";
 import { useModal } from "@/components/providers/ModalContext";
 import { SendNotificationDialog } from "@/components/notification/SendNotificationDialog";
+import { StudentProgressSection } from "./components/StudentProgressSection";
 
 type StudentWithInfo = Database["public"]["Tables"]["student_info"]["Row"] & {
   user_info: Database["public"]["Tables"]["user_info"]["Row"] | null;
@@ -18,6 +19,7 @@ export default function TeacherStudentManagementPage() {
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
     null
   );
+  const [currentUserId, setCurrentUserId] = useState<string>("");
 
   // Edit Mode State
   const [isEditing, setIsEditing] = useState(false);
@@ -47,9 +49,11 @@ export default function TeacherStudentManagementPage() {
 
       const { data: teacherData, error: teacherError } = await supabase
         .from("teacher_info")
-        .select("teacher_code")
+        .select("teacher_code, id")
         .eq("id", user.id)
         .single();
+
+      if (user) setCurrentUserId(user.id);
 
       if (teacherError) throw teacherError;
       if (!teacherData) return;
@@ -201,9 +205,8 @@ export default function TeacherStudentManagementPage() {
           <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-240px)] lg:h-[calc(100vh-280px)] min-h-[500px]">
             {/* Left ListView */}
             <div
-              className={`lg:w-1/3 flex-col bg-surface-light dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card overflow-hidden ${
-                selectedStudentId ? "hidden lg:flex" : "flex"
-              }`}
+              className={`lg:w-1/3 flex-col bg-surface-light dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card overflow-hidden ${selectedStudentId ? "hidden lg:flex" : "flex"
+                }`}
             >
               <div className="p-4 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
                 <div className="flex items-center gap-2">
@@ -235,11 +238,10 @@ export default function TeacherStudentManagementPage() {
                       <div
                         key={student.id}
                         onClick={() => setSelectedStudentId(student.id)}
-                        className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors border-l-4 ${
-                          isSelected
+                        className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors border-l-4 ${isSelected
                             ? "border-primary bg-blue-50/50 dark:bg-blue-900/10"
                             : "border-transparent"
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center gap-3">
                           <div className="relative">
@@ -277,9 +279,8 @@ export default function TeacherStudentManagementPage() {
 
             {/* Right Panel - View or Edit */}
             <div
-              className={`lg:w-2/3 bg-surface-light dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex-col overflow-hidden ${
-                selectedStudentId ? "flex" : "hidden lg:flex"
-              }`}
+              className={`lg:w-2/3 bg-surface-light dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex-col overflow-hidden ${selectedStudentId ? "flex" : "hidden lg:flex"
+                }`}
             >
               {selectedStudent && selectedStudent.user_info ? (
                 isEditing ? (
@@ -352,11 +353,10 @@ export default function TeacherStudentManagementPage() {
                                 />
                                 <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
                                 <span
-                                  className={`ml-2 text-sm font-bold ${
-                                    editForm.isActive
+                                  className={`ml-2 text-sm font-bold ${editForm.isActive
                                       ? "text-primary"
                                       : "text-slate-400"
-                                  }`}
+                                    }`}
                                 >
                                   {editForm.isActive ? "啟用中" : "已停用"}
                                 </span>
@@ -380,8 +380,8 @@ export default function TeacherStudentManagementPage() {
                                 <span className="font-medium text-slate-800 dark:text-gray-300">
                                   {selectedStudent.created_at
                                     ? new Date(
-                                        selectedStudent.created_at
-                                      ).toLocaleDateString()
+                                      selectedStudent.created_at
+                                    ).toLocaleDateString()
                                     : "N/A"}
                                 </span>
                               </div>
@@ -395,8 +395,8 @@ export default function TeacherStudentManagementPage() {
                                 <span className="font-medium text-slate-800 dark:text-gray-300">
                                   {selectedStudent.updated_at
                                     ? new Date(
-                                        selectedStudent.updated_at
-                                      ).toLocaleString()
+                                      selectedStudent.updated_at
+                                    ).toLocaleString()
                                     : "N/A"}
                                 </span>
                               </div>
@@ -496,11 +496,11 @@ export default function TeacherStudentManagementPage() {
                                 課程與學習狀態
                               </h3>
                             </div>
-                            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/10 text-yellow-800 dark:text-yellow-200 rounded-lg text-sm flex items-center gap-2">
-                              <span className="material-symbols-outlined">
-                                construction
-                              </span>
-                              <span>課程進度、學員標籤等功能開發中...</span>
+                            <div className="bg-white dark:bg-slate-800/50 rounded-lg p-2">
+                              <StudentProgressSection
+                                studentId={selectedStudent.id}
+                                teacherId={currentUserId}
+                              />
                             </div>
                             <div className="absolute right-0 top-0 size-24 bg-orange-50/50 dark:bg-orange-900/5 rounded-bl-full pointer-events-none"></div>
                           </div>
@@ -616,8 +616,8 @@ export default function TeacherStudentManagementPage() {
                                   加入時間:{" "}
                                   {selectedStudent.created_at
                                     ? new Date(
-                                        selectedStudent.created_at
-                                      ).toLocaleDateString()
+                                      selectedStudent.created_at
+                                    ).toLocaleDateString()
                                     : "N/A"}
                                 </p>
                               </div>
