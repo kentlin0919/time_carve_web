@@ -124,7 +124,7 @@ TimeCarve 是一個現代化的家教預約與媒合平台，專注於提供高�
     -   個人品牌管理（Profile & Portfolio 編輯）
     -   課程管理（Courses: 建立/編輯/上下架）
     -   可預約時段管理（Availability）
-    -   預約管理（Bookings: 查看/審核/取消）
+    -   預約管理（Bookings: 查看/審核/取消/改期管理-提出與審核）
     -   學生管理（Students CRM）
     -   學員課程進度管理（Progress Tracking: 依學生更新教學進度、章節完成度、教學筆記）
     -   教案管理（Lesson Plans）
@@ -136,7 +136,7 @@ TimeCarve 是一個現代化的家教預約與媒合平台，專注於提供高�
     -   學生儀表板（Dashboard）
     -   課程探索與詳情（Courses）
     -   預約流程（Booking Flow）
-    -   我的預約（Bookings: 歷史/即將到來）
+    -   我的預約（Bookings: 歷史/即將到來/改期管理-提出與審核）
     -   學習進度與歷程（Progress: 查看課程百分比、章節完成狀態、教師評語）
     -   個人資料設定（Profile）
     -   通知中心（Notifications: 接收課前提醒郵件）
@@ -284,9 +284,30 @@ TimeCarve 是一個現代化的家教預約與媒合平台，專注於提供高�
 
 #### 3. 就學狀態 (Enrollment Status)
 - 使用者必須能從以下選項中選擇：
+    - **就學狀態 (Enrollment Status)**:
     - **就讀中 (Currently studying)**
     - **已畢業 (Graduated)**
     - **肄業 (Dropped out)**
+
+### 5.6 新增功能規劃：預約改期申請 (Rescheduling Request)
+
+針對已付款且狀態為「已確認」的預約，學生或教師可提出改期申請。
+
+#### 1. 業務規則 (Business Rules)
+- **提出申請**: 學生或教師皆可對未來且已確認的預約發起「改期申請」，並提供新的建議時段。
+- **審核機制**: 另一方必須在系統中「同意」或「拒絕」該申請。
+- **自動更新**: 若對方同意，系統將自動更新 `bookings` 的時間，並同步更新 Google Calendar。
+- **狀態流轉**: 申請中預約狀態保持不變，但標記有「改期申請中」狀態，直到決定結果。
+
+#### 2. 資料庫變更 (Database Schema)
+- **`booking_reschedule_requests`** (新資料表):
+    - `id` (UUID)
+    - `booking_id` (UUID, FK)
+    - `requested_by` (UUID, FK): 發起人
+    - `original_start_time` (Timestamp)
+    - `new_start_time` (Timestamp)
+    - `status` (String): `pending`, `approved`, `rejected`
+    - `reason` (Text): 改期原因
 
 ### 主要用戶流程
 -   **教師**：註冊 → 建立個人品牌 → 上架課程 → 設定可預約時段 → 接收預約 → 授課 → 記錄學員/收入。

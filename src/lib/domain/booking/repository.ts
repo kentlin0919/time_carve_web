@@ -7,4 +7,8 @@ export interface BookingRepository {
   getAllBookings(startDate: string, endDate: string): Promise<Booking[]>;
   createBooking(booking: Omit<Booking, "id" | "status" | "studentName" | "studentEmail" | "courseTitle">): Promise<Booking>;
   getUnpaidBookingsCount(studentId: string): Promise<number>;
+  getPendingBookingsCount(teacherId: string): Promise<number>;
+  getPendingBookings(teacherId: string): Promise<Booking[]>;
+  updateBooking(id: string, data: Partial<Booking>): Promise<void>;
+  getBookingById(id: string): Promise<Booking | null>;
 }

@@ -37,7 +37,7 @@ export class SupabaseReportRepository implements ReportRepository {
       .gte('booking_date', startDate.toISOString())
       .lte('booking_date', endDate.toISOString());
 
-    if (currentError) throw currentError;
+    if (currentError) throw new Error(`Failed to fetch current stats: ${currentError.message} (Details: ${currentError.details || 'none'}, Hint: ${currentError.hint || 'none'})`);
 
     // Query 2: Previous Period
     const { data: prevData, error: prevError } = await this.supabase
@@ -53,7 +53,7 @@ export class SupabaseReportRepository implements ReportRepository {
       .gte('booking_date', prevStartDate.toISOString())
       .lt('booking_date', startDate.toISOString());
 
-    if (prevError) throw prevError;
+    if (prevError) throw new Error(`Failed to fetch previous stats: ${prevError.message} (Details: ${prevError.details || 'none'}, Hint: ${prevError.hint || 'none'})`);
 
     const calc = (bookings: any[]) => {
       const paidBookings = bookings.filter(b => {
@@ -106,10 +106,10 @@ export class SupabaseReportRepository implements ReportRepository {
       .eq('teacher_id', teacherId)
       .gte('booking_date', startDate.toISOString());
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to fetch revenue trends: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
 
     const monthlyRevenue: Record<string, number> = {};
-    
+
     // Initialize months
     let iter = new Date(startDate);
     while (iter <= now) {
@@ -136,7 +136,7 @@ export class SupabaseReportRepository implements ReportRepository {
   }
 
   async getCourseRevenueDistribution(teacherId: string): Promise<CourseRevenueDistribution[]> {
-      const { data, error } = await this.supabase
+    const { data, error } = await this.supabase
       .from('bookings')
       .select(`
         price,
@@ -145,7 +145,7 @@ export class SupabaseReportRepository implements ReportRepository {
       `)
       .eq('teacher_id', teacherId);
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to fetch course revenue: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
 
     const distribution: Record<string, number> = {};
     let total = 0;
@@ -192,7 +192,7 @@ export class SupabaseReportRepository implements ReportRepository {
     // We can search course title or student name if we flatten or text search is setup.
     // For now, simple client side filter or assuming minimal search needed?
     // Actually, listing recent transactions is key.
-    
+
     // Pagination
     const page = filter.page || 1;
     const pageSize = filter.pageSize || 10;
@@ -202,7 +202,7 @@ export class SupabaseReportRepository implements ReportRepository {
     query = query.order('booking_date', { ascending: false }).range(from, to);
 
     const { data, error, count } = await query;
-    if (error) throw error;
+    if (error) throw new Error(`Failed to fetch transactions: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
 
     const transactions = (data || []).map((b: any) => ({
       id: b.id,

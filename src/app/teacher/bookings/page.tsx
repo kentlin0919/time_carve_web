@@ -2,20 +2,23 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { getTeacherBookings } from "@/app/actions/booking";
+import { getTeacherBookings, getTeacherPendingBookings } from "@/app/actions/booking";
 import { getTeacherProfile } from "@/app/actions/teacher";
 import { Booking } from "@/lib/domain/booking/entity";
 import { TeacherProfile } from "@/lib/domain/teacher/entity";
 import { EditBookingDialog } from "@/components/teacher/bookings/EditBookingDialog";
 import { CreateBookingDialog } from "@/components/teacher/bookings/CreateBookingDialog";
+import { ReviewRescheduleDialog } from "@/components/bookings/ReviewRescheduleDialog";
 
 export default function TeacherBookingsPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [pendingBookings, setPendingBookings] = useState<Booking[]>([]); // New State
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<TeacherProfile | null>(null);
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
+  const [reviewingBooking, setReviewingBooking] = useState<Booking | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   // Fetch profile on mount
@@ -54,8 +57,14 @@ export default function TeacherBookingsPage() {
     try {
       const start = new Date(year, month, 1);
       const end = new Date(year, month + 1, 0); // Last day of month
-      const data = await getTeacherBookings(start, end);
+
+      const [data, pendingData] = await Promise.all([
+        getTeacherBookings(start, end),
+        getTeacherPendingBookings()
+      ]);
+
       setBookings(data);
+      setPendingBookings(pendingData);
     } catch (error) {
       console.error("Failed to fetch bookings:", error);
     } finally {
@@ -82,6 +91,9 @@ export default function TeacherBookingsPage() {
       else if (booking.status === "pending") color = "orange";
       else if (booking.status === "cancelled") color = "red";
 
+      // Check for pending reschedule
+      const hasPendingReschedule = booking.rescheduleRequests?.some(r => r.status === 'pending');
+
       grouped[day].push({
         time: booking.startTime.substring(0, 5), // HH:mm
         name: booking.studentName || "Unknown",
@@ -91,6 +103,7 @@ export default function TeacherBookingsPage() {
         courseTitle: booking.courseTitle,
         email: booking.studentEmail,
         id: booking.id,
+        hasPendingReschedule // Add this flag
       });
     });
     return grouped;
@@ -158,6 +171,40 @@ export default function TeacherBookingsPage() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
+        {/* Pending Banner */}
+        {pendingBookings.length > 0 && (
+          <div className="bg-orange-50 border-b border-orange-100 px-8 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-orange-600">
+                pending_actions
+              </span>
+              <div>
+                <p className="text-sm font-bold text-orange-800">
+                  您有 {pendingBookings.length} 筆待確認的預約
+                </p>
+                <p className="text-xs text-orange-600">
+                  這些預約可能在其他月份，請盡快審核。
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                // For now, perhaps just log or open a dialog?
+                // Or maybe we should append these pending bookings to the list temporarily to view them?
+                // Let's implement a simple modal or expander to view them later.
+                // For MVP, just scrolling to current date isn't enough.
+                // We'll trigger the EditBookingDialog for the first one for now as a quick fix or just let the user know.
+                if (pendingBookings[0]) {
+                  setEditingBooking(pendingBookings[0]);
+                }
+              }}
+              className="px-4 py-2 bg-white border border-orange-200 text-orange-700 text-xs font-bold rounded-lg hover:bg-orange-50 transition-colors shadow-sm"
+            >
+              立即審核 ({pendingBookings.length})
+            </button>
+          </div>
+        )}
+
         {/* Toolbar */}
         <div className="px-8 py-6 pb-2">
           <div className="flex flex-col xl:flex-row justify-between gap-4">
@@ -323,21 +370,19 @@ export default function TeacherBookingsPage() {
                       className={`
                                     border-b border-r border-border-light dark:border-border-dark p-2 min-h-[100px] 
                                     transition-colors cursor-pointer group relative
-                                    ${
-                                      isSelected
-                                        ? "bg-blue-50/40 dark:bg-primary/5 hover:bg-blue-50/60 dark:hover:bg-primary/10 ring-1 ring-inset ring-primary/30 z-10"
-                                        : "bg-white dark:bg-surface-dark hover:bg-slate-50 dark:hover:bg-slate-800/30"
-                                    }
+                                    ${isSelected
+                          ? "bg-blue-50/40 dark:bg-primary/5 hover:bg-blue-50/60 dark:hover:bg-primary/10 ring-1 ring-inset ring-primary/30 z-10"
+                          : "bg-white dark:bg-surface-dark hover:bg-slate-50 dark:hover:bg-slate-800/30"
+                        }
                                 `}
                     >
                       <span
                         className={`
                                     flex items-center justify-center w-7 h-7 rounded-full text-sm font-bold 
-                                    ${
-                                      isSelected
-                                        ? "bg-primary text-white shadow-sm"
-                                        : "text-slate-700 dark:text-slate-300"
-                                    }
+                                    ${isSelected
+                            ? "bg-primary text-white shadow-sm"
+                            : "text-slate-700 dark:text-slate-300"
+                          }
                                 `}
                       >
                         {d.day}
@@ -348,15 +393,14 @@ export default function TeacherBookingsPage() {
                             key={evIdx}
                             className={`
                                             px-2 py-1 rounded text-[11px] font-medium truncate shadow-sm
-                                            ${
-                                              ev.color === "red"
-                                                ? "bg-red-100 text-red-700 border border-red-200 opacity-70"
-                                                : ev.color === "orange"
-                                                ? "bg-orange-100 text-orange-700 border border-orange-200"
-                                                : ev.color === "emerald"
-                                                ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-                                                : "bg-slate-100 text-slate-700 border border-slate-200"
-                                            }
+                                            ${ev.color === "red"
+                                ? "bg-red-100 text-red-700 border border-red-200 opacity-70"
+                                : ev.color === "orange"
+                                  ? "bg-orange-100 text-orange-700 border border-orange-200"
+                                  : ev.color === "emerald"
+                                    ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                                    : "bg-slate-100 text-slate-700 border border-slate-200"
+                              }
                                         `}
                           >
                             {ev.time} {ev.name}
@@ -388,7 +432,7 @@ export default function TeacherBookingsPage() {
                 <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded text-xs font-bold">
                   {
                     ["週日", "週一", "週二", "週三", "週四", "週五", "週六"][
-                      selectedDate.getDay()
+                    selectedDate.getDay()
                     ]
                   }
                 </div>
@@ -413,19 +457,18 @@ export default function TeacherBookingsPage() {
                             </span>
                           </div>
                           <span
-                            className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${
-                              ev.status === "confirmed"
-                                ? "bg-emerald-100 text-emerald-700 border-emerald-200"
-                                : ev.status === "pending"
+                            className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${ev.status === "confirmed"
+                              ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                              : ev.status === "pending"
                                 ? "bg-orange-100 text-orange-700 border-orange-200"
                                 : "bg-slate-100 text-slate-700 border-slate-200"
-                            }`}
+                              }`}
                           >
                             {ev.status === "confirmed"
                               ? "已確認"
                               : ev.status === "pending"
-                              ? "待確認"
-                              : ev.status}
+                                ? "待確認"
+                                : ev.status}
                           </span>
                         </div>
                         <h4 className="text-sm font-bold text-slate-800 dark:text-white mb-1">
@@ -448,18 +491,45 @@ export default function TeacherBookingsPage() {
                           <button className="flex-1 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-transparent hover:border-border-light dark:hover:border-border-dark transition-all shadow-sm">
                             查看詳情
                           </button>
-                          <button
-                            onClick={() => {
-                              // Find the original booking object
-                              const booking = bookings.find(
-                                (b) => b.id === ev.id
-                              );
-                              if (booking) setEditingBooking(booking);
-                            }}
-                            className="flex-1 py-1.5 text-xs font-medium text-primary dark:text-primary hover:bg-primary hover:text-white rounded-lg bg-white/50 dark:bg-slate-800/50 border border-transparent hover:border-primary transition-all shadow-sm"
-                          >
-                            編輯預約
-                          </button>
+
+                          {/* @ts-ignore */}
+                          {ev.hasPendingReschedule ? (
+                            <button
+                              onClick={() => {
+                                const booking = bookings.find((b) => b.id === ev.id);
+                                if (booking) {
+                                  // Find the pending request
+                                  const request = booking.rescheduleRequests?.find(r => r.status === 'pending');
+                                  if (request) {
+                                    // We need to pass the request ID to the dialog.
+                                    // But the dialog takes `booking` and assumes we want to edit it?
+                                    // No, ReviewRescheduleDialog takes `booking`, `requestId`, `newDate`...
+                                    // Wait, ReviewRescheduleDialog props are: { open, onOpenChange, booking, request, onSuccess }
+                                    // I need to check ReviewRescheduleDialog props.
+                                    // For now, I'll set the reviewingBooking and handle the rest in the dialog component area.
+                                    setReviewingBooking(booking);
+                                  }
+                                }
+                              }}
+                              className="flex-1 py-1.5 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-lg shadow-sm transition-all flex items-center justify-center gap-1"
+                            >
+                              <span className="material-symbols-outlined text-[14px]">update</span>
+                              審核改期
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                // Find the original booking object
+                                const booking = bookings.find(
+                                  (b) => b.id === ev.id
+                                );
+                                if (booking) setEditingBooking(booking);
+                              }}
+                              className="flex-1 py-1.5 text-xs font-medium text-primary dark:text-primary hover:bg-primary hover:text-white rounded-lg bg-white/50 dark:bg-slate-800/50 border border-transparent hover:border-primary transition-all shadow-sm"
+                            >
+                              編輯預約
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -554,6 +624,30 @@ export default function TeacherBookingsPage() {
         }}
         onSuccess={refreshBookings}
       />
+
+      {reviewingBooking && (() => {
+        const request = reviewingBooking.rescheduleRequests?.find(r => r.status === 'pending');
+        if (!request) return null;
+        return (
+          <ReviewRescheduleDialog
+            open={!!reviewingBooking}
+            onOpenChange={(open) => {
+              if (!open) setReviewingBooking(null);
+            }}
+            requestId={request.id}
+            currentDate={reviewingBooking.bookingDate}
+            currentTime={`${reviewingBooking.startTime.slice(0, 5)} - ${reviewingBooking.endTime.slice(0, 5)}`}
+            newDate={new Date(request.newStartTime).toLocaleDateString()}
+            newTime={new Date(request.newStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            reason={request.reason}
+            requestedBy={reviewingBooking.studentName || "學生"}
+            onSuccess={() => {
+              setReviewingBooking(null);
+              refreshBookings();
+            }}
+          />
+        );
+      })()}
 
       {profile && (
         <CreateBookingDialog

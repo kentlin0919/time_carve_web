@@ -34,6 +34,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      booking_reschedule_requests: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          new_start_time: string
+          original_start_time: string
+          reason: string | null
+          requested_by: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          new_start_time: string
+          original_start_time: string
+          reason?: string | null
+          requested_by: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          new_start_time?: string
+          original_start_time?: string
+          reason?: string | null
+          requested_by?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_reschedule_requests_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_statuses: {
         Row: {
           color: string
@@ -74,6 +118,9 @@ export type Database = {
           notes: string | null
           paid_at: string | null
           price: number | null
+          purchase_id: string | null
+          reminder_sent: boolean | null
+          reminder_sent_at: string | null
           start_time: string
           status_id: number
           student_id: string
@@ -89,6 +136,9 @@ export type Database = {
           notes?: string | null
           paid_at?: string | null
           price?: number | null
+          purchase_id?: string | null
+          reminder_sent?: boolean | null
+          reminder_sent_at?: string | null
           start_time: string
           status_id: number
           student_id: string
@@ -104,6 +154,9 @@ export type Database = {
           notes?: string | null
           paid_at?: string | null
           price?: number | null
+          purchase_id?: string | null
+          reminder_sent?: boolean | null
+          reminder_sent_at?: string | null
           start_time?: string
           status_id?: number
           student_id?: string
@@ -116,6 +169,13 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "course_purchases"
             referencedColumns: ["id"]
           },
           {
@@ -194,6 +254,57 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_purchases: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          price_paid: number
+          remaining_hours: number
+          status: string
+          student_id: string
+          total_hours: number
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          price_paid?: number
+          remaining_hours?: number
+          status?: string
+          student_id: string
+          total_hours?: number
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          price_paid?: number
+          remaining_hours?: number
+          status?: string
+          student_id?: string
+          total_hours?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_purchases_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_purchases_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student_info"
             referencedColumns: ["id"]
           },
         ]
@@ -657,6 +768,7 @@ export type Database = {
       student_education: {
         Row: {
           created_at: string | null
+          degree_level: string | null
           department: string | null
           end_year: number | null
           grade: string | null
@@ -669,6 +781,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          degree_level?: string | null
           department?: string | null
           end_year?: number | null
           grade?: string | null
@@ -681,6 +794,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          degree_level?: string | null
           department?: string | null
           end_year?: number | null
           grade?: string | null
@@ -1038,6 +1152,7 @@ export type Database = {
           bio: string | null
           booking_settings: Json | null
           created_at: string
+          enable_email_reminders: boolean | null
           experience_years: number | null
           google_calendar_enabled: boolean | null
           id: string
@@ -1047,6 +1162,7 @@ export type Database = {
           notification_settings: Json | null
           philosophy_items: Json
           philosophy_subtitle: string | null
+          reminder_minutes: number | null
           specialties: string[] | null
           teacher_code: string
           title: string | null
@@ -1057,6 +1173,7 @@ export type Database = {
           bio?: string | null
           booking_settings?: Json | null
           created_at?: string
+          enable_email_reminders?: boolean | null
           experience_years?: number | null
           google_calendar_enabled?: boolean | null
           id: string
@@ -1066,6 +1183,7 @@ export type Database = {
           notification_settings?: Json | null
           philosophy_items?: Json
           philosophy_subtitle?: string | null
+          reminder_minutes?: number | null
           specialties?: string[] | null
           teacher_code: string
           title?: string | null
@@ -1076,6 +1194,7 @@ export type Database = {
           bio?: string | null
           booking_settings?: Json | null
           created_at?: string
+          enable_email_reminders?: boolean | null
           experience_years?: number | null
           google_calendar_enabled?: boolean | null
           id?: string
@@ -1085,6 +1204,7 @@ export type Database = {
           notification_settings?: Json | null
           philosophy_items?: Json
           philosophy_subtitle?: string | null
+          reminder_minutes?: number | null
           specialties?: string[] | null
           teacher_code?: string
           title?: string | null

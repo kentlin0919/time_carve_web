@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useSystemModules } from "@/hooks/useSystemModules";
+import { getTeacherPendingBookingCount } from "@/app/actions/booking";
 
 export default function TeacherSidebar({
   isOpen,
@@ -23,6 +24,7 @@ export default function TeacherSidebar({
   const [avatarUrl, setAvatarUrl] = useState(
     "https://lh3.googleusercontent.com/aida-public/AB6AXuDO6reZcrIx4TpNaoa2cHckBMT5jGOVcSOgCiWFeFHvwR5BhOlm6EzZoO1nDA5jhhdVnLiS3xPcbfPeCVuaPW7x9yyQ1OpilXHhQqZf7s1ilC_fOFoonIf98HRVehAYuVriM8l3I0MrYHIn39RVWEj_4jU-wlh_BemOK4VeRUNedhA-sln2p5816fNCRlBCziM3mk1IHmY1EIx1yw45MJkIcGFi9fz7JcPrVe1C0mU8MYnl7CYlnU1BMQEyHUmuypSHuwydpWLgPOU"
   );
+  const [pendingCount, setPendingCount] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,6 +54,14 @@ export default function TeacherSidebar({
         if ((teacherData as any).title) setTitle((teacherData as any).title);
         if (teacherData.teacher_code) setTeacherCode(teacherData.teacher_code);
       }
+
+      // Fetch pending count
+      try {
+        const count = await getTeacherPendingBookingCount();
+        setPendingCount(count);
+      } catch (e) {
+        console.error("Failed to fetch pending count", e);
+      }
     };
     fetchData();
   }, []);
@@ -75,7 +85,7 @@ export default function TeacherSidebar({
           name: "預約管理",
           href: "/teacher/bookings",
           icon: "calendar_month",
-          badge: "3",
+          badge: pendingCount > 0 ? String(pendingCount) : undefined,
           key: "teacher_bookings",
         },
         {
@@ -127,9 +137,8 @@ export default function TeacherSidebar({
     <>
       {/* Mobile Overlay */}
       <div
-        className={`fixed inset-0 bg-black/50 z-30 lg:hidden transition-opacity duration-300 ${
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 bg-black/50 z-30 lg:hidden transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
         onClick={onClose}
       />
 
@@ -210,19 +219,17 @@ export default function TeacherSidebar({
                           onClick={() => onClose()}
                           className={`
                                       flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all font-medium group
-                                      ${
-                                        isActive
-                                          ? "bg-primary/10 text-primary-dark dark:text-primary border-l-4 border-primary"
-                                          : "text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary"
-                                      }
+                                      ${isActive
+                              ? "bg-primary/10 text-primary-dark dark:text-primary border-l-4 border-primary"
+                              : "text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary"
+                            }
                                   `}
                         >
                           <span
-                            className={`material-symbols-outlined ${
-                              isActive
+                            className={`material-symbols-outlined ${isActive
                                 ? "filled"
                                 : "group-hover:text-primary transition-colors"
-                            }`}
+                              }`}
                           >
                             {item.icon}
                           </span>
@@ -246,16 +253,14 @@ export default function TeacherSidebar({
               <Link
                 href="/teacher/settings"
                 onClick={() => onClose()}
-                className={`flex w-full items-center gap-3 px-3 py-2 rounded-lg transition-all ${
-                  pathname === "/teacher/settings"
+                className={`flex w-full items-center gap-3 px-3 py-2 rounded-lg transition-all ${pathname === "/teacher/settings"
                     ? "bg-primary/10 text-primary-dark dark:text-primary border-l-4 border-primary"
                     : "text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-                }`}
+                  }`}
               >
                 <span
-                  className={`material-symbols-outlined ${
-                    pathname === "/teacher/settings" ? "filled" : ""
-                  }`}
+                  className={`material-symbols-outlined ${pathname === "/teacher/settings" ? "filled" : ""
+                    }`}
                 >
                   settings
                 </span>

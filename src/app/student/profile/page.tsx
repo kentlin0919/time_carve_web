@@ -55,6 +55,7 @@ export default function StudentProfilePage() {
   const [school, setSchool] = useState("");
   const [status, setStatus] = useState("studying");
   const [department, setDepartment] = useState("");
+  const [degreeLevel, setDegreeLevel] = useState("");
 
   useEffect(() => {
     fetchProfile();
@@ -109,6 +110,7 @@ export default function StudentProfilePage() {
             setStatus(eduData.education_statuses.status_key);
           }
           setDepartment(eduData.department || "");
+          setDegreeLevel(eduData.degree_level || "");
         }
       }
     } catch (error) {
@@ -143,7 +145,7 @@ export default function StudentProfilePage() {
       }
 
       // 2. Update Education
-      console.log("Updating education with:", { school, status, department });
+      console.log("Updating education with:", { school, status, department, degreeLevel });
 
       // Get/Create School ID
       const matchedSchool = schools.find((s) => s.name === school);
@@ -190,6 +192,7 @@ export default function StudentProfilePage() {
         school_id: schoolId,
         status_id: statusData.id,
         department: department,
+        degree_level: degreeLevel,
         updated_at: new Date().toISOString(),
       };
 
@@ -346,8 +349,7 @@ export default function StudentProfilePage() {
                       className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
                       src={
                         avatarPreview ||
-                        `https://ui-avatars.com/api/?name=${
-                          name || "User"
+                        `https://ui-avatars.com/api/?name=${name || "User"
                         }&background=random`
                       }
                     />
@@ -486,6 +488,13 @@ export default function StudentProfilePage() {
                 setStatus={setStatus}
                 department={department}
                 setDepartment={setDepartment}
+                degreeLevel={degreeLevel}
+                setDegreeLevel={setDegreeLevel}
+                labels={{
+                  school: "就讀學校",
+                  status: "就學狀態",
+                  department: "科系/所",
+                }}
               />
             </div>
           </div>

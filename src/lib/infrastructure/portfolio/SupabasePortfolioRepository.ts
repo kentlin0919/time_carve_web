@@ -43,7 +43,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
       .order('created_at', { ascending: false });
 
     if (error) {
-      throw error;
+      throw new Error(`Failed to get portfolios by teacher: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
     }
 
     return data.map((item: any) => this.mapToEntity(item));
@@ -85,7 +85,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to create portfolio: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
     return this.mapToEntity(result);
   }
 
@@ -119,7 +119,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
 
     if (error) {
       console.error('[Repo] Update error:', error);
-      throw error;
+      throw new Error(`Failed to update portfolio: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
     }
     return this.mapToEntity(result);
   }
@@ -130,7 +130,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
       .delete()
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to delete portfolio: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
   }
 
   async addMedia(data: Partial<PortfolioMedia>): Promise<PortfolioMedia> {
@@ -140,7 +140,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to add media: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
     return result as PortfolioMedia;
   }
 
@@ -150,7 +150,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
       .delete()
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to delete media: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
   }
 
   async updateMediaOrder(id: string, order: number): Promise<void> {
@@ -159,7 +159,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
       .update({ sort_order: order })
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to update media order: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
   }
 
   async updateTags(portfolioId: string, tagIds: string[]): Promise<void> {
@@ -181,7 +181,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
         }))
       );
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to update tags: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
   }
 
   // Types
@@ -193,7 +193,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to get portfolio types: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
     return data as PortfolioType[] || [];
   }
 
@@ -204,7 +204,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to create type: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
     return result as PortfolioType;
   }
 
@@ -216,7 +216,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to update type: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
     return result as PortfolioType;
   }
 
@@ -226,7 +226,7 @@ export class SupabasePortfolioRepository implements PortfolioRepository {
       .delete()
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to delete type: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
   }
 
   private mapToEntity(data: any): Portfolio {

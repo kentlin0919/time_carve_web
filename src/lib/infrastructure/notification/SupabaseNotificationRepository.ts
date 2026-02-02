@@ -4,7 +4,7 @@ import { Notification, NotificationType } from '@/lib/domain/notification/entity
 import { NotificationRepository } from '@/lib/domain/notification/repository';
 
 export class SupabaseNotificationRepository implements NotificationRepository {
-  constructor(private supabase: SupabaseClient<Database>) {}
+  constructor(private supabase: SupabaseClient<Database>) { }
 
   async getNotifications(userId: string): Promise<Notification[]> {
     const { data, error } = await this.supabase
@@ -13,7 +13,7 @@ export class SupabaseNotificationRepository implements NotificationRepository {
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to fetch notifications: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
 
     return data.map(this.mapToEntity);
   }
@@ -24,7 +24,7 @@ export class SupabaseNotificationRepository implements NotificationRepository {
       .update({ is_read: true })
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to mark notification as read: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
   }
 
   async createNotification(userId: string, type: NotificationType, title: string, content: string, data?: Record<string, any>): Promise<void> {
@@ -39,7 +39,7 @@ export class SupabaseNotificationRepository implements NotificationRepository {
         data: data || null,
       });
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to create notification: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
   }
 
   private mapToEntity(row: Database['public']['Tables']['notifications']['Row']): Notification {

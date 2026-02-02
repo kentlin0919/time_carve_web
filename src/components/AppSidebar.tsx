@@ -6,6 +6,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
+import { getTeacherPendingBookingCount } from "@/app/actions/booking";
+
 export default function AppSidebar({
   isOpen,
   onClose,
@@ -21,6 +23,7 @@ export default function AppSidebar({
   const [loading, setLoading] = useState(true);
   const [userInfo, setUserInfo] = useState<any>(null);
   const [studentInfo, setStudentInfo] = useState<any>(null);
+  const [pendingCount, setPendingCount] = useState(0);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -41,6 +44,13 @@ export default function AppSidebar({
         // Given existing code uses "AuthGuard", let's assume path segments imply role for navigation context
         if (pathname.startsWith("/teacher")) {
           setUserRole("teacher");
+          // Fetch pending count for teacher
+          try {
+            const count = await getTeacherPendingBookingCount();
+            setPendingCount(count);
+          } catch (e) {
+            console.error("Failed to fetch pending count", e);
+          }
         } else if (pathname.startsWith("/student")) {
           setUserRole("student");
         } else if (pathname.startsWith("/admin")) {
@@ -91,7 +101,12 @@ export default function AppSidebar({
       return [
         { name: "儀表板", href: "/teacher/dashboard", icon: "dashboard" },
         { name: "課程管理", href: "/teacher/courses", icon: "edit_note" },
-        { name: "預約管理", href: "/teacher/bookings", icon: "calendar_today" },
+        {
+          name: "預約管理",
+          href: "/teacher/bookings",
+          icon: "calendar_today",
+          badge: pendingCount > 0 ? pendingCount : undefined
+        },
         { name: "學生列表", href: "/teacher/students", icon: "groups" },
         { name: "作品集", href: "/teacher/portfolio", icon: "photo_library" },
         { name: "報表", href: "/teacher/reports", icon: "bar_chart" },
@@ -187,6 +202,13 @@ export default function AppSidebar({
                     {item.icon}
                   </span>
                   <span className="text-sm">{item.name}</span>
+                  {/* @ts-ignore */}
+                  {item.badge && (
+                    <span className="ml-auto bg-orange-500/20 text-orange-600 dark:text-orange-400 text-xs font-bold px-2 py-0.5 rounded-full">
+                      {/* @ts-ignore */}
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               );
             })}

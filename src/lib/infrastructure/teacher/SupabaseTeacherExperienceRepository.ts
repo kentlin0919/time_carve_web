@@ -5,7 +5,7 @@ import { CreateTeacherExperienceDTO, TeacherExperience, UpdateTeacherExperienceD
 
 export class SupabaseTeacherExperienceRepository implements TeacherExperienceRepository {
   // Use generic database type or any to bypass potential type generation lag in IDE
-  constructor(private supabase: SupabaseClient<any>) {}
+  constructor(private supabase: SupabaseClient<any>) { }
 
   async getExperience(teacherId: string): Promise<TeacherExperience[]> {
     const { data, error } = await this.supabase
@@ -15,7 +15,7 @@ export class SupabaseTeacherExperienceRepository implements TeacherExperienceRep
       .order('end_date', { ascending: false, nullsFirst: true }) // Current jobs first
       .order('start_date', { ascending: false });
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to get experience: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
     return data;
   }
 
@@ -29,7 +29,7 @@ export class SupabaseTeacherExperienceRepository implements TeacherExperienceRep
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to add experience: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
     return data;
   }
 
@@ -41,7 +41,7 @@ export class SupabaseTeacherExperienceRepository implements TeacherExperienceRep
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to update experience: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
     return data;
   }
 
@@ -51,6 +51,6 @@ export class SupabaseTeacherExperienceRepository implements TeacherExperienceRep
       .delete()
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) throw new Error(`Failed to delete experience: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
   }
 }

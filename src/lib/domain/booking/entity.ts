@@ -14,4 +14,10 @@ export interface Booking {
   courseType?: string;
   coursePrice?: number;
   teacherName?: string;
+  purchaseId?: string | null;
+  paidAt?: string | null;
+  price?: number;
+  // Reschedule info
+  rescheduleRequests?: any[]; // Avoiding circular dependency or import issues, simplify as any[] or generic types for now. 
+  // Ideally import { RescheduleRequest } from "./RescheduleRequest";
 }

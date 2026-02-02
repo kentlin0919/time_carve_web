@@ -57,7 +57,7 @@ export class SupabaseAvailabilityRepository implements AvailabilityRepository {
     // Note: Supabase doesn't support transactions in client-side JS directly without RPC, 
     // but for now we can do delete then insert. 
     // A better approach might be to upsert or use a specific RPC if atomic safety is critical.
-    
+
     // 1. Delete existing weekly availability for this teacher
     const { error: deleteError } = await this.client
       .from("teacher_availability_weekly")
@@ -65,7 +65,7 @@ export class SupabaseAvailabilityRepository implements AvailabilityRepository {
       .eq("teacher_id", teacherId);
 
     if (deleteError) {
-      throw new Error(`Failed to delete existing availability: ${deleteError.message}`);
+      throw new Error(`Failed to delete existing availability: ${deleteError.message} (Details: ${deleteError.details || 'none'}, Hint: ${deleteError.hint || 'none'})`);
     }
 
     // 2. Insert new availability
@@ -82,7 +82,7 @@ export class SupabaseAvailabilityRepository implements AvailabilityRepository {
         );
 
       if (insertError) {
-        throw new Error(`Failed to insert new availability: ${insertError.message}`);
+        throw new Error(`Failed to insert new availability: ${insertError.message} (Details: ${insertError.details || 'none'}, Hint: ${insertError.hint || 'none'})`);
       }
     }
   }
@@ -96,7 +96,7 @@ export class SupabaseAvailabilityRepository implements AvailabilityRepository {
       .eq("date", date);
 
     if (deleteError) {
-      throw new Error(`Failed to delete existing overrides: ${deleteError.message}`);
+      throw new Error(`Failed to delete existing overrides: ${deleteError.message} (Details: ${deleteError.details || 'none'}, Hint: ${deleteError.hint || 'none'})`);
     }
 
     // 2. Insert new overrides
@@ -114,7 +114,7 @@ export class SupabaseAvailabilityRepository implements AvailabilityRepository {
         );
 
       if (insertError) {
-        throw new Error(`Failed to save overrides: ${insertError.message}`);
+        throw new Error(`Failed to save overrides: ${insertError.message} (Details: ${insertError.details || 'none'}, Hint: ${insertError.hint || 'none'})`);
       }
     }
   }
@@ -126,7 +126,7 @@ export class SupabaseAvailabilityRepository implements AvailabilityRepository {
       .eq("id", overrideId);
 
     if (error) {
-      throw new Error(`Failed to delete override: ${error.message}`);
+      throw new Error(`Failed to delete override: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
     }
   }
 }

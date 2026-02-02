@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useModal } from "@/components/providers/ModalContext";
 import { useStudentCourseDetail } from "../../courses/useStudentTeacherCourses";
 import { getAvailableSlots, createBooking } from "@/app/actions/booking";
+import { getStudentPurchases } from "@/app/actions/purchase";
+import { Purchase } from "@/lib/domain/purchase/entity";
 
 // Helper to get days in month
 const getDaysInMonth = (year: number, month: number) => {
@@ -40,6 +42,10 @@ export default function StudentBookingCreatePage() {
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Purchase State
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [selectedPurchaseId, setSelectedPurchaseId] = useState<string | null>(null);
+
   // Calendar State
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
@@ -56,6 +62,35 @@ export default function StudentBookingCreatePage() {
 
   const { course, context, loading, error } = useStudentCourseDetail(courseId);
 
+  // Fetch Purchases
+  useEffect(() => {
+    async function fetchPurchases() {
+      try {
+        const myPurchases = await getStudentPurchases();
+        setPurchases(myPurchases);
+      } catch (e) {
+        console.error("Failed to fetch purchases", e);
+      }
+    }
+    fetchPurchases();
+  }, []);
+
+  // Determine applicable purchase for this course
+  const applicablePurchase = useMemo(() => {
+    return purchases.find(p => p.courseId === courseId && p.status === 'active');
+  }, [purchases, courseId]);
+
+  // Auto-select if applicable purchase has enough hours
+  useEffect(() => {
+    if (applicablePurchase) {
+      if (applicablePurchase.remainingHours >= hours) {
+        setSelectedPurchaseId(applicablePurchase.id);
+      } else {
+        setSelectedPurchaseId(null);
+      }
+    }
+  }, [applicablePurchase, hours]);
+
   useEffect(() => {
     setHours(Math.max(1, hoursParam));
   }, [hoursParam]);
@@ -66,17 +101,19 @@ export default function StudentBookingCreatePage() {
         setIsFetchingSlots(true);
         setSelectedSlots([]);
         try {
+          // Format date as YYYY-MM-DD (local)
+          const dateStr = `${selectedDate.getFullYear()}-${String(
+            selectedDate.getMonth() + 1
+          ).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+
           // Always fetch 30-minute slots to support split booking
           const slots = await getAvailableSlots(
             context.teacherId,
-            selectedDate,
-            selectedDate,
+            dateStr,
+            dateStr,
             30 // Duration fixed to 30 mins
           );
           setAvailableSlots(slots);
-
-          // Auto-detect split mode if NO contiguous blocks exist?
-          // We will calculate contiguous blocks later.
         } catch (error) {
           console.error("Failed to fetch slots", error);
           setAvailableSlots([]);
@@ -88,7 +125,7 @@ export default function StudentBookingCreatePage() {
       }
     }
     fetchSlots();
-  }, [selectedDate, context?.teacherId]); // Removed course.durationMinutes dependency as we fetch fixed 30m
+  }, [selectedDate, context?.teacherId]);
 
   // Derive Contiguous Blocks for Standard Mode
   const contiguousBlocks = useMemo(() => {
@@ -230,14 +267,7 @@ export default function StudentBookingCreatePage() {
       if (prev.includes(startTime)) {
         return prev.filter((s) => s !== startTime);
       } else {
-        // Optional: Validation to prevent over-selecting?
-        // Requirement says "Split Booking: Prompt student to select multiple time slots to fulfill duration."
-        // Better to allow selection up to required limit?
-        // Let's rely on visual feedback and disable confirm if not matching.
         if (prev.length >= hours * 2) {
-          // Maybe replace the last one or just ignore?
-          // Let's just allow it and show error if > required? Or clamp?
-          // Simple behavior: Toggle is fine. user must manage count.
           return [...prev, startTime];
         }
         return [...prev, startTime];
@@ -246,14 +276,14 @@ export default function StudentBookingCreatePage() {
   };
 
   const totalPrice = useMemo(() => {
+    if (selectedPurchaseId) return 0;
     if (!course?.price) return 0;
     return course.price * hours;
-  }, [course?.price, hours]);
+  }, [course?.price, hours, selectedPurchaseId]);
 
   const formattedSelectedDate = selectedDate
-    ? `${selectedDate.getFullYear()}年 ${
-        selectedDate.getMonth() + 1
-      }月 ${selectedDate.getDate()}日 (${weekDays[selectedDate.getDay()]})`
+    ? `${selectedDate.getFullYear()}年 ${selectedDate.getMonth() + 1
+    }月 ${selectedDate.getDate()}日 (${weekDays[selectedDate.getDay()]})`
     : null;
 
   // Selected Count Check
@@ -296,9 +326,6 @@ export default function StudentBookingCreatePage() {
       chunks.push({ start: currentStart, end: toTimeStr(currentEndMins) });
 
       // 2. Submit bookings sequentially
-      // For split bookings, do we show one modal per booking? Or one success modal?
-      // One success modal.
-
       for (const chunk of chunks) {
         await createBooking({
           studentId: context.studentId,
@@ -308,6 +335,7 @@ export default function StudentBookingCreatePage() {
           startTime: chunk.start,
           endTime: chunk.end,
           notes: notes.trim() || null,
+          purchaseId: selectedPurchaseId
         });
       }
 
@@ -321,7 +349,7 @@ export default function StudentBookingCreatePage() {
       console.error("Error creating booking:", err);
       showModal({
         title: "送出失敗",
-        description: "預約送出失敗，請稍後再試。",
+        description: err instanceof Error ? err.message : "預約送出失敗，請稍後再試。",
         confirmText: "確定",
       });
     } finally {
@@ -335,7 +363,7 @@ export default function StudentBookingCreatePage() {
 
   return (
     <div className="container mx-auto max-w-6xl p-6 md:p-10 pb-24">
-      {/* Header omitted for brevity, keeping same */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div>
           <Link
@@ -353,7 +381,6 @@ export default function StudentBookingCreatePage() {
         <div className="lg:col-span-8 flex flex-col gap-6">
           {/* Calendar Step */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
-            {/* Calendar UI (Reuse existing UI Code) */}
             <div className="flex justify-between items-center mb-4">
               <h2 className="font-bold text-lg">1. 選擇日期</h2>
               <div className="flex items-center gap-4">
@@ -389,13 +416,12 @@ export default function StudentBookingCreatePage() {
                     key={idx}
                     disabled={past}
                     onClick={() => handleDayClick(day)}
-                    className={`p-2 rounded-lg transition-colors ${
-                      selected
-                        ? "bg-primary text-white"
-                        : past
+                    className={`p-2 rounded-lg transition-colors ${selected
+                      ? "bg-primary text-white"
+                      : past
                         ? "text-slate-300"
                         : "hover:bg-slate-100"
-                    }`}
+                      }`}
                   >
                     {day}
                   </button>
@@ -455,11 +481,10 @@ export default function StudentBookingCreatePage() {
                         <button
                           key={block.startTime}
                           onClick={() => handleBlockClick(block.startTime)}
-                          className={`p-3 rounded-xl border text-sm font-bold transition-all ${
-                            selectedSlots[0] === block.startTime // Simple check
-                              ? "bg-primary text-white border-primary shadow-lg"
-                              : "border-slate-200 hover:border-primary hover:text-primary"
-                          }`}
+                          className={`p-3 rounded-xl border text-sm font-bold transition-all ${selectedSlots[0] === block.startTime // Simple check
+                            ? "bg-primary text-white border-primary shadow-lg"
+                            : "border-slate-200 hover:border-primary hover:text-primary"
+                            }`}
                         >
                           {block.startTime} - {block.endTime}
                         </button>
@@ -488,11 +513,10 @@ export default function StudentBookingCreatePage() {
                           <button
                             key={slot.startTime}
                             onClick={() => handleSlotToggle(slot.startTime)}
-                            className={`p-2 rounded-lg border text-xs font-bold ${
-                              isActive
-                                ? "bg-primary text-white border-primary"
-                                : "border-slate-200 hover:bg-slate-50"
-                            }`}
+                            className={`p-2 rounded-lg border text-xs font-bold ${isActive
+                              ? "bg-primary text-white border-primary"
+                              : "border-slate-200 hover:bg-slate-50"
+                              }`}
                           >
                             {slot.startTime}
                           </button>
@@ -510,6 +534,53 @@ export default function StudentBookingCreatePage() {
         <div className="lg:col-span-4">
           <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xl p-6 sticky top-24">
             <h3 className="font-bold text-lg mb-4">預約確認</h3>
+
+            {/* Payment Method Selection */}
+            {applicablePurchase && (
+              <div
+                className={`mb-4 p-3 rounded-lg border ${selectedPurchaseId === applicablePurchase.id
+                  ? "border-teal-500 bg-teal-50 dark:bg-teal-900/10"
+                  : "border-slate-200"
+                  } transition-all cursor-pointer`}
+                onClick={() => {
+                  if (selectedPurchaseId === applicablePurchase.id) {
+                    setSelectedPurchaseId(null);
+                  } else {
+                    if (applicablePurchase.remainingHours >= hours) {
+                      setSelectedPurchaseId(applicablePurchase.id);
+                    } else {
+                      showModal({
+                        title: "時數不足",
+                        description: `您的課程包剩餘 ${applicablePurchase.remainingHours} 小時，不足以支付此次 ${hours} 小時的預約。請選擇單次付費或購買新課程包。`,
+                        confirmText: "了解",
+                      });
+                    }
+                  }
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`w-4 h-4 rounded-full border flex items-center justify-center ${selectedPurchaseId === applicablePurchase.id
+                        ? "border-teal-500"
+                        : "border-slate-400"
+                        }`}
+                    >
+                      {selectedPurchaseId === applicablePurchase.id && (
+                        <div className="w-2.5 h-2.5 rounded-full bg-teal-500"></div>
+                      )}
+                    </div>
+                    <span className="font-bold text-sm text-slate-800 dark:text-white">
+                      使用課程包扣點
+                    </span>
+                  </div>
+                  <span className="text-xs font-bold bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">
+                    剩餘 {applicablePurchase.remainingHours} hr
+                  </span>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-4 mb-6">
               <div className="flex justify-between">
                 <span className="text-slate-500">日期</span>
@@ -526,9 +597,8 @@ export default function StudentBookingCreatePage() {
                 <span className="font-bold text-right">
                   {selectedCount > 0
                     ? isSplitMode
-                      ? `${selectedCount} 個時段 (${
-                          (selectedCount * 30) / 60
-                        } hr)`
+                      ? `${selectedCount} 個時段 (${(selectedCount * 30) / 60
+                      } hr)`
                       : `${selectedSlots[0]} 起`
                     : "-"}
                 </span>
@@ -536,7 +606,19 @@ export default function StudentBookingCreatePage() {
               <div className="flex justify-between text-lg border-t pt-4 mt-2">
                 <span className="font-bold">總金額</span>
                 <span className="font-black text-primary">
-                  NT$ {totalPrice.toLocaleString()}
+                  {selectedPurchaseId ? (
+                    <span>
+                      <span className="line-through text-slate-400 text-sm mr-2">
+                        NT$ {((course.price || 0) * hours).toLocaleString()}
+                      </span>
+                      0{" "}
+                      <span className="text-xs font-normal text-slate-500">
+                        (扣除 {hours} hr)
+                      </span>
+                    </span>
+                  ) : (
+                    `NT$ ${totalPrice.toLocaleString()}`
+                  )}
                 </span>
               </div>
             </div>

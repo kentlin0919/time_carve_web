@@ -30,6 +30,7 @@ export default function OnboardingPage() {
   const [school, setSchool] = useState("");
   const [status, setStatus] = useState("studying");
   const [department, setDepartment] = useState("");
+  const [degreeLevel, setDegreeLevel] = useState("bachelor");
 
   useEffect(() => {
     // Check if logged in
@@ -97,6 +98,7 @@ export default function OnboardingPage() {
                  school_id,
                  status_id,
                  department,
+                 degree_level,
                  schools ( name )
                `,
               )
@@ -109,6 +111,7 @@ export default function OnboardingPage() {
                 setSchool((studentEdu.schools as any).name);
               }
               if (studentEdu.department) setDepartment(studentEdu.department);
+              if (studentEdu.degree_level) setDegreeLevel(studentEdu.degree_level);
 
               // Map status_id back to status key
               const STATUS_ID_MAP: Record<number, string> = {
@@ -130,6 +133,7 @@ export default function OnboardingPage() {
                  school_id,
                  status_id,
                  department,
+                 degree_level,
                  schools ( name )
                `,
               )
@@ -142,6 +146,7 @@ export default function OnboardingPage() {
                 setSchool((teacherEdu.schools as any).name);
               }
               if (teacherEdu.department) setDepartment(teacherEdu.department);
+              if (teacherEdu.degree_level) setDegreeLevel(teacherEdu.degree_level);
 
               // Map status_id back to status key
               const STATUS_ID_MAP: Record<number, string> = {
@@ -240,6 +245,7 @@ export default function OnboardingPage() {
                 school_id: schoolId,
                 status_id: statusId,
                 department: department,
+                degree_level: degreeLevel,
               })
               .eq("id", existingEdu.id);
             eduError = error;
@@ -249,6 +255,7 @@ export default function OnboardingPage() {
               school_id: schoolId,
               status_id: statusId,
               department: department,
+              degree_level: degreeLevel,
             });
             eduError = error;
           }
@@ -285,6 +292,7 @@ export default function OnboardingPage() {
               school_id: schoolId,
               status_id: statusId,
               department: department,
+              degree_level: degreeLevel,
             })
             .eq("id", existingEdu.id);
           eduError = error;
@@ -294,6 +302,7 @@ export default function OnboardingPage() {
             school_id: schoolId,
             status_id: statusId,
             department: department,
+            degree_level: degreeLevel,
           });
           eduError = error;
         }
@@ -346,7 +355,7 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-4">
-      <div className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-slate-100 dark:border-gray-700">
+      <div className="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-slate-100 dark:border-gray-700">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
             完善個人資料
@@ -387,6 +396,8 @@ export default function OnboardingPage() {
               setStatus={setStatus}
               department={department}
               setDepartment={setDepartment}
+              degreeLevel={degreeLevel}
+              setDegreeLevel={setDegreeLevel}
               labels={{
                 school: "就讀學校",
                 status: "就學狀態",

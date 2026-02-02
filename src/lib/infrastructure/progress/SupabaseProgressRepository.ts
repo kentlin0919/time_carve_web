@@ -27,7 +27,7 @@ export class SupabaseProgressRepository implements ProgressRepository {
             .select('*')
             .eq('student_id', studentId);
 
-        if (error) throw new Error(error.message);
+        if (error) throw new Error(`Failed to get progress by student: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
         return data.map(this.mapToEntity);
     }
 
@@ -39,7 +39,7 @@ export class SupabaseProgressRepository implements ProgressRepository {
             .eq('course_id', courseId)
             .maybeSingle();
 
-        if (error) throw new Error(error.message);
+        if (error) throw new Error(`Failed to get progress by student and course: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
         return data ? this.mapToEntity(data) : null;
     }
 
@@ -59,7 +59,7 @@ export class SupabaseProgressRepository implements ProgressRepository {
             .select()
             .single();
 
-        if (error) throw new Error(error.message);
+        if (error) throw new Error(`Failed to create progress: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
         return this.mapToEntity(data);
     }
 
@@ -80,7 +80,7 @@ export class SupabaseProgressRepository implements ProgressRepository {
             .select()
             .single();
 
-        if (error) throw new Error(error.message);
+        if (error) throw new Error(`Failed to update progress: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
         return this.mapToEntity(data);
     }
 }

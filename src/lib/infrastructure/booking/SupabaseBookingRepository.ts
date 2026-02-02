@@ -28,6 +28,9 @@ export class SupabaseBookingRepository implements BookingRepository {
           title,
           course_type,
           price
+        ),
+        reschedule_requests:booking_reschedule_requests (
+           id, requested_by, new_start_time, status, reason, created_at
         )
       `)
       .eq("teacher_id", teacherId)
@@ -55,6 +58,15 @@ export class SupabaseBookingRepository implements BookingRepository {
       courseTitle: item.course?.title || "",
       courseType: item.course?.course_type || "",
       coursePrice: item.course?.price || 0,
+      rescheduleRequests: item.reschedule_requests?.map((r: any) => ({
+        id: r.id,
+        bookingId: item.id,
+        requestedBy: r.requested_by,
+        newStartTime: r.new_start_time,
+        status: r.status,
+        reason: r.reason,
+        createdAt: r.created_at
+      })) || [],
     }));
 
   }
@@ -71,6 +83,9 @@ export class SupabaseBookingRepository implements BookingRepository {
       throw new Error("Could not find 'pending' booking status");
     }
 
+    const startTimestamp = `${booking.bookingDate} ${booking.startTime}:00`;
+    const endTimestamp = `${booking.bookingDate} ${booking.endTime}:00`;
+
     const { data, error } = await this.client
       .from("bookings")
       // @ts-ignore
@@ -79,10 +94,13 @@ export class SupabaseBookingRepository implements BookingRepository {
         student_id: booking.studentId,
         course_id: booking.courseId,
         booking_date: booking.bookingDate,
-        start_time: booking.startTime,
-        end_time: booking.endTime,
+        start_time: startTimestamp,
+        end_time: endTimestamp,
         status_id: statusData.id,
         notes: booking.notes,
+        purchase_id: booking.purchaseId,
+        price: booking.price,
+        paid_at: booking.paidAt
       })
       .select(`
         *,
@@ -94,8 +112,28 @@ export class SupabaseBookingRepository implements BookingRepository {
 
     if (error) {
       console.error("Error creating booking:", error);
-      throw error;
+      throw new Error(`Failed to create booking: ${error.message} (${error.code})`);
     }
+
+    return this.mapRowToBooking(data);
+  }
+
+  private mapRowToBooking(data: any): Booking {
+    // Helper to extract HH:mm from timestamp or time string
+    const formatTime = (timeVal: string) => {
+      // If it's a full timestamp (contains T or space and date parts)
+      if (timeVal && (timeVal.includes("T") || timeVal.includes("-"))) {
+        const date = new Date(timeVal);
+        const hours = date.getUTCHours().toString().padStart(2, "0");
+        const minutes = date.getUTCMinutes().toString().padStart(2, "0");
+        return `${hours}:${minutes}`;
+      }
+      // If it's already HH:mm or HH:mm:ss
+      if (timeVal && timeVal.includes(":")) {
+        return timeVal.substring(0, 5);
+      }
+      return timeVal;
+    };
 
     return {
       id: data.id,
@@ -103,10 +141,12 @@ export class SupabaseBookingRepository implements BookingRepository {
       studentId: data.student_id,
       courseId: data.course_id,
       bookingDate: data.booking_date,
-      startTime: data.start_time,
-      endTime: data.end_time,
+      startTime: formatTime(data.start_time),
+      endTime: formatTime(data.end_time),
       status: data.booking_status?.status_key || "pending",
       notes: data.notes,
+      price: data.price,
+      purchaseId: data.purchase_id
     };
   }
 
@@ -134,6 +174,9 @@ export class SupabaseBookingRepository implements BookingRepository {
           title,
           course_type,
           price
+        ),
+        reschedule_requests:booking_reschedule_requests (
+           id, requested_by, new_start_time, status, reason, created_at
         )
       `)
       .neq("booking_status.status_key", "cancelled")
@@ -146,22 +189,7 @@ export class SupabaseBookingRepository implements BookingRepository {
       throw new Error(`Failed to fetch all bookings: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
     }
 
-    return data.map((item: any) => ({
-      id: item.id,
-      teacherId: item.teacher_id,
-      studentId: item.student_id,
-      courseId: item.course_id,
-      bookingDate: item.booking_date,
-      startTime: item.start_time,
-      endTime: item.end_time,
-      status: item.booking_status?.status_key || "pending",
-      studentName: item.student?.user?.name || "Unknown",
-      studentEmail: item.student?.user?.email || "",
-      teacherName: item.teacher?.user?.name || "Unknown", // Add teacher name
-      courseTitle: item.course?.title || "",
-      courseType: item.course?.course_type || "",
-      coursePrice: item.course?.price || 0,
-    }));
+    return data.map((item: any) => this.mapRowToBooking(item));
   }
 
   async getUnpaidBookingsCount(studentId: string): Promise<number> {
@@ -187,5 +215,151 @@ export class SupabaseBookingRepository implements BookingRepository {
     }
 
     return count || 0;
+  }
+
+  async getPendingBookingsCount(teacherId: string): Promise<number> {
+    // 1. Get status ID for 'pending'
+    const { data: statusData, error: statusError } = await this.client
+      .from("booking_statuses")
+      .select("id")
+      .eq("status_key", "pending")
+      .single();
+
+    if (statusError || !statusData) {
+      console.error("Could not find 'pending' booking status for count");
+      return 0;
+    }
+
+    // 2. Count bookings with this status for the teacher
+    const { count, error } = await this.client
+      .from("bookings")
+      .select("*", { count: "exact", head: true })
+      .eq("teacher_id", teacherId)
+      .eq("status_id", statusData.id);
+
+    if (error) {
+      console.error("Error fetching pending booking count:", error);
+      return 0;
+    }
+
+    return count || 0;
+  }
+
+  async getPendingBookings(teacherId: string): Promise<Booking[]> {
+    // 1. Get status ID for 'pending'
+    const { data: statusData, error: statusError } = await this.client
+      .from("booking_statuses")
+      .select("id")
+      .eq("status_key", "pending")
+      .single();
+
+    if (statusError || !statusData) {
+      console.error("Could not find 'pending' booking status for list");
+      return [];
+    }
+
+    const { data, error } = await this.client
+      .from("bookings")
+      .select(`
+        *,
+        booking_status:booking_statuses!fk_booking_status (
+          status_key
+        ),
+        student:student_info (
+          user:user_info (
+            name,
+            email
+          )
+        ),
+        course:courses (
+          title,
+          course_type,
+          price
+        ),
+        reschedule_requests:booking_reschedule_requests (
+           id, requested_by, new_start_time, status, reason, created_at
+        )
+      `)
+      .eq("teacher_id", teacherId)
+      .eq("status_id", statusData.id)
+      .order("booking_date", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching pending bookings:", error);
+      return [];
+    }
+
+    return data.map((item: any) => this.mapRowToBooking(item));
+  }
+
+  async getBookingById(id: string): Promise<Booking | null> {
+    const { data, error } = await this.client
+      .from("bookings")
+      .select(`
+        *,
+        booking_status:booking_statuses (
+          status_key
+        ),
+        student:student_info (
+          user:user_info (name, email)
+        ),
+        course:courses (
+          title, course_type, price
+        ),
+        reschedule_requests:booking_reschedule_requests (
+           id, requested_by, new_start_time, status, reason, created_at
+        )
+      `)
+      .eq("id", id)
+      .single();
+
+    if (error || !data) return null;
+
+    return this.mapRowToBooking(data);
+  }
+
+  async updateBooking(id: string, booking: Partial<Booking>): Promise<void> {
+    const updateData: any = { updated_at: new Date().toISOString() };
+
+    // If Date or Time changes, we must sync booking_date, start_time, and end_time
+    if (booking.bookingDate || booking.startTime || booking.endTime) {
+      const existing = await this.getBookingById(id);
+      if (!existing) {
+        throw new Error(`Booking ${id} not found for update`);
+      }
+
+      const newDate = booking.bookingDate || existing.bookingDate;
+      const newStart = booking.startTime || existing.startTime;
+      const newEnd = booking.endTime || existing.endTime;
+
+      updateData.booking_date = newDate;
+
+      const toTimestamp = (date: string, time: string) => {
+        if (time.includes("T") || time.includes(" ")) return time; // Already timestamp
+        return `${date} ${time}:00`;
+      };
+
+      updateData.start_time = toTimestamp(newDate, newStart);
+      updateData.end_time = toTimestamp(newDate, newEnd);
+    }
+
+    if (booking.status) {
+      const { data: statusData, error } = await this.client
+        .from("booking_statuses")
+        .select("id")
+        .eq("status_key", booking.status)
+        .single();
+      if (statusData) updateData.status_id = statusData.id;
+    }
+    if (booking.notes) updateData.notes = booking.notes;
+
+    const { error } = await this.client
+      .from("bookings")
+      .update(updateData)
+      .eq("id", id);
+
+    if (error) {
+      throw new Error(`Failed to update booking: ${error.message}`);
+    }
   }
 }

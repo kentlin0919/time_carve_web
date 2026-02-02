@@ -4,18 +4,20 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { Database } from "@/types/database.types";
+import { RescheduleDialog } from "@/components/bookings/RescheduleDialog";
 
 // Booking Type Definition
 type BookingWithDetails = Database["public"]["Tables"]["bookings"]["Row"] & {
   courses: Database["public"]["Tables"]["courses"]["Row"] | null;
   teacher_info:
-    | (Database["public"]["Tables"]["teacher_info"]["Row"] & {
-        user_info: Database["public"]["Tables"]["user_info"]["Row"] | null;
-      })
-    | null;
+  | (Database["public"]["Tables"]["teacher_info"]["Row"] & {
+    user_info: Database["public"]["Tables"]["user_info"]["Row"] | null;
+  })
+  | null;
   booking_statuses:
-    | Database["public"]["Tables"]["booking_statuses"]["Row"]
-    | null;
+  | Database["public"]["Tables"]["booking_statuses"]["Row"]
+  | null;
+  reschedule_requests: Database["public"]["Tables"]["booking_reschedule_requests"]["Row"][];
 };
 
 // Helper for status styling
@@ -90,19 +92,22 @@ export default function StudentBookingsPage() {
         .select(
           `
           *,
-          *,
           courses (*),
           teacher_info (
             *,
             user_info (name)
           ),
-          booking_statuses (*)
+          booking_statuses (*),
+          reschedule_requests:booking_reschedule_requests (*)
         `
         )
         .eq("student_id", studentData.id)
         .order("booking_date", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase Fetch Error:", JSON.stringify(error, null, 2));
+        throw error;
+      }
 
       setBookings((data as unknown as BookingWithDetails[]) || []);
     } catch (error) {
@@ -171,21 +176,19 @@ export default function StudentBookingsPage() {
           <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl flex w-full lg:w-auto">
             <button
               onClick={() => setActiveTab("upcoming")}
-              className={`flex-1 lg:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all border ${
-                activeTab === "upcoming"
-                  ? "bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-white border-slate-200 dark:border-slate-600"
-                  : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 border-transparent"
-              }`}
+              className={`flex-1 lg:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all border ${activeTab === "upcoming"
+                ? "bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-white border-slate-200 dark:border-slate-600"
+                : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 border-transparent"
+                }`}
             >
               即將到來
             </button>
             <button
               onClick={() => setActiveTab("history")}
-              className={`flex-1 lg:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all border ${
-                activeTab === "history"
-                  ? "bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-white border-slate-200 dark:border-slate-600"
-                  : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 border-transparent"
-              }`}
+              className={`flex-1 lg:flex-none px-6 py-2 rounded-lg text-sm font-bold transition-all border ${activeTab === "history"
+                ? "bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-white border-slate-200 dark:border-slate-600"
+                : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 border-transparent"
+                }`}
             >
               歷史記錄
             </button>
@@ -237,6 +240,7 @@ export default function StudentBookingsPage() {
 }
 
 function BookingCard({ booking }: { booking: BookingWithDetails }) {
+  const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const dateObj = new Date(booking.booking_date);
   const month = `${dateObj.getMonth() + 1}月`;
   const date = String(dateObj.getDate()).padStart(2, "0");
@@ -260,6 +264,10 @@ function BookingCard({ booking }: { booking: BookingWithDetails }) {
 
   const status = booking.booking_statuses?.status_key || "pending";
   const themeName = getStatusTheme(status);
+
+  const pendingReschedule = booking.reschedule_requests?.find(
+    (r) => r.status === "pending"
+  );
 
   const themeColors = {
     green: {
@@ -303,87 +311,114 @@ function BookingCard({ booking }: { booking: BookingWithDetails }) {
   const theme = themeColors[themeName as keyof typeof themeColors];
 
   return (
-    <div className="bg-surface-light dark:bg-surface-dark bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 trans-all group relative overflow-hidden transition-all duration-300">
-      <div
-        className={`absolute left-0 top-0 bottom-0 w-1.5 ${theme.bar}`}
-      ></div>
-      <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
-        {/* Date Box */}
+    <>
+      <div className="bg-surface-light dark:bg-surface-dark bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 trans-all group relative overflow-hidden transition-all duration-300">
         <div
-          className={`flex-shrink-0 w-full md:w-20 h-16 md:h-20 ${theme.dateBg} rounded-xl flex flex-row md:flex-col items-center justify-center md:justify-center gap-3 md:gap-0 ${theme.dateText} border ${theme.dateBorder}`}
-        >
-          <span className="text-sm font-bold uppercase tracking-wider">
-            {month}
-          </span>
-          <span className="text-2xl md:text-3xl font-black font-display leading-none">
-            {date}
-          </span>
-          <span className="md:hidden font-bold">{dayWeek}</span>
-        </div>
-
-        {/* Info */}
-        <div className="flex-1 min-w-0 grid grid-cols-1 lg:grid-cols-12 gap-4 w-full">
-          <div className="lg:col-span-5 flex flex-col justify-center gap-1">
-            <h3 className="font-bold text-slate-800 dark:text-white text-lg md:text-xl truncate">
-              {booking.courses?.title || "未知課程"}
-            </h3>
-            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
-              <span className="material-symbols-outlined text-[18px]">
-                school
-              </span>
-              <span>{booking.courses?.course_type || "一般課程"}</span>
-            </div>
-          </div>
-          <div className="lg:col-span-4 flex flex-col justify-center gap-2 text-sm">
-            <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-              <span className="material-symbols-outlined text-[18px] text-slate-400">
-                schedule
-              </span>
-              <span className="font-medium">
-                {timeRange} ({duration})
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-              <span className="material-symbols-outlined text-[18px] text-slate-400">
-                person
-              </span>
-              <span>
-                {booking.teacher_info?.user_info?.name ||
-                  booking.teacher_info?.title ||
-                  "指導老師"}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-              <span className="material-symbols-outlined text-[18px] text-slate-400">
-                location_on
-              </span>
-              <span>{booking.courses?.location || "線上/實體"}</span>
-            </div>
-          </div>
-          <div className="lg:col-span-3 flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-3 mt-2 lg:mt-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-slate-800">
-            <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-                theme.badgeBg
-              } ${theme.badgeText} ${
-                status === "pending" ? "animate-pulse" : ""
-              }`}
-            >
-              <span className="material-symbols-outlined text-[14px]">
-                {theme.icon}
-              </span>
-              {getStatusLabel(status)}
+          className={`absolute left-0 top-0 bottom-0 w-1.5 ${theme.bar}`}
+        ></div>
+        <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
+          {/* Date Box */}
+          <div
+            className={`flex-shrink-0 w-full md:w-20 h-16 md:h-20 ${theme.dateBg} rounded-xl flex flex-row md:flex-col items-center justify-center md:justify-center gap-3 md:gap-0 ${theme.dateText} border ${theme.dateBorder}`}
+          >
+            <span className="text-sm font-bold uppercase tracking-wider">
+              {month}
             </span>
-            <div className="flex items-center gap-2">
-              <Link
-                href={`/student/bookings/${booking.id}`}
-                className="text-xs font-bold text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-primary transition-colors px-2 py-1"
+            <span className="text-2xl md:text-3xl font-black font-display leading-none">
+              {date}
+            </span>
+            <span className="md:hidden font-bold">{dayWeek}</span>
+          </div>
+
+          {/* Info */}
+          <div className="flex-1 min-w-0 grid grid-cols-1 lg:grid-cols-12 gap-4 w-full">
+            <div className="lg:col-span-5 flex flex-col justify-center gap-1">
+              <h3 className="font-bold text-slate-800 dark:text-white text-lg md:text-xl truncate">
+                {booking.courses?.title || "未知課程"}
+              </h3>
+              <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
+                <span className="material-symbols-outlined text-[18px]">
+                  school
+                </span>
+                <span>{booking.courses?.course_type || "一般課程"}</span>
+              </div>
+            </div>
+            <div className="lg:col-span-4 flex flex-col justify-center gap-2 text-sm">
+              <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                <span className="material-symbols-outlined text-[18px] text-slate-400">
+                  schedule
+                </span>
+                <span className="font-medium">
+                  {timeRange} ({duration})
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                <span className="material-symbols-outlined text-[18px] text-slate-400">
+                  person
+                </span>
+                <span>
+                  {booking.teacher_info?.user_info?.name ||
+                    booking.teacher_info?.title ||
+                    "指導老師"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                <span className="material-symbols-outlined text-[18px] text-slate-400">
+                  location_on
+                </span>
+                <span>{booking.courses?.location || "線上/實體"}</span>
+              </div>
+            </div>
+            <div className="lg:col-span-3 flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-3 mt-2 lg:mt-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-slate-800">
+              <span
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${theme.badgeBg
+                  } ${theme.badgeText} ${status === "pending" ? "animate-pulse" : ""
+                  }`}
               >
-                查看詳情
-              </Link>
+                <span className="material-symbols-outlined text-[14px]">
+                  {theme.icon}
+                </span>
+                {getStatusLabel(status)}
+              </span>
+
+              {pendingReschedule ? (
+                <span className="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-md border border-orange-100 flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px]">
+                    schedule
+                  </span>
+                  改期申請中
+                </span>
+              ) : status === "confirmed" || status === "pending" ? (
+                <button
+                  onClick={() => setIsRescheduleOpen(true)}
+                  className="text-xs font-bold text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-primary transition-colors px-2 py-1 flex items-center gap-1"
+                >
+                  <span className="material-symbols-outlined text-[14px]">
+                    edit_calendar
+                  </span>
+                  申請改期
+                </button>
+              ) : null}
+
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/student/bookings/${booking.id}`}
+                  className="text-xs font-bold text-slate-500 hover:text-primary dark:text-slate-400 dark:hover:text-primary transition-colors px-2 py-1"
+                >
+                  查看詳情
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <RescheduleDialog
+        bookingId={booking.id}
+        open={isRescheduleOpen}
+        onOpenChange={setIsRescheduleOpen}
+        onSuccess={() => window.location.reload()}
+      />
+    </>
   );
 }
