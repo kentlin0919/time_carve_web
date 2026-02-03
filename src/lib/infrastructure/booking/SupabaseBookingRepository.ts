@@ -146,7 +146,11 @@ export class SupabaseBookingRepository implements BookingRepository {
       status: data.booking_status?.status_key || "pending",
       notes: data.notes,
       price: data.price,
-      purchaseId: data.purchase_id
+      purchaseId: data.purchase_id,
+      courseTitle: data.course?.title || "",
+      studentName: data.student?.user?.name || "",
+      teacherName: data.teacher?.user?.name || "",
+      courseType: data.course?.course_type || ""
     };
   }
 
@@ -303,8 +307,11 @@ export class SupabaseBookingRepository implements BookingRepository {
         student:student_info (
           user:user_info (name, email)
         ),
+        teacher:teacher_info (
+          title
+        ),
         course:courses (
-          title, course_type, price
+          title, course_type, price, description, sections, location
         ),
         reschedule_requests:booking_reschedule_requests (
            id, requested_by, new_start_time, status, reason, created_at
@@ -315,7 +322,21 @@ export class SupabaseBookingRepository implements BookingRepository {
 
     if (error || !data) return null;
 
-    return this.mapRowToBooking(data);
+    const booking = this.mapRowToBooking(data);
+
+    // Enrich with extra details for the detail page
+    booking.courseDescription = data.course?.description || "";
+    booking.courseSections = data.course?.sections as any[] || [];
+    booking.teacherTitle = data.teacher?.title || "";
+    booking.location = data.course?.location || "";
+    booking.teacherNotes = data.notes || ""; // Booking notes often used as teacher notes
+
+    // Mocking payment status/method for now as per entity definition
+    // In real scenario, would join with payment tables
+    booking.paymentStatus = data.paid_at ? "paid" : "pending";
+    booking.paymentMethod = data.paid_at ? "線上付款" : "尚未付款";
+
+    return booking;
   }
 
   async updateBooking(id: string, booking: Partial<Booking>): Promise<void> {

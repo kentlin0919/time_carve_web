@@ -17,7 +17,12 @@ export interface Booking {
   purchaseId?: string | null;
   paidAt?: string | null;
   price?: number;
-  // Reschedule info
-  rescheduleRequests?: any[]; // Avoiding circular dependency or import issues, simplify as any[] or generic types for now. 
-  // Ideally import { RescheduleRequest } from "./RescheduleRequest";
+  // Expanded details for Booking Detail Page
+  courseDescription?: string;
+  courseSections?: any[]; // Keep flexible for now, or define CourseSection type
+  teacherTitle?: string;
+  location?: string;
+  paymentStatus?: "paid" | "pending" | "refunded";
+  paymentMethod?: string; // e.g. "信用卡 (Visa **** 4242)" - likely need to mock or fetch from payment logs
+  teacherNotes?: string; // Mapped from booking.notes or separate field?
 }

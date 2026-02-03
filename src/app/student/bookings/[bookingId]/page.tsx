@@ -1,116 +1,33 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
-import { CourseSection } from "@/lib/domain/course/entity";
+import { notFound } from "next/navigation";
+import { SupabaseBookingRepository } from "@/lib/infrastructure/booking/SupabaseBookingRepository";
+import { createClient } from "@/lib/supabase/server";
 
-interface BookingDetail {
-  id: string;
-  courseId: string;
-  courseTitle: string;
-  courseDesc: string;
-  courseType: string;
-  sections: CourseSection[];
-  bookingDate: string;
-  startTime: string;
-  endTime: string;
-  duration: string;
-  teacherName: string;
-  teacherTitle: string;
-  location: string;
-  status: "confirmed" | "pending" | "cancelled";
-  totalPrice: number;
-  paymentStatus: "paid" | "pending" | "refunded";
-  paymentMethod: string;
-  teacherNotes: string;
-  createdAt: string;
+interface BookingDetailProps {
+  params: Promise<{
+    bookingId: string;
+  }>;
 }
 
-// Mock data for demonstration
-const MOCK_BOOKING: BookingDetail = {
-  id: "20241026-01",
-  courseId: "course-1",
-  courseTitle: "上顎中門齒形態雕刻",
-  courseDesc:
-    "本課程將重點講解上顎中門齒的解剖特徵，並進行 1:1 蠟塊雕刻實作指導，適合已有基礎概念的學員。",
-  courseType: "實作課程",
-  sections: [
-    {
-      id: "1",
-      title: "咬合器操作與模型定位",
-      learningObjective: "熟悉半調節式咬合器構造，並正確裝載上下顎模型。",
-      keyPoints: [
-        "咬合器各部組件名稱與功能",
-        "Mounting 上顎模型定位",
-        "面弓轉移 (Face-bow Transfer) 原理",
-        "咬合平面 (Occlusal Plane) 之決定",
-      ],
-    },
-    {
-      id: "2",
-      title: "蠟型堆塑基礎技法",
-      learningObjective: "掌握蠟塊加熱與堆塑的基本手法。",
-      keyPoints: [
-        "蠟刀選擇與握持方式",
-        "蠟塊加熱溫度控制",
-        "基本堆塑順序與技巧",
-      ],
-    },
-  ],
-  bookingDate: "2024-10-26",
-  startTime: "14:00",
-  endTime: "16:00",
-  duration: "2小時",
-  teacherName: "林醫師",
-  teacherTitle: "資深假牙贗復專科醫師",
-  location: "台北總校區 - 教室 A03 (3樓)",
-  status: "confirmed",
-  totalPrice: 1500,
-  paymentStatus: "paid",
-  paymentMethod: "信用卡 (Visa **** 4242)",
-  teacherNotes:
-    "請學員務必攜帶個人雕刻刀具組（包含 PKT 1-5 號），並準備好乾淨的白袍。若有近視請配戴眼鏡，以免影響操作精細度。建議提早 10 分鐘抵達教室準備器材。",
-  createdAt: "2024-10-20",
-};
+export default async function BookingDetailPage({ params }: BookingDetailProps) {
+  const { bookingId } = await params;
 
-export default function BookingDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const bookingId = params.bookingId as string;
-
-  const [booking, setBooking] = useState<BookingDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // In production, fetch from Supabase
-    // For now, use mock data
-    setBooking(MOCK_BOOKING);
-    setLoading(false);
-  }, [bookingId]);
-
-  if (loading) {
-    return (
-      <div className="flex-1 flex items-center justify-center h-full">
-        <div className="text-slate-500 dark:text-slate-400">載入中...</div>
-      </div>
-    );
-  }
+  const supabase = await createClient();
+  const bookingRepo = new SupabaseBookingRepository(supabase);
+  const booking = await bookingRepo.getBookingById(bookingId);
 
   if (!booking) {
-    return (
-      <div className="flex-1 flex items-center justify-center h-full">
-        <div className="text-slate-500 dark:text-slate-400">找不到預約記錄</div>
-      </div>
-    );
+    return notFound();
   }
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return `${date.getFullYear()}年 ${
-      date.getMonth() + 1
-    }月 ${date.getDate()}日`;
+    try {
+      const date = new Date(dateStr);
+      return `${date.getFullYear()}年 ${date.getMonth() + 1
+        }月 ${date.getDate()}日`;
+    } catch (e) {
+      return dateStr;
+    }
   };
 
   const statusConfig = {
@@ -135,9 +52,16 @@ export default function BookingDetailPage() {
       icon: "cancel",
       label: "已取消",
     },
+    rejected: { // Handle rejected status if mapped
+      bg: "bg-red-100 dark:bg-red-900/40",
+      text: "text-red-700 dark:text-red-400",
+      border: "border-red-200 dark:border-red-800/50",
+      icon: "cancel",
+      label: "已拒絕",
+    }
   };
 
-  const status = statusConfig[booking.status];
+  const status = statusConfig[booking.status as keyof typeof statusConfig] || statusConfig.pending;
 
   return (
     <div className="container mx-auto max-w-[1024px] p-6 md:p-10 flex flex-col gap-6 pb-24">
@@ -161,7 +85,7 @@ export default function BookingDetailPage() {
             預約詳情
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base">
-            訂單編號 #{booking.id}
+            訂單編號 #{booking.id.slice(0, 8)}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -190,13 +114,13 @@ export default function BookingDetailPage() {
                       <span className="material-symbols-outlined text-[16px]">
                         school
                       </span>
-                      {booking.courseType}
+                      {booking.courseType || "一般課程"}
                     </div>
                     <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
                       {booking.courseTitle}
                     </h2>
                     <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-                      {booking.courseDesc}
+                      {booking.courseDescription || "無課程描述"}
                     </p>
                   </div>
                 </div>
@@ -217,7 +141,7 @@ export default function BookingDetailPage() {
                     {formatDate(booking.bookingDate)}
                   </p>
                   <p className="text-slate-600 dark:text-slate-300 font-medium">
-                    {booking.startTime} - {booking.endTime} ({booking.duration})
+                    {booking.startTime} - {booking.endTime}
                   </p>
                 </div>
               </div>
@@ -230,10 +154,10 @@ export default function BookingDetailPage() {
                     上課地點
                   </p>
                   <p className="text-slate-900 dark:text-white font-bold text-lg">
-                    {booking.location.split(" - ")[0]}
+                    {booking.location?.split(" - ")[0] || "線上課程"}
                   </p>
                   <p className="text-slate-600 dark:text-slate-300 font-medium">
-                    {booking.location.split(" - ")[1]}
+                    {booking.location?.split(" - ")[1] || ""}
                   </p>
                   <a
                     className="text-primary text-xs font-bold mt-1 inline-flex items-center hover:underline"
@@ -248,7 +172,7 @@ export default function BookingDetailPage() {
               </div>
             </div>
 
-            {/* Teacher Notes */}
+            {/* Teacher Notes - Show both booking notes (often used as teacher notes) */}
             {booking.teacherNotes && (
               <div className="bg-slate-50 dark:bg-slate-800/50 p-6 md:p-8 border-t border-slate-100 dark:border-slate-800">
                 <div className="flex gap-3 mb-2">
@@ -267,7 +191,7 @@ export default function BookingDetailPage() {
           </div>
 
           {/* Course Sections - 詳細教案內容 */}
-          {booking.sections && booking.sections.length > 0 && (
+          {booking.courseSections && booking.courseSections.length > 0 && (
             <div className="bg-surface-light dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-700 shadow-soft overflow-hidden">
               <div className="p-6 md:p-8 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -279,13 +203,13 @@ export default function BookingDetailPage() {
                   </h3>
                 </div>
                 <span className="text-sm text-slate-500 dark:text-slate-400">
-                  共 {booking.sections.length} 個單元 · 實作導向
+                  共 {booking.courseSections.length} 個單元
                 </span>
               </div>
               <div className="p-6 md:p-8 space-y-6">
-                {booking.sections.map((section, idx) => (
+                {booking.courseSections.map((section: any, idx: number) => (
                   <div
-                    key={section.id}
+                    key={section.id || idx}
                     className="relative pl-8 pb-6 last:pb-0 border-l-2 border-slate-200 dark:border-slate-700 last:border-l-0"
                   >
                     {/* Section Number Circle */}
@@ -321,7 +245,7 @@ export default function BookingDetailPage() {
                             單元重點
                           </p>
                           <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            {section.keyPoints.map((point, pointIdx) => (
+                            {section.keyPoints.map((point: string, pointIdx: number) => (
                               <li
                                 key={pointIdx}
                                 className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300"
@@ -353,13 +277,14 @@ export default function BookingDetailPage() {
                 <span className="material-symbols-outlined text-[32px]">
                   person
                 </span>
+                {/* Assuming no avatar URL in booking initially, can be added later */}
               </div>
               <div>
                 <p className="text-slate-900 dark:text-white font-bold text-lg">
-                  {booking.teacherName}
+                  {booking.teacherName || "未知教師"}
                 </p>
                 <p className="text-slate-500 dark:text-slate-400 text-sm">
-                  {booking.teacherTitle}
+                  {booking.teacherTitle || "教師"}
                 </p>
               </div>
             </div>
@@ -380,11 +305,10 @@ export default function BookingDetailPage() {
                 付款資訊
               </h3>
               <span
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold ${
-                  booking.paymentStatus === "paid"
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold ${booking.paymentStatus === "paid"
                     ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
                     : "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400"
-                }`}
+                  }`}
               >
                 {booking.paymentStatus === "paid" ? "已付款" : "待付款"}
               </span>
@@ -395,7 +319,7 @@ export default function BookingDetailPage() {
                   課程費用
                 </span>
                 <span className="font-medium text-slate-800 dark:text-white">
-                  NT$ {booking.totalPrice.toLocaleString()}
+                  NT$ {(booking.coursePrice || 0).toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
@@ -403,7 +327,7 @@ export default function BookingDetailPage() {
                   付款方式
                 </span>
                 <span className="font-medium text-slate-800 dark:text-white">
-                  {booking.paymentMethod}
+                  {booking.paymentMethod || "尚未付款"}
                 </span>
               </div>
               <div className="border-t border-slate-100 dark:border-slate-700 my-2"></div>
@@ -412,7 +336,7 @@ export default function BookingDetailPage() {
                   總計
                 </span>
                 <span className="font-black text-xl text-primary-dark dark:text-primary">
-                  NT$ {booking.totalPrice.toLocaleString()}
+                  NT$ {(booking.price || booking.coursePrice || 0).toLocaleString()}
                 </span>
               </div>
             </div>
