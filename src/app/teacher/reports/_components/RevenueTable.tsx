@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Transaction } from "@/lib/domain/reports/ReportRepository"; // Ensure this matches path
+import { getTransactionDetail, ReportTransactionDetail } from "@/app/actions/reports";
+import { useModal } from "@/components/providers/ModalContext";
 
 interface RevenueTableProps {
   transactions: Transaction[];
@@ -23,6 +25,8 @@ export function RevenueTable({
   onFilterType,
 }: RevenueTableProps) {
   const totalPages = Math.ceil(total / pageSize);
+  const { showModal } = useModal();
+  const [detailLoadingId, setDetailLoadingId] = useState<string | null>(null);
 
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat("zh-TW", {
@@ -31,12 +35,181 @@ export function RevenueTable({
       minimumFractionDigits: 0,
     }).format(val);
   const formatDate = (dateStr: string) => {
-    // dateStr is ISO
+    // dateStr is YYYY-MM-DD (avoid timezone shifts)
+    const safe = dateStr?.slice(0, 10);
+    if (safe && /^\d{4}-\d{2}-\d{2}$/.test(safe)) return safe;
     const d = new Date(dateStr);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}-${String(d.getDate()).padStart(2, "0")}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  };
+
+  const formatTimeRange = (start?: string, end?: string) => {
+    const toHHmm = (val?: string) => {
+      if (!val) return "--:--";
+      return val.includes("T") ? new Date(val).toISOString().slice(11, 16) : val.slice(0, 5);
+    };
+    return `${toHHmm(start)} - ${toHHmm(end)}`;
+  };
+
+  const renderDetailContent = (detail: ReportTransactionDetail) => {
+    const sections = Array.isArray(detail.course.sections) ? detail.course.sections : [];
+    const completedIds = detail.progress?.completedSectionIds || [];
+    const progressPercent =
+      detail.progress?.progressPercentage ??
+      (sections.length > 0 ? Math.round((completedIds.length / sections.length) * 100) : 0);
+
+    return (
+      <div className="max-h-[60vh] overflow-y-auto pr-1 space-y-6">
+        {/* Student */}
+        <div className="flex items-center gap-3">
+          {detail.student.avatarUrl ? (
+            <img
+              src={detail.student.avatarUrl}
+              alt={detail.student.name}
+              className="size-10 rounded-full object-cover"
+            />
+          ) : (
+            <div className="size-10 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 flex items-center justify-center text-sm font-bold">
+              {detail.student.name?.[0]}
+            </div>
+          )}
+          <div>
+            <p className="text-sm font-bold text-slate-800 dark:text-white">
+              {detail.student.name}
+            </p>
+            <p className="text-xs text-text-sub">學生</p>
+          </div>
+        </div>
+
+        {/* Booking Record */}
+        <div className="rounded-xl border border-border-light dark:border-border-dark bg-slate-50/60 dark:bg-slate-800/40 p-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-bold text-slate-800 dark:text-white">課程紀錄</p>
+            <span className="text-xs px-2 py-1 rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+              {detail.booking.statusLabel || detail.booking.statusKey || "未知狀態"}
+            </span>
+          </div>
+          <div className="text-sm text-slate-700 dark:text-gray-200">
+            <div>日期：{formatDate(detail.booking.bookingDate)}</div>
+            <div>時間：{formatTimeRange(detail.booking.startTime, detail.booking.endTime)}</div>
+            <div>實收金額：{formatCurrency(Number(detail.booking.price || 0))}</div>
+            {detail.booking.paidAt && (
+              <div>付款時間：{formatDate(detail.booking.paidAt)}</div>
+            )}
+            {detail.booking.notes && (
+              <div className="mt-1 text-text-sub">備註：{detail.booking.notes}</div>
+            )}
+          </div>
+        </div>
+
+        {/* Course Details */}
+        <div className="rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-slate-800 p-4 space-y-2">
+          <p className="text-sm font-bold text-slate-800 dark:text-white">課程詳情</p>
+          <div className="text-sm text-slate-700 dark:text-gray-200 space-y-1">
+            <div>課程名稱：{detail.course.title}</div>
+            <div>類型：{detail.course.courseType}</div>
+            <div>時長：{detail.course.durationMinutes || 0} 分鐘</div>
+            <div>定價：{formatCurrency(Number(detail.course.price || 0))}</div>
+            {detail.course.location && <div>地點：{detail.course.location}</div>}
+          </div>
+          {detail.course.description && (
+            <div className="text-sm text-text-sub">簡介：{detail.course.description}</div>
+          )}
+          {detail.course.expectedLearningOutcomes?.length ? (
+            <div className="text-sm text-slate-700 dark:text-gray-200">
+              學習成果：
+              <div className="flex flex-wrap gap-2 mt-2">
+                {detail.course.expectedLearningOutcomes.map((item, idx) => (
+                  <span
+                    key={`${item}-${idx}`}
+                    className="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-700 text-xs"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        {/* Learning Map */}
+        <div className="rounded-xl border border-border-light dark:border-border-dark bg-slate-50/60 dark:bg-slate-800/40 p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-bold text-slate-800 dark:text-white">學習地圖</p>
+            <span className="text-xs font-bold text-primary">{progressPercent}%</span>
+          </div>
+          <div className="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+            <div
+              className="bg-primary h-full rounded-full transition-all"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          {sections.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {sections.map((section: any, idx: number) => {
+                const id = section.id ?? String(idx);
+                const title = section.title ?? section.name ?? `章節 ${idx + 1}`;
+                const completed = completedIds.includes(id);
+                return (
+                  <div
+                    key={id}
+                    className={`flex items-center gap-2 p-2 rounded-lg border text-sm ${
+                      completed
+                        ? "bg-emerald-50/70 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-300"
+                        : "bg-white dark:bg-slate-700 border-border-light dark:border-border-dark text-slate-700 dark:text-gray-200"
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[16px]">
+                      {completed ? "check_circle" : "radio_button_unchecked"}
+                    </span>
+                    <span className="truncate">{title}</span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-text-sub">此課程尚未設定章節。</p>
+          )}
+          {!detail.progress && (
+            <p className="text-xs text-text-sub">尚未建立學生進度紀錄。</p>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const handleViewDetail = async (transactionId: string) => {
+    try {
+      setDetailLoadingId(transactionId);
+      showModal({
+        title: "載入中...",
+        description: "正在取得課程與學習紀錄",
+        type: "info",
+        size: "lg",
+        confirmText: "關閉",
+        children: (
+          <div className="text-sm text-text-sub text-center py-6">資料載入中</div>
+        ),
+      });
+      const detail = await getTransactionDetail(transactionId);
+      showModal({
+        title: "課程詳情",
+        description: "學生課程紀錄與學習地圖",
+        type: "info",
+        size: "lg",
+        confirmText: "關閉",
+        children: renderDetailContent(detail),
+      });
+    } catch (error) {
+      console.error(error);
+      showModal({
+        type: "error",
+        title: "載入失敗",
+        description: "無法取得詳細資訊，請稍後再試",
+        confirmText: "好",
+      });
+    } finally {
+      setDetailLoadingId(null);
+    }
   };
 
   return (
@@ -157,7 +330,12 @@ export function RevenueTable({
                     {formatCurrency(t.amount)}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <button className="text-text-sub hover:text-primary transition-colors">
+                    <button
+                      onClick={() => handleViewDetail(t.id)}
+                      className="text-text-sub hover:text-primary transition-colors disabled:opacity-50"
+                      disabled={detailLoadingId === t.id}
+                      aria-label="查看詳情"
+                    >
                       <span className="material-symbols-outlined text-[20px]">
                         visibility
                       </span>

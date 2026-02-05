@@ -9,17 +9,35 @@ export class SupabaseReportRepository implements ReportRepository {
     this.supabase = client || defaultClient;
   }
 
+  private toNumber(val: unknown): number {
+    if (typeof val === "number") return val;
+    if (typeof val === "string" && val.trim() !== "") {
+      const n = Number(val);
+      return Number.isFinite(n) ? n : 0;
+    }
+    return 0;
+  }
+
+  private resolveAmount(row: any): number {
+    const bookingPrice = this.toNumber(row?.price);
+    const coursePrice = this.toNumber((row?.course as any)?.price);
+    // bookings.price defaults to 0 when not set; treat 0 as "unset"
+    return bookingPrice > 0 ? bookingPrice : coursePrice;
+  }
+
   private isPaid(statusKey: string): boolean {
     return ['completed', 'confirmed'].includes(statusKey);
   }
 
   async getStats(teacherId: string, startDate: Date, endDate: Date): Promise<ReportStats> {
-    // Calculate previous period
-    const duration = endDate.getTime() - startDate.getTime();
-    const prevStartDate = new Date(startDate.getTime() - duration);
-    const prevEndDate = new Date(startDate.getTime()); // Overlaps exactly? Usually strictly less.
-    // Actually, report usually compares "Last Month" vs "Current Month".
-    // If range is arbitrary, exact shift is fine.
+    // Calculate previous period (inclusive day range)
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    const durationDays =
+      Math.floor((endDate.getTime() - startDate.getTime()) / oneDayMs) + 1;
+    const prevStartDate = new Date(startDate);
+    prevStartDate.setDate(prevStartDate.getDate() - durationDays);
+    const prevEndDate = new Date(startDate);
+    prevEndDate.setDate(prevEndDate.getDate() - 1);
 
     // Fetch ALL relevant bookings for both periods to minimize queries?
     // Or just two queries.
@@ -31,11 +49,12 @@ export class SupabaseReportRepository implements ReportRepository {
         price,
         booking_date,
         student_id,
+        course:courses(price),
         booking_statuses!inner(status_key)
       `)
       .eq('teacher_id', teacherId)
-      .gte('booking_date', startDate.toISOString())
-      .lte('booking_date', endDate.toISOString());
+      .gte('booking_date', startDate.toISOString().slice(0, 10))
+      .lte('booking_date', endDate.toISOString().slice(0, 10));
 
     if (currentError) throw new Error(`Failed to fetch current stats: ${currentError.message} (Details: ${currentError.details || 'none'}, Hint: ${currentError.hint || 'none'})`);
 
@@ -47,11 +66,12 @@ export class SupabaseReportRepository implements ReportRepository {
         price,
         booking_date,
         student_id,
+        course:courses(price),
         booking_statuses!inner(status_key)
       `)
       .eq('teacher_id', teacherId)
-      .gte('booking_date', prevStartDate.toISOString())
-      .lt('booking_date', startDate.toISOString());
+      .gte('booking_date', prevStartDate.toISOString().slice(0, 10))
+      .lte('booking_date', prevEndDate.toISOString().slice(0, 10));
 
     if (prevError) throw new Error(`Failed to fetch previous stats: ${prevError.message} (Details: ${prevError.details || 'none'}, Hint: ${prevError.hint || 'none'})`);
 
@@ -60,7 +80,9 @@ export class SupabaseReportRepository implements ReportRepository {
         const status = Array.isArray(b.booking_statuses) ? b.booking_statuses[0] : b.booking_statuses;
         return this.isPaid(status?.status_key);
       });
-      const totalRevenue = paidBookings.reduce((sum, b) => sum + (b.price || 0), 0);
+      const totalRevenue = paidBookings.reduce((sum, b) => {
+        return sum + this.resolveAmount(b);
+      }, 0);
       const totalSessions = paidBookings.length;
       const averageOrderValue = totalSessions > 0 ? totalRevenue / totalSessions : 0;
       const activeStudents = new Set(paidBookings.map(b => b.student_id)).size;
@@ -101,10 +123,11 @@ export class SupabaseReportRepository implements ReportRepository {
       .select(`
         price,
         booking_date,
+        course:courses(price),
         booking_statuses!inner(status_key)
       `)
       .eq('teacher_id', teacherId)
-      .gte('booking_date', startDate.toISOString());
+      .gte('booking_date', startDate.toISOString().slice(0, 10));
 
     if (error) throw new Error(`Failed to fetch revenue trends: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
 
@@ -121,11 +144,12 @@ export class SupabaseReportRepository implements ReportRepository {
     data?.forEach(b => {
       const status = Array.isArray(b.booking_statuses) ? b.booking_statuses[0] : b.booking_statuses;
       if (!this.isPaid(status?.status_key)) return;
-      // booking_date is YYYY-MM-DD
-      const date = new Date(b.booking_date);
-      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      // booking_date is YYYY-MM-DD (avoid timezone shifts)
+      const dateStr = String(b.booking_date);
+      const [year, month] = dateStr.split("-");
+      const key = year && month ? `${year}-${month}` : "";
       if (monthlyRevenue[key] !== undefined) {
-        monthlyRevenue[key] += (b.price || 0);
+        monthlyRevenue[key] += this.resolveAmount(b);
       }
     });
 
@@ -140,7 +164,7 @@ export class SupabaseReportRepository implements ReportRepository {
       .from('bookings')
       .select(`
         price,
-        course:courses(title),
+        course:courses(title, price),
         booking_statuses!inner(status_key)
       `)
       .eq('teacher_id', teacherId);
@@ -154,9 +178,9 @@ export class SupabaseReportRepository implements ReportRepository {
       const status = Array.isArray(b.booking_statuses) ? b.booking_statuses[0] : b.booking_statuses;
       if (!this.isPaid(status?.status_key)) return;
       const title = (b.course as any)?.title || 'Unknown Course';
-      const price = b.price || 0;
-      distribution[title] = (distribution[title] || 0) + price;
-      total += price;
+      const amount = this.resolveAmount(b);
+      distribution[title] = (distribution[title] || 0) + amount;
+      total += amount;
     });
 
     // Convert to percentage? Or amount. The type says "value: percentage or amount". Let's return amount for flexibility, or calc % here.
@@ -174,7 +198,9 @@ export class SupabaseReportRepository implements ReportRepository {
         id,
         booking_date,
         price,
-        course:courses(title, course_type),
+        student_id,
+        course_id,
+        course:courses(title, course_type, price),
         student:student_info(
           user:user_info(name, avatar_url)
         ),
@@ -186,8 +212,8 @@ export class SupabaseReportRepository implements ReportRepository {
     // "Revenue Details" usually implies money received.
     query = query.in('booking_statuses.status_key', ['completed', 'confirmed']);
 
-    if (filter.startDate) query = query.gte('booking_date', filter.startDate.toISOString());
-    if (filter.endDate) query = query.lte('booking_date', filter.endDate.toISOString());
+    if (filter.startDate) query = query.gte('booking_date', filter.startDate.toISOString().slice(0, 10));
+    if (filter.endDate) query = query.lte('booking_date', filter.endDate.toISOString().slice(0, 10));
     // Search? Supabase doesn't easily search across joined tables deep nested.
     // We can search course title or student name if we flatten or text search is setup.
     // For now, simple client side filter or assuming minimal search needed?
@@ -211,7 +237,10 @@ export class SupabaseReportRepository implements ReportRepository {
       studentAvatar: b.student?.user?.avatar_url,
       courseTitle: b.course?.title || 'Unknown',
       courseType: b.course?.course_type || 'General',
-      amount: b.price || 0,
+      amount: this.resolveAmount(b),
+      studentId: b.student_id,
+      courseId: b.course_id,
+      statusKey: Array.isArray(b.booking_statuses) ? b.booking_statuses[0]?.status_key : b.booking_statuses?.status_key,
     }));
 
     return { data: transactions, total: count || 0 };

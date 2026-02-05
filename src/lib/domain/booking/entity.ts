@@ -1,3 +1,5 @@
+import { RescheduleRequest } from "./RescheduleRequest";
+
 export interface Booking {
   id: string;
   teacherId: string;
@@ -14,6 +16,9 @@ export interface Booking {
   courseType?: string;
   coursePrice?: number;
   teacherName?: string;
+  teacherEmail?: string;
+  teacherPhone?: string | null;
+  teacherAvatar?: string | null;
   purchaseId?: string | null;
   paidAt?: string | null;
   price?: number;
@@ -25,4 +30,5 @@ export interface Booking {
   paymentStatus?: "paid" | "pending" | "refunded";
   paymentMethod?: string; // e.g. "信用卡 (Visa **** 4242)" - likely need to mock or fetch from payment logs
   teacherNotes?: string; // Mapped from booking.notes or separate field?
+  rescheduleRequests?: RescheduleRequest[];
 }

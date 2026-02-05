@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SupabaseBookingRepository } from "@/lib/infrastructure/booking/SupabaseBookingRepository";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 interface BookingDetailProps {
   params: Promise<{
@@ -18,6 +18,41 @@ export default async function BookingDetailPage({ params }: BookingDetailProps) 
 
   if (!booking) {
     return notFound();
+  }
+
+  let teacherName = booking.teacherName;
+  let teacherTitle = booking.teacherTitle;
+  let teacherEmail = booking.teacherEmail;
+  let teacherPhone = booking.teacherPhone;
+  let teacherAvatar = booking.teacherAvatar;
+
+  if (!teacherName || !teacherTitle || !teacherEmail || !teacherPhone || !teacherAvatar) {
+    try {
+      const admin = createAdminClient();
+      const { data: teacherData } = await admin
+        .from("teacher_info")
+        .select(
+          `
+          title,
+          user_info (
+            name,
+            email,
+            phone,
+            avatar_url
+          )
+        `
+        )
+        .eq("id", booking.teacherId)
+        .single();
+
+      teacherName = teacherName || teacherData?.user_info?.name || "";
+      teacherTitle = teacherTitle || teacherData?.title || "";
+      teacherEmail = teacherEmail || teacherData?.user_info?.email || "";
+      teacherPhone = teacherPhone || teacherData?.user_info?.phone || null;
+      teacherAvatar = teacherAvatar || teacherData?.user_info?.avatar_url || null;
+    } catch (e) {
+      // Fail silently, fallback to "未知教師"
+    }
   }
 
   const formatDate = (dateStr: string) => {
@@ -273,28 +308,85 @@ export default async function BookingDetailPage({ params }: BookingDetailProps) 
               授課教師
             </h3>
             <div className="flex items-center gap-4 mb-6">
-              <div className="size-14 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 overflow-hidden relative">
-                <span className="material-symbols-outlined text-[32px]">
-                  person
-                </span>
-                {/* Assuming no avatar URL in booking initially, can be added later */}
-              </div>
+              {teacherAvatar ? (
+                <img
+                  src={teacherAvatar}
+                  alt={teacherName || "教師"}
+                  className="size-14 rounded-full object-cover"
+                />
+              ) : (
+                <div className="size-14 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 overflow-hidden relative">
+                  <span className="material-symbols-outlined text-[32px]">
+                    person
+                  </span>
+                </div>
+              )}
               <div>
                 <p className="text-slate-900 dark:text-white font-bold text-lg">
-                  {booking.teacherName || "未知教師"}
+                  {teacherName || "未知教師"}
                 </p>
                 <p className="text-slate-500 dark:text-slate-400 text-sm">
-                  {booking.teacherTitle || "教師"}
+                  {teacherTitle || "教師"}
                 </p>
               </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <button className="w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-all flex items-center justify-center gap-2">
-                <span className="material-symbols-outlined text-[18px]">
-                  mail
-                </span>
-                聯絡教師
-              </button>
+            <div className="flex flex-col gap-3">
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/50 p-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">
+                    Email
+                  </span>
+                  <span className="font-medium text-slate-800 dark:text-white">
+                    {teacherEmail || "未提供"}
+                  </span>
+                </div>
+                {teacherPhone ? (
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-slate-500 dark:text-slate-400">
+                      電話
+                    </span>
+                    <span className="font-medium text-slate-800 dark:text-white">
+                      {teacherPhone}
+                    </span>
+                  </div>
+                ) : null}
+              </div>
+              <div className="flex gap-2">
+                <a
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-all flex items-center justify-center gap-2"
+                  href={
+                    teacherEmail
+                      ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
+                          teacherEmail
+                        )}&su=${encodeURIComponent(
+                          `關於課程「${booking.courseTitle}」的詢問`
+                        )}&body=${encodeURIComponent(
+                          `老師您好：\n\n我想詢問「${booking.courseTitle}」的課程內容與上課安排。\n預約日期：${formatDate(
+                            booking.bookingDate
+                          )}\n上課時間：${booking.startTime} - ${booking.endTime}\n\n謝謝老師！`
+                        )}`
+                      : "#"
+                  }
+                  target={teacherEmail ? "_blank" : undefined}
+                  rel={teacherEmail ? "noopener noreferrer" : undefined}
+                >
+                  <span className="material-symbols-outlined text-[18px]">
+                    mail
+                  </span>
+                  Email
+                </a>
+                {teacherPhone ? (
+                  <a
+                    className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-all flex items-center justify-center gap-2"
+                    href={`tel:${teacherPhone}`}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      call
+                    </span>
+                    致電
+                  </a>
+                ) : null}
+              </div>
             </div>
           </div>
 

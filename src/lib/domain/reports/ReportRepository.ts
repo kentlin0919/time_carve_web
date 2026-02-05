@@ -37,6 +37,9 @@ export type Transaction = {
   courseTitle: string;
   courseType: string;
   amount: number;
+  studentId?: string;
+  courseId?: string;
+  statusKey?: string;
 };
 
 export interface ReportRepository {

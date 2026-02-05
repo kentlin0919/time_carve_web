@@ -92,7 +92,7 @@ export default function TeacherBookingsPage() {
       else if (booking.status === "cancelled") color = "red";
 
       // Check for pending reschedule
-      const hasPendingReschedule = booking.rescheduleRequests?.some(r => r.status === 'pending');
+      const hasPendingReschedule = (booking as any).rescheduleRequests?.some((r: any) => r.status === 'pending');
 
       grouped[day].push({
         time: booking.startTime.substring(0, 5), // HH:mm
@@ -626,7 +626,7 @@ export default function TeacherBookingsPage() {
       />
 
       {reviewingBooking && (() => {
-        const request = reviewingBooking.rescheduleRequests?.find(r => r.status === 'pending');
+        const request = (reviewingBooking as any).rescheduleRequests?.find((r: any) => r.status === 'pending');
         if (!request) return null;
         return (
           <ReviewRescheduleDialog

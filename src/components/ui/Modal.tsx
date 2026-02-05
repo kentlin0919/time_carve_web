@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export type ModalType = "info" | "success" | "warning" | "error";
+export type ModalSize = "sm" | "md" | "lg" | "xl";
 
 interface ModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface ModalProps {
   description?: string;
   children?: React.ReactNode;
   type?: ModalType;
+  size?: ModalSize;
   confirmText?: string;
   onConfirm?: () => void;
   showCancel?: boolean;
@@ -26,6 +28,7 @@ export function Modal({
   description,
   children,
   type = "info",
+  size = "md",
   confirmText = "我知道了",
   onConfirm,
   showCancel = false,
@@ -75,8 +78,16 @@ export function Modal({
         onClick={onClose}
       ></div>
       <div
-        className={`relative w-full max-w-[420px] transform rounded-[32px] bg-white dark:bg-gray-800 p-8 text-left shadow-2xl transition-all duration-300 border border-slate-100 dark:border-gray-700 ${
+        className={`relative w-full transform rounded-[32px] bg-white dark:bg-gray-800 p-8 text-left shadow-2xl transition-all duration-300 border border-slate-100 dark:border-gray-700 ${
           isOpen ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
+        } ${
+          size === "sm"
+            ? "max-w-[360px]"
+            : size === "lg"
+            ? "max-w-[720px]"
+            : size === "xl"
+            ? "max-w-[900px]"
+            : "max-w-[420px]"
         }`}
       >
         <div className="flex flex-col items-center justify-center mb-6">

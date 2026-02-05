@@ -17,7 +17,7 @@ import {
   CourseRevenueDistribution,
   Transaction,
 } from "@/lib/domain/reports/ReportRepository";
-import { startOfMonth, endOfMonth, subMonths } from "date-fns";
+import { startOfMonth, endOfMonth, format } from "date-fns";
 
 export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
@@ -45,10 +45,12 @@ export default function ReportsPage() {
 
       const startDate = startOfMonth(selectedDate);
       const endDate = endOfMonth(selectedDate);
+      const startDateStr = format(startDate, "yyyy-MM-dd");
+      const endDateStr = format(endDate, "yyyy-MM-dd");
 
       // Parallel Fetching
       const [statsData, trendsData, distData, transData] = await Promise.all([
-        getReportStats(startDate.toISOString(), endDate.toISOString()),
+        getReportStats(startDateStr, endDateStr),
         getRevenueTrends(trendRange),
         getCourseRevenueDistribution(),
         getTransactionList({

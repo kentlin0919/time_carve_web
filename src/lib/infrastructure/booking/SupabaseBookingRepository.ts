@@ -30,7 +30,7 @@ export class SupabaseBookingRepository implements BookingRepository {
           price
         ),
         reschedule_requests:booking_reschedule_requests (
-           id, requested_by, new_start_time, status, reason, created_at
+           id, requested_by, original_start_time, new_start_time, status, reason, created_at, updated_at
         )
       `)
       .eq("teacher_id", teacherId)
@@ -62,10 +62,12 @@ export class SupabaseBookingRepository implements BookingRepository {
         id: r.id,
         bookingId: item.id,
         requestedBy: r.requested_by,
+        originalStartTime: r.original_start_time,
         newStartTime: r.new_start_time,
         status: r.status,
         reason: r.reason,
-        createdAt: r.created_at
+        createdAt: r.created_at,
+        updatedAt: r.updated_at
       })) || [],
     }));
 
@@ -148,9 +150,40 @@ export class SupabaseBookingRepository implements BookingRepository {
       price: data.price,
       purchaseId: data.purchase_id,
       courseTitle: data.course?.title || "",
+      coursePrice: data.course?.price || 0,
       studentName: data.student?.user?.name || "",
-      teacherName: data.teacher?.user?.name || "",
-      courseType: data.course?.course_type || ""
+      teacherName:
+        data.teacher?.user?.name ||
+        data.teacher?.user_info?.name ||
+        data.teacher_info?.user_info?.name ||
+        "",
+      teacherEmail:
+        data.teacher?.user?.email ||
+        data.teacher?.user_info?.email ||
+        data.teacher_info?.user_info?.email ||
+        "",
+      teacherPhone:
+        data.teacher?.user?.phone ||
+        data.teacher?.user_info?.phone ||
+        data.teacher_info?.user_info?.phone ||
+        null,
+      teacherAvatar:
+        data.teacher?.user?.avatar_url ||
+        data.teacher?.user_info?.avatar_url ||
+        data.teacher_info?.user_info?.avatar_url ||
+        null,
+      courseType: data.course?.course_type || "",
+      rescheduleRequests: data.reschedule_requests?.map((r: any) => ({
+        id: r.id,
+        bookingId: data.id,
+        requestedBy: r.requested_by,
+        originalStartTime: r.original_start_time,
+        newStartTime: r.new_start_time,
+        status: r.status,
+        reason: r.reason,
+        createdAt: r.created_at,
+        updatedAt: r.updated_at
+      }))
     };
   }
 
@@ -180,7 +213,7 @@ export class SupabaseBookingRepository implements BookingRepository {
           price
         ),
         reschedule_requests:booking_reschedule_requests (
-           id, requested_by, new_start_time, status, reason, created_at
+           id, requested_by, original_start_time, new_start_time, status, reason, created_at, updated_at
         )
       `)
       .neq("booking_status.status_key", "cancelled")
@@ -281,7 +314,7 @@ export class SupabaseBookingRepository implements BookingRepository {
           price
         ),
         reschedule_requests:booking_reschedule_requests (
-           id, requested_by, new_start_time, status, reason, created_at
+           id, requested_by, original_start_time, new_start_time, status, reason, created_at, updated_at
         )
       `)
       .eq("teacher_id", teacherId)
@@ -308,13 +341,14 @@ export class SupabaseBookingRepository implements BookingRepository {
           user:user_info (name, email)
         ),
         teacher:teacher_info (
-          title
+          title,
+          user_info (name, email, phone, avatar_url)
         ),
         course:courses (
           title, course_type, price, description, sections, location
         ),
         reschedule_requests:booking_reschedule_requests (
-           id, requested_by, new_start_time, status, reason, created_at
+           id, requested_by, original_start_time, new_start_time, status, reason, created_at, updated_at
         )
       `)
       .eq("id", id)
