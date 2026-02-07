@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import type { Portfolio } from "@/lib/domain/portfolio/entity";
-import Footer from "@/components/Footer";
 import { Modal } from "@/components/ui/Modal";
 
 type TeacherInfo = {
@@ -362,8 +361,6 @@ export default function TeacherPortfolioGalleryPage() {
                     </div>
                 </div>
             </Modal>
-
-            <Footer />
 
             <style jsx>{`
         .portfolio-card:hover .hover-overlay {
