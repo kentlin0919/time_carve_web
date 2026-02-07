@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import type { Portfolio } from "@/lib/domain/portfolio/entity";
 import Footer from "@/components/Footer";
+import { Modal } from "@/components/ui/Modal";
 
 type TeacherInfo = {
     id: string;
@@ -14,6 +15,8 @@ type TeacherInfo = {
     avatar_url: string | null;
     title: string | null;
     bio: string | null;
+    email?: string | null;
+    phone?: string | null;
 };
 
 type PortfolioWithCategory = Portfolio & {
@@ -46,6 +49,7 @@ export default function TeacherPortfolioGalleryPage() {
     const [categories, setCategories] = useState<string[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isConsultOpen, setIsConsultOpen] = useState(false);
 
     useEffect(() => {
         if (!teacherCode) {
@@ -218,7 +222,10 @@ export default function TeacherPortfolioGalleryPage() {
                             <span className="material-symbols-outlined">person</span>
                             教師個人頁
                         </Link>
-                        <button className="flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-white border border-gray-200 dark:border-gray-700 px-8 py-3.5 rounded-full font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
+                        <button
+                            onClick={() => setIsConsultOpen(true)}
+                            className="flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-white border border-gray-200 dark:border-gray-700 px-8 py-3.5 rounded-full font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+                        >
                             <span className="material-symbols-outlined">mail</span>
                             諮詢導師
                         </button>
@@ -269,7 +276,7 @@ export default function TeacherPortfolioGalleryPage() {
                                     href={`/portfolio/${portfolio.id}`}
                                     className="portfolio-card group cursor-pointer"
                                 >
-                                    <div className="relative overflow-hidden rounded-2xl aspect-[4/5] mb-4 shadow-md bg-gray-100">
+                                    <div className="relative overflow-hidden rounded-2xl aspect-[4/3] mb-4 shadow-md bg-gray-100">
                                         {portfolio.cover_image_url ? (
                                             <Image
                                                 alt={portfolio.title}
@@ -330,15 +337,30 @@ export default function TeacherPortfolioGalleryPage() {
             </main>
 
             {/* Floating CTA */}
-            <div className="fixed bottom-8 right-8 z-40 hidden lg:block">
-                <Link
-                    href={`/teachers/${teacherCode}`}
-                    className="flex items-center gap-3 bg-primary text-white pl-5 pr-7 py-4 rounded-full shadow-2xl shadow-primary/40 hover:scale-110 active:scale-95 transition-all"
-                >
-                    <span className="material-symbols-outlined text-[26px]">event_available</span>
-                    <span className="font-bold">立即預約 {name} 的課程</span>
-                </Link>
-            </div>
+            {/* Floating CTA removed */}
+
+            <Modal
+                isOpen={isConsultOpen}
+                onClose={() => setIsConsultOpen(false)}
+                title="諮詢老師"
+                description="以下是老師的聯絡方式"
+                confirmText="關閉"
+            >
+                <div className="space-y-3 text-sm">
+                    <div className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 px-4 py-3">
+                        <span className="text-slate-500">Email</span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">
+                            {teacher.email || "尚未提供"}
+                        </span>
+                    </div>
+                    <div className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 px-4 py-3">
+                        <span className="text-slate-500">電話</span>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">
+                            {teacher.phone || "尚未提供"}
+                        </span>
+                    </div>
+                </div>
+            </Modal>
 
             <Footer />
 

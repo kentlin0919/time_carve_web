@@ -220,11 +220,7 @@ function TeachersContent() {
             </h2>
           </div>
 
-          <div className="hidden md:flex items-center gap-4">
-            <button className="flex h-10 cursor-pointer items-center justify-center rounded-full bg-primary px-6 text-white text-sm font-bold shadow-glow hover:bg-primary-dark hover:shadow-lg hover:-translate-y-0.5 transition-all active:scale-95">
-              <span className="truncate">預約諮詢</span>
-            </button>
-          </div>
+          <div className="hidden md:flex items-center gap-4"></div>
           <button className="md:hidden flex items-center justify-center text-[#111618] dark:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
             <span className="material-symbols-outlined">menu</span>
           </button>
@@ -460,15 +456,15 @@ function TeachersContent() {
                   精選作品集
                 </h2>
               </div>
-              <a
+              <Link
                 className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full text-gray-600 hover:text-primary hover:bg-primary/5 transition-all text-sm font-bold"
-                href="#"
+                href={`/teachers/${teacherCode}/portfolio`}
               >
                 更多作品
                 <span className="material-symbols-outlined text-lg">
                   arrow_forward
                 </span>
-              </a>
+              </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {portfolios.length > 0 ? (

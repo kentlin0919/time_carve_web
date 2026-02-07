@@ -52,31 +52,69 @@ export async function exportReportData(startDateStr: string, endDateStr: string)
 
   const repo = new SupabaseReportRepository(supabase);
 
-  // Fetch data
-  const [stats, transactions] = await Promise.all([
+  // Fetch teacher info
+  const { data: teacherInfo } = await supabase
+    .from('teacher_info')
+    .select('user:user_info(name)')
+    .eq('user_id', user.id)
+    .single();
+  const teacherName = (teacherInfo?.user as { name?: string })?.name || '未知';
+
+  // Fetch all data
+  const [stats, distribution, transactions] = await Promise.all([
     repo.getStats(user.id, new Date(startDateStr), new Date(endDateStr)),
+    repo.getCourseRevenueDistribution(user.id),
     repo.getTransactions(user.id, { startDate: new Date(startDateStr), endDate: new Date(endDateStr), pageSize: 1000 }),
   ]);
+
+  // Format helpers
+  const formatCurrency = (val: number) => `$${val.toLocaleString()}`;
+  const formatGrowth = (val: number) => `${val >= 0 ? '+' : ''}${val.toFixed(1)}%`;
+  const now = new Date();
+  const exportTime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
   // Build CSV
   const lines: string[] = [];
 
-  // Header - Summary
-  lines.push("營收報表摘要");
+  // Section 1: Header
+  lines.push("TimeCarve 刻時 - 營收報表");
+  lines.push(`教師名稱,${teacherName}`);
   lines.push(`報表期間,${startDateStr} ~ ${endDateStr}`);
-  lines.push("");
-  lines.push("指標,數值,成長率");
-  lines.push(`本月總營收,$${stats.totalRevenue},${stats.totalRevenueGrowth.toFixed(1)}%`);
-  lines.push(`累計課程數,${stats.totalSessions}堂,${stats.totalSessionsGrowth.toFixed(1)}%`);
-  lines.push(`平均每堂收入,$${stats.averageOrderValue.toFixed(0)},${stats.averageOrderValueGrowth.toFixed(1)}%`);
-  lines.push(`活躍學生數,${stats.activeStudents}人,${stats.activeStudentsGrowth.toFixed(1)}%`);
+  lines.push(`匯出時間,${exportTime}`);
   lines.push("");
 
-  // Header - Transaction List
-  lines.push("營收明細");
-  lines.push("日期,學生姓名,課程名稱,課程類型,金額");
-  transactions.data.forEach((t) => {
-    lines.push(`${t.date},${t.studentName},${t.courseTitle},${t.courseType},$${t.amount}`);
+  // Section 2: Summary Stats
+  lines.push("=== 統計摘要 ===");
+  lines.push("指標,數值,成長率");
+  lines.push(`本月總營收,${formatCurrency(stats.totalRevenue)},${formatGrowth(stats.totalRevenueGrowth)}`);
+  lines.push(`累計課程數,${stats.totalSessions} 堂,${formatGrowth(stats.totalSessionsGrowth)}`);
+  lines.push(`平均每堂收入,${formatCurrency(stats.averageOrderValue)},${formatGrowth(stats.averageOrderValueGrowth)}`);
+  lines.push(`活躍學生數,${stats.activeStudents} 人,${formatGrowth(stats.activeStudentsGrowth)}`);
+  lines.push("");
+
+  // Section 3: Course Distribution
+  lines.push("=== 課程收入分佈 ===");
+  lines.push("課程名稱,營收金額,佔比");
+  const totalRevenue = distribution.reduce((sum, d) => sum + d.value, 0);
+  distribution.forEach((d) => {
+    const percentage = totalRevenue > 0 ? (d.value / totalRevenue * 100) : 0;
+    lines.push(`${d.name},${formatCurrency(d.value)},${percentage.toFixed(1)}%`);
+  });
+  lines.push("");
+
+  // Section 4: Transaction List
+  lines.push("=== 交易明細 ===");
+  lines.push("序號,日期,學生姓名,課程名稱,課程類型,金額,狀態");
+  const statusMap: Record<string, string> = {
+    'pending': '待確認',
+    'confirmed': '已確認',
+    'completed': '已完成',
+    'cancelled': '已取消',
+    'in_progress': '進行中',
+  };
+  transactions.data.forEach((t, idx) => {
+    const statusText = statusMap[t.statusKey || ''] || t.statusKey || '未知';
+    lines.push(`${idx + 1},${t.date},${t.studentName},${t.courseTitle},${t.courseType},${formatCurrency(t.amount)},${statusText}`);
   });
 
   return lines.join("\n");
