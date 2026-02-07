@@ -12,6 +12,22 @@ export class SupabaseCourseRepository implements CourseRepository {
     this.supabase = client || createClient();
   }
 
+  async getAllPublicCourses(): Promise<Course[]> {
+    const { data, error } = await this.supabase
+      .from("courses")
+      .select("*, course_tags(tags(name)), teacher_info!inner(is_public)")
+      .eq("is_active", true)
+      .eq("teacher_info.is_public", true)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching public courses:", error);
+      return [];
+    }
+
+    return data.map(this.mapToEntity);
+  }
+
   async getTeacherCourses(teacherId: string): Promise<Course[]> {
     const { data, error } = await this.supabase
       .from("courses")

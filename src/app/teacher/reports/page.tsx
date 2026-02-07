@@ -5,11 +5,13 @@ import { StatsGrid } from "./_components/StatsGrid";
 import { RevenueChart } from "./_components/RevenueChart";
 import { CourseDistribution } from "./_components/CourseDistribution";
 import { RevenueTable } from "./_components/RevenueTable";
+import { AdvancedFilter, AdvancedFilterValues } from "./_components/AdvancedFilter";
 import {
   getReportStats,
   getRevenueTrends,
   getCourseRevenueDistribution,
   getTransactionList,
+  exportReportData,
 } from "@/app/actions/reports";
 import {
   ReportStats,
@@ -38,6 +40,15 @@ export default function ReportsPage() {
 
   // Date Range for stats (default to current month)
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilterValues>({
+    startDate: "",
+    endDate: "",
+    courseType: "",
+    minAmount: "",
+    maxAmount: "",
+  });
 
   const fetchData = useCallback(async () => {
     try {
@@ -84,6 +95,33 @@ export default function ReportsPage() {
   // Use a temporary state for input and effect for debounce?
   // For simplicity, just fetch on generic state change for now.
 
+  const [exporting, setExporting] = useState(false);
+
+  const handleExport = async () => {
+    try {
+      setExporting(true);
+      const startDate = startOfMonth(selectedDate);
+      const endDate = endOfMonth(selectedDate);
+      const startDateStr = format(startDate, "yyyy-MM-dd");
+      const endDateStr = format(endDate, "yyyy-MM-dd");
+
+      const csvContent = await exportReportData(startDateStr, endDateStr);
+      const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `報表_${startDateStr}_${endDateStr}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Export failed:", error);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full bg-background-light dark:bg-background-dark overflow-hidden">
       {/* Header */}
@@ -98,7 +136,10 @@ export default function ReportsPage() {
         </div>
         <div className="flex items-center gap-3">
           <div className="relative inline-block text-left">
-            <button className="flex items-center justify-center gap-2 rounded-lg h-9 px-4 bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark text-slate-600 dark:text-gray-300 shadow-sm text-sm font-medium transition-all hover:bg-slate-50 dark:hover:bg-slate-700">
+            <button
+              onClick={() => setShowDatePicker(!showDatePicker)}
+              className="flex items-center justify-center gap-2 rounded-lg h-9 px-4 bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark text-slate-600 dark:text-gray-300 shadow-sm text-sm font-medium transition-all hover:bg-slate-50 dark:hover:bg-slate-700"
+            >
               <span className="material-symbols-outlined text-[18px]">
                 calendar_month
               </span>
@@ -109,15 +150,71 @@ export default function ReportsPage() {
                 expand_more
               </span>
             </button>
-            {/* Simple Date Picker Popover could go here, omitting for brevity */}
+            {showDatePicker && (
+              <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark rounded-xl shadow-lg z-20 p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <button
+                    onClick={() =>
+                      setSelectedDate(
+                        new Date(selectedDate.getFullYear() - 1, selectedDate.getMonth())
+                      )
+                    }
+                    className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      chevron_left
+                    </span>
+                  </button>
+                  <span className="font-bold text-slate-800 dark:text-white">
+                    {selectedDate.getFullYear()}年
+                  </span>
+                  <button
+                    onClick={() =>
+                      setSelectedDate(
+                        new Date(selectedDate.getFullYear() + 1, selectedDate.getMonth())
+                      )
+                    }
+                    className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      chevron_right
+                    </span>
+                  </button>
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        setSelectedDate(new Date(selectedDate.getFullYear(), i));
+                        setShowDatePicker(false);
+                      }}
+                      className={`py-2 rounded-lg text-sm font-medium transition-colors ${selectedDate.getMonth() === i
+                        ? "bg-primary text-white"
+                        : "hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-gray-300"
+                        }`}
+                    >
+                      {i + 1}月
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-          <button className="flex items-center justify-center gap-2 rounded-lg h-9 px-4 bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark text-slate-600 dark:text-gray-300 shadow-sm text-sm font-medium transition-all hover:bg-slate-50 dark:hover:bg-slate-700">
+          <button
+            onClick={handleExport}
+            disabled={exporting}
+            className="flex items-center justify-center gap-2 rounded-lg h-9 px-4 bg-white dark:bg-slate-800 border border-border-light dark:border-border-dark text-slate-600 dark:text-gray-300 shadow-sm text-sm font-medium transition-all hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50"
+          >
             <span className="material-symbols-outlined text-[18px]">
-              download
+              {exporting ? "hourglass_empty" : "download"}
             </span>
-            <span>匯出報表</span>
+            <span>{exporting ? "匯出中..." : "匯出報表"}</span>
           </button>
-          <button className="flex items-center justify-center gap-2 rounded-lg h-9 px-4 bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/30 text-sm font-bold transition-all active:scale-95">
+          <button
+            onClick={() => setShowAdvancedFilter(true)}
+            className="flex items-center justify-center gap-2 rounded-lg h-9 px-4 bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/30 text-sm font-bold transition-all active:scale-95"
+          >
             <span className="material-symbols-outlined text-[18px]">
               filter_list
             </span>
@@ -176,6 +273,18 @@ export default function ReportsPage() {
           />
         </div>
       </div>
+
+      {/* Advanced Filter Modal */}
+      <AdvancedFilter
+        isOpen={showAdvancedFilter}
+        onClose={() => setShowAdvancedFilter(false)}
+        initialValues={advancedFilters}
+        onApply={(filters) => {
+          setAdvancedFilters(filters);
+          setCourseTypeFilter(filters.courseType);
+          setPage(1);
+        }}
+      />
     </div>
   );
 }

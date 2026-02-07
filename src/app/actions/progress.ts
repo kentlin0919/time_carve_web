@@ -92,11 +92,28 @@ export async function getMyCoursesWithProgress() {
     if (progresses.length === 0) return [];
 
     const courseIds = progresses.map(p => p.course_id);
+    
+    // Fetch courses and purchases in parallel
     const courseRepo = new SupabaseCourseRepository(supabase);
-    const courses = await courseRepo.getByIds(courseIds);
+    const [courses, purchases] = await Promise.all([
+        courseRepo.getByIds(courseIds),
+        supabase.from('course_purchases').select('*').eq('student_id', user.id).eq('status', 'active')
+    ]);
 
     return progresses.map(p => {
         const course = courses.find(c => c.id === p.course_id);
-        return { ...p, course };
-    }).filter(item => item.course !== undefined) as (StudentCourseProgress & { course: Course })[];
+        const purchase = purchases.data?.find(pur => pur.course_id === p.course_id);
+        return { 
+            ...p, 
+            course,
+            purchase: purchase ? {
+                totalHours: purchase.total_hours,
+                remainingHours: purchase.remaining_hours,
+                id: purchase.id
+            } : null
+        };
+    }).filter(item => item.course !== undefined) as (StudentCourseProgress & { 
+        course: Course, 
+        purchase: { totalHours: number, remainingHours: number, id: string } | null 
+    })[];
 }

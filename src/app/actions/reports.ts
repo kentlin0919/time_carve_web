@@ -45,6 +45,43 @@ export async function getTransactionList(filter: TransactionFilter) {
   return repo.getTransactions(user.id, filter);
 }
 
+export async function exportReportData(startDateStr: string, endDateStr: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const repo = new SupabaseReportRepository(supabase);
+
+  // Fetch data
+  const [stats, transactions] = await Promise.all([
+    repo.getStats(user.id, new Date(startDateStr), new Date(endDateStr)),
+    repo.getTransactions(user.id, { startDate: new Date(startDateStr), endDate: new Date(endDateStr), pageSize: 1000 }),
+  ]);
+
+  // Build CSV
+  const lines: string[] = [];
+
+  // Header - Summary
+  lines.push("營收報表摘要");
+  lines.push(`報表期間,${startDateStr} ~ ${endDateStr}`);
+  lines.push("");
+  lines.push("指標,數值,成長率");
+  lines.push(`本月總營收,$${stats.totalRevenue},${stats.totalRevenueGrowth.toFixed(1)}%`);
+  lines.push(`累計課程數,${stats.totalSessions}堂,${stats.totalSessionsGrowth.toFixed(1)}%`);
+  lines.push(`平均每堂收入,$${stats.averageOrderValue.toFixed(0)},${stats.averageOrderValueGrowth.toFixed(1)}%`);
+  lines.push(`活躍學生數,${stats.activeStudents}人,${stats.activeStudentsGrowth.toFixed(1)}%`);
+  lines.push("");
+
+  // Header - Transaction List
+  lines.push("營收明細");
+  lines.push("日期,學生姓名,課程名稱,課程類型,金額");
+  transactions.data.forEach((t) => {
+    lines.push(`${t.date},${t.studentName},${t.courseTitle},${t.courseType},$${t.amount}`);
+  });
+
+  return lines.join("\n");
+}
+
 export type ReportTransactionDetail = {
   booking: {
     id: string;
@@ -71,7 +108,7 @@ export type ReportTransactionDetail = {
     durationMinutes: number | null;
     price: number | string | null;
     location: string | null;
-    sections: any[] | null;
+    sections: unknown[] | null;
     expectedLearningOutcomes: string[] | null;
   };
   progress: {
@@ -170,21 +207,21 @@ export async function getTransactionDetail(bookingId: string): Promise<ReportTra
       durationMinutes: booking.course?.duration_minutes || null,
       price: booking.course?.price ?? null,
       location: booking.course?.location || null,
-      sections: booking.course?.sections || null,
-      expectedLearningOutcomes: booking.course?.expected_learning_outcomes || null,
+      sections: Array.isArray(booking.course?.sections) ? booking.course.sections as unknown[] : null,
+      expectedLearningOutcomes: Array.isArray(booking.course?.expected_learning_outcomes) ? booking.course.expected_learning_outcomes as string[] : null,
     },
     progress: progressRow
       ? {
-          id: progressRow.id,
-          status: progressRow.status,
-          progressPercentage: progressRow.progress_percentage,
-          completedSectionIds: Array.isArray(progressRow.completed_section_ids)
-            ? progressRow.completed_section_ids
-            : [],
-          currentSectionId: progressRow.current_section_id,
-          teacherNotes: progressRow.teacher_notes,
-          updatedAt: progressRow.updated_at,
-        }
+        id: progressRow.id,
+        status: progressRow.status,
+        progressPercentage: progressRow.progress_percentage,
+        completedSectionIds: Array.isArray(progressRow.completed_section_ids)
+          ? progressRow.completed_section_ids
+          : [],
+        currentSectionId: progressRow.current_section_id,
+        teacherNotes: progressRow.teacher_notes,
+        updatedAt: progressRow.updated_at,
+      }
       : null,
   };
 }

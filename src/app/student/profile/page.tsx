@@ -439,7 +439,7 @@ export default function StudentProfilePage() {
                   真實姓名
                 </label>
                 <input
-                  className="w-full rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-primary focus:ring-primary trans-all font-medium"
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-2.5 font-medium focus:border-primary focus:ring-primary trans-all"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -450,7 +450,7 @@ export default function StudentProfilePage() {
                   電子郵件
                 </label>
                 <input
-                  className="w-full rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-primary focus:ring-primary trans-all font-medium bg-slate-100 dark:bg-slate-900 text-slate-500 cursor-not-allowed"
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 px-4 py-2.5 font-medium cursor-not-allowed"
                   type="email"
                   value={email}
                   disabled
@@ -461,7 +461,7 @@ export default function StudentProfilePage() {
                   手機號碼
                 </label>
                 <input
-                  className="w-full rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-primary focus:ring-primary trans-all font-medium"
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-2.5 font-medium focus:border-primary focus:ring-primary trans-all"
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
@@ -520,7 +520,7 @@ export default function StudentProfilePage() {
                     新密碼
                   </label>
                   <input
-                    className="w-full rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-primary focus:ring-primary trans-all font-medium"
+                    className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-2.5 font-medium focus:border-primary focus:ring-primary trans-all"
                     placeholder="請輸入新密碼"
                     type="password"
                     value={newPassword}
@@ -532,7 +532,7 @@ export default function StudentProfilePage() {
                     確認新密碼
                   </label>
                   <input
-                    className="w-full rounded-xl border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:border-primary focus:ring-primary trans-all font-medium"
+                    className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-2.5 font-medium focus:border-primary focus:ring-primary trans-all"
                     placeholder="再次輸入新密碼"
                     type="password"
                     value={confirmPassword}

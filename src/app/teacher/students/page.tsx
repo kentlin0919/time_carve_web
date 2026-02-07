@@ -661,11 +661,131 @@ export default function TeacherStudentManagementPage() {
                     </div>
 
                     <div className="p-6 overflow-y-auto flex-1 bg-surface-light dark:bg-surface-dark">
-                      <div className="text-center text-gray-400 py-10">
-                        <span className="material-symbols-outlined text-4xl mb-2">
-                          info
-                        </span>
-                        <p>更多學生詳情功能開發中</p>
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div className="lg:col-span-5 flex flex-col gap-6">
+                          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-border-light dark:border-border-dark p-5 shadow-sm">
+                            <div className="flex items-center gap-2 mb-4">
+                              <span className="material-symbols-outlined text-primary text-[20px]">
+                                badge
+                              </span>
+                              <h3 className="font-bold text-slate-800 dark:text-white">
+                                基本資訊
+                              </h3>
+                            </div>
+                            <div className="space-y-3 text-sm">
+                              <div className="flex items-center justify-between">
+                                <span className="text-text-sub">學員編號</span>
+                                <span className="font-medium text-slate-800 dark:text-slate-200">
+                                  {selectedStudent.student_code || "N/A"}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-text-sub">帳號狀態</span>
+                                <span
+                                  className={`text-xs font-bold px-2.5 py-1 rounded-full border ${
+                                    selectedStudent.user_info.is_active
+                                      ? "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-900/40"
+                                      : "bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
+                                  }`}
+                                >
+                                  {selectedStudent.user_info.is_active
+                                    ? "啟用中"
+                                    : "已停用"}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-text-sub">加入日期</span>
+                                <span className="font-medium text-slate-800 dark:text-slate-200">
+                                  {selectedStudent.created_at
+                                    ? new Date(
+                                        selectedStudent.created_at
+                                      ).toLocaleDateString()
+                                    : "N/A"}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-text-sub">最近更新</span>
+                                <span className="font-medium text-slate-800 dark:text-slate-200">
+                                  {selectedStudent.updated_at
+                                    ? new Date(
+                                        selectedStudent.updated_at
+                                      ).toLocaleDateString()
+                                    : "N/A"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-border-light dark:border-border-dark p-5 shadow-sm">
+                            <div className="flex items-center gap-2 mb-4">
+                              <span className="material-symbols-outlined text-primary text-[20px]">
+                                contact_mail
+                              </span>
+                              <h3 className="font-bold text-slate-800 dark:text-white">
+                                聯絡方式
+                              </h3>
+                            </div>
+                            <div className="space-y-4 text-sm">
+                              <div className="flex items-center gap-3">
+                                <span className="material-symbols-outlined text-text-sub text-[18px]">
+                                  mail
+                                </span>
+                                <div className="flex flex-col">
+                                  <span className="text-text-sub text-xs">
+                                    Email
+                                  </span>
+                                  <span className="font-medium text-slate-800 dark:text-slate-200">
+                                    {selectedStudent.user_info.email}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <span className="material-symbols-outlined text-text-sub text-[18px]">
+                                  call
+                                </span>
+                                <div className="flex flex-col">
+                                  <span className="text-text-sub text-xs">
+                                    電話
+                                  </span>
+                                  <span className="font-medium text-slate-800 dark:text-slate-200">
+                                    {selectedStudent.user_info.phone || "未提供"}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-border-light dark:border-border-dark p-5 shadow-sm">
+                            <div className="flex items-center gap-2 mb-4">
+                              <span className="material-symbols-outlined text-primary text-[20px]">
+                                note_alt
+                              </span>
+                              <h3 className="font-bold text-slate-800 dark:text-white">
+                                教學備註
+                              </h3>
+                            </div>
+                            <div className="text-xs text-text-sub bg-slate-50 dark:bg-slate-900/40 rounded-xl p-4 border border-dashed border-border-light dark:border-border-dark">
+                              尚未建立備註，您可以進入編輯模式補充。
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="lg:col-span-7 flex flex-col gap-6">
+                          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-border-light dark:border-border-dark p-5 shadow-sm">
+                            <div className="flex items-center gap-2 mb-4">
+                              <span className="material-symbols-outlined text-primary text-[20px]">
+                                school
+                              </span>
+                              <h3 className="font-bold text-slate-800 dark:text-white">
+                                課程與學習進度
+                              </h3>
+                            </div>
+                            <StudentProgressSection
+                              studentId={selectedStudent.id}
+                              teacherId={currentUserId}
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </>

@@ -10,6 +10,42 @@ export class SupabaseBookingRepository implements BookingRepository {
     this.client = client || defaultClient;
   }
 
+  async getStudentBookings(studentId: string): Promise<Booking[]> {
+    const { data, error } = await this.client
+      .from("bookings")
+      .select(`
+        *,
+        booking_status:booking_statuses!fk_booking_status (
+          status_key
+        ),
+        teacher:teacher_info (
+          user:user_info (
+            name,
+            email,
+            avatar_url
+          )
+        ),
+        course:courses (
+          title,
+          course_type,
+          price,
+          location
+        ),
+        reschedule_requests:booking_reschedule_requests (
+           id, requested_by, original_start_time, new_start_time, status, reason, created_at, updated_at
+        )
+      `)
+      .eq("student_id", studentId)
+      .order("booking_date", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching student bookings:", error);
+      return [];
+    }
+
+    return data.map((item: any) => this.mapRowToBooking(item));
+  }
+
   async getBookings(teacherId: string, startDate: string, endDate: string): Promise<Booking[]> {
     const { data, error } = await this.client
       .from("bookings")
@@ -44,32 +80,7 @@ export class SupabaseBookingRepository implements BookingRepository {
       return [];
     }
 
-    return data.map((item: any) => ({
-      id: item.id,
-      teacherId: item.teacher_id,
-      studentId: item.student_id,
-      courseId: item.course_id,
-      bookingDate: item.booking_date,
-      startTime: item.start_time,
-      endTime: item.end_time,
-      status: item.booking_status?.status_key || "pending", // Map nested status back to string
-      studentName: item.student?.user?.name || "Unknown",
-      studentEmail: item.student?.user?.email || "",
-      courseTitle: item.course?.title || "",
-      courseType: item.course?.course_type || "",
-      coursePrice: item.course?.price || 0,
-      rescheduleRequests: item.reschedule_requests?.map((r: any) => ({
-        id: r.id,
-        bookingId: item.id,
-        requestedBy: r.requested_by,
-        originalStartTime: r.original_start_time,
-        newStartTime: r.new_start_time,
-        status: r.status,
-        reason: r.reason,
-        createdAt: r.created_at,
-        updatedAt: r.updated_at
-      })) || [],
-    }));
+    return data.map((item: any) => this.mapRowToBooking(item));
 
   }
 
@@ -173,6 +184,10 @@ export class SupabaseBookingRepository implements BookingRepository {
         data.teacher_info?.user_info?.avatar_url ||
         null,
       courseType: data.course?.course_type || "",
+      homework: data.homework ?? null,
+      teacherFeedback: data.teacher_feedback ?? null,
+      teacherFeedbackVisible: data.teacher_feedback_visible ?? true,
+      feedbackUpdatedAt: data.feedback_updated_at ?? null,
       rescheduleRequests: data.reschedule_requests?.map((r: any) => ({
         id: r.id,
         bookingId: data.id,
@@ -407,6 +422,13 @@ export class SupabaseBookingRepository implements BookingRepository {
       if (statusData) updateData.status_id = statusData.id;
     }
     if (booking.notes) updateData.notes = booking.notes;
+    if (booking.homework !== undefined) updateData.homework = booking.homework;
+    if (booking.teacherFeedback !== undefined)
+      updateData.teacher_feedback = booking.teacherFeedback;
+    if (booking.teacherFeedbackVisible !== undefined)
+      updateData.teacher_feedback_visible = booking.teacherFeedbackVisible;
+    if (booking.feedbackUpdatedAt !== undefined)
+      updateData.feedback_updated_at = booking.feedbackUpdatedAt;
 
     const { error } = await this.client
       .from("bookings")

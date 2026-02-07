@@ -114,6 +114,8 @@ export type Database = {
           course_id: string
           created_at: string
           end_time: string
+          feedback_updated_at: string | null
+          homework: string | null
           id: string
           notes: string | null
           paid_at: string | null
@@ -125,6 +127,8 @@ export type Database = {
           status_id: number
           student_id: string
           teacher_id: string
+          teacher_feedback: string | null
+          teacher_feedback_visible: boolean
           updated_at: string
         }
         Insert: {
@@ -132,6 +136,8 @@ export type Database = {
           course_id: string
           created_at?: string
           end_time: string
+          feedback_updated_at?: string | null
+          homework?: string | null
           id?: string
           notes?: string | null
           paid_at?: string | null
@@ -143,6 +149,8 @@ export type Database = {
           status_id: number
           student_id: string
           teacher_id: string
+          teacher_feedback?: string | null
+          teacher_feedback_visible?: boolean
           updated_at?: string
         }
         Update: {
@@ -150,6 +158,8 @@ export type Database = {
           course_id?: string
           created_at?: string
           end_time?: string
+          feedback_updated_at?: string | null
+          homework?: string | null
           id?: string
           notes?: string | null
           paid_at?: string | null
@@ -161,6 +171,8 @@ export type Database = {
           status_id?: number
           student_id?: string
           teacher_id?: string
+          teacher_feedback?: string | null
+          teacher_feedback_visible?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -1473,4 +1485,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useStudentCourses } from "./useStudentCourses";
@@ -11,6 +11,97 @@ export default function StudentCoursesPage() {
   const [selectedHours, setSelectedHours] = useState<{ [key: string]: number }>(
     {}
   );
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    keyword: "",
+    courseType: "all",
+    priceMin: "",
+    priceMax: "",
+    durationMin: "",
+    durationMax: "",
+    includeInquiry: true,
+    selectedTags: [] as string[],
+  });
+  const [sortBy, setSortBy] = useState("created_desc");
+
+  const tagOptions = useMemo(() => {
+    const set = new Set<string>();
+    courses.forEach((course) => {
+      course.tags?.forEach((tag) => {
+        if (tag.text) set.add(tag.text);
+      });
+    });
+    return Array.from(set).slice(0, 12);
+  }, [courses]);
+
+  const filteredCourses = useMemo(() => {
+    const keyword = filters.keyword.trim().toLowerCase();
+    const priceMin = filters.priceMin ? Number(filters.priceMin) : null;
+    const priceMax = filters.priceMax ? Number(filters.priceMax) : null;
+    const durationMin = filters.durationMin ? Number(filters.durationMin) : null;
+    const durationMax = filters.durationMax ? Number(filters.durationMax) : null;
+    const selectedTags = new Set(filters.selectedTags);
+
+    return courses.filter((course) => {
+      if (keyword) {
+        const haystack = `${course.title} ${course.desc ?? ""}`.toLowerCase();
+        if (!haystack.includes(keyword)) return false;
+      }
+
+      if (filters.courseType !== "all") {
+        if (course.courseType !== filters.courseType) return false;
+      }
+
+      if (!filters.includeInquiry && !course.price) return false;
+
+      if (priceMin !== null) {
+        if (!course.price || course.price < priceMin) return false;
+      }
+
+      if (priceMax !== null) {
+        if (!course.price || course.price > priceMax) return false;
+      }
+
+      if (durationMin !== null && course.durationMinutes < durationMin)
+        return false;
+      if (durationMax !== null && course.durationMinutes > durationMax)
+        return false;
+
+      if (selectedTags.size > 0) {
+        const courseTags = course.tags?.map((tag) => tag.text) ?? [];
+        const hasMatch = courseTags.some((tag) => selectedTags.has(tag));
+        if (!hasMatch) return false;
+      }
+
+      return true;
+    });
+  }, [courses, filters]);
+
+  const sortedCourses = useMemo(() => {
+    const list = [...filteredCourses];
+    list.sort((a, b) => {
+      switch (sortBy) {
+        case "created_desc":
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case "updated_desc":
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        case "price_asc":
+          return (a.price ?? Number.MAX_SAFE_INTEGER) - (b.price ?? Number.MAX_SAFE_INTEGER);
+        case "price_desc":
+          return (b.price ?? -1) - (a.price ?? -1);
+        case "duration_asc":
+          return a.durationMinutes - b.durationMinutes;
+        case "duration_desc":
+          return b.durationMinutes - a.durationMinutes;
+        case "title_asc":
+          return a.title.localeCompare(b.title, "zh-Hant");
+        default:
+          return 0;
+      }
+    });
+    return list;
+  }, [filteredCourses, sortBy]);
 
   const handleHourChange = (courseId: string, delta: number) => {
     setSelectedHours((prev) => {
@@ -76,23 +167,308 @@ export default function StudentCoursesPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="relative group">
-              <button className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 shadow-sm">
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setIsFilterOpen((prev) => !prev);
+                  setIsSortOpen(false);
+                }}
+                className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 shadow-sm"
+              >
                 <span className="material-symbols-outlined text-[20px]">
                   filter_list
                 </span>
                 篩選課程
               </button>
+              {isFilterOpen && (
+                <div className="absolute right-0 mt-3 w-[340px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl p-5 z-30">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-slate-900 dark:text-white font-bold">
+                      篩選條件
+                    </span>
+                    <button
+                      onClick={() =>
+                        setFilters({
+                          keyword: "",
+                          courseType: "all",
+                          priceMin: "",
+                          priceMax: "",
+                          durationMin: "",
+                          durationMax: "",
+                          includeInquiry: true,
+                          selectedTags: [],
+                        })
+                      }
+                      className="text-xs font-bold text-primary hover:underline"
+                    >
+                      清除篩選
+                    </button>
+                  </div>
+                  <div className="flex flex-col gap-4">
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 block">
+                        關鍵字
+                      </label>
+                      <input
+                        value={filters.keyword}
+                        onChange={(e) =>
+                          setFilters((prev) => ({
+                            ...prev,
+                            keyword: e.target.value,
+                          }))
+                        }
+                        placeholder="輸入課程名稱或描述"
+                        className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 block">
+                        課程型態
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { value: "all", label: "全部" },
+                          { value: "online", label: "線上課程" },
+                          { value: "offline", label: "實體課程" },
+                          { value: "hybrid", label: "混合課程" },
+                        ].map((option) => (
+                          <button
+                            key={option.value}
+                            onClick={() =>
+                              setFilters((prev) => ({
+                                ...prev,
+                                courseType: option.value,
+                              }))
+                            }
+                            className={`rounded-xl px-3 py-2 text-xs font-bold border transition-all ${
+                              filters.courseType === option.value
+                                ? "bg-primary text-white border-primary"
+                                : "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700"
+                            }`}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 block">
+                          價格下限
+                        </label>
+                        <input
+                          type="number"
+                          value={filters.priceMin}
+                          onChange={(e) =>
+                            setFilters((prev) => ({
+                              ...prev,
+                              priceMin: e.target.value,
+                            }))
+                          }
+                          placeholder="0"
+                          className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 block">
+                          價格上限
+                        </label>
+                        <input
+                          type="number"
+                          value={filters.priceMax}
+                          onChange={(e) =>
+                            setFilters((prev) => ({
+                              ...prev,
+                              priceMax: e.target.value,
+                            }))
+                          }
+                          placeholder="不限"
+                          className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 block">
+                          時長下限(分鐘)
+                        </label>
+                        <input
+                          type="number"
+                          value={filters.durationMin}
+                          onChange={(e) =>
+                            setFilters((prev) => ({
+                              ...prev,
+                              durationMin: e.target.value,
+                            }))
+                          }
+                          placeholder="0"
+                          className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 block">
+                          時長上限(分鐘)
+                        </label>
+                        <input
+                          type="number"
+                          value={filters.durationMax}
+                          onChange={(e) =>
+                            setFilters((prev) => ({
+                              ...prev,
+                              durationMax: e.target.value,
+                            }))
+                          }
+                          placeholder="不限"
+                          className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        />
+                      </div>
+                    </div>
+
+                    <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                      <input
+                        type="checkbox"
+                        checked={filters.includeInquiry}
+                        onChange={(e) =>
+                          setFilters((prev) => ({
+                            ...prev,
+                            includeInquiry: e.target.checked,
+                          }))
+                        }
+                        className="h-4 w-4 rounded border-slate-300 dark:border-slate-600"
+                      />
+                      包含洽詢課程
+                    </label>
+
+                    {tagOptions.length > 0 && (
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 block">
+                          標籤
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {tagOptions.map((tag) => {
+                            const isSelected = filters.selectedTags.includes(tag);
+                            return (
+                              <button
+                                key={tag}
+                                onClick={() =>
+                                  setFilters((prev) => ({
+                                    ...prev,
+                                    selectedTags: isSelected
+                                      ? prev.selectedTags.filter((t) => t !== tag)
+                                      : [...prev.selectedTags, tag],
+                                  }))
+                                }
+                                className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${
+                                  isSelected
+                                    ? "bg-primary text-white border-primary"
+                                    : "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700"
+                                }`}
+                              >
+                                {tag}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="pt-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                      <span>
+                        已篩選 {filteredCourses.length} / {courses.length} 門
+                      </span>
+                      <button
+                        onClick={() => setIsFilterOpen(false)}
+                        className="px-3 py-1.5 rounded-lg bg-primary text-white font-bold"
+                      >
+                        套用
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="relative group">
-              <button className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 shadow-sm">
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setIsSortOpen((prev) => !prev);
+                  setIsFilterOpen(false);
+                }}
+                className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 shadow-sm"
+              >
                 <span className="material-symbols-outlined text-[20px]">
                   sort
                 </span>
                 排序方式
               </button>
+              {isSortOpen && (
+                <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl p-3 z-30">
+                  {[
+                    { value: "created_desc", label: "最新上架" },
+                    { value: "updated_desc", label: "最近更新" },
+                    { value: "price_asc", label: "價格低到高" },
+                    { value: "price_desc", label: "價格高到低" },
+                    { value: "duration_asc", label: "時長短到長" },
+                    { value: "duration_desc", label: "時長長到短" },
+                    { value: "title_asc", label: "標題 A-Z" },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        setSortBy(option.value);
+                        setIsSortOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-xl text-sm font-bold transition-all ${
+                        sortBy === option.value
+                          ? "bg-primary text-white"
+                          : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+          <span className="font-semibold text-slate-700 dark:text-slate-200">
+            共 {sortedCourses.length} 門課程
+          </span>
+          {filters.keyword && (
+            <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
+              關鍵字：{filters.keyword}
+            </span>
+          )}
+          {filters.courseType !== "all" && (
+            <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
+              類型：
+              {filters.courseType === "online"
+                ? "線上"
+                : filters.courseType === "offline"
+                ? "實體"
+                : "混合"}
+            </span>
+          )}
+          {(filters.priceMin || filters.priceMax) && (
+            <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
+              價格：{filters.priceMin || "0"} - {filters.priceMax || "不限"}
+            </span>
+          )}
+          {(filters.durationMin || filters.durationMax) && (
+            <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
+              時長：{filters.durationMin || "0"} - {filters.durationMax || "不限"} 分
+            </span>
+          )}
+          {filters.selectedTags.length > 0 && (
+            <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
+              標籤：{filters.selectedTags.join(" / ")}
+            </span>
+          )}
         </div>
 
         {/* Empty State */}
@@ -110,9 +486,23 @@ export default function StudentCoursesPage() {
           </div>
         )}
 
+        {courses.length > 0 && sortedCourses.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+            <span className="material-symbols-outlined text-6xl mb-4">
+              menu_book
+            </span>
+            <p className="text-lg font-medium text-slate-600 dark:text-slate-300">
+              沒有符合條件的課程
+            </p>
+            <p className="text-sm mt-2">
+              請調整篩選條件，或聯繫老師了解更多資訊。
+            </p>
+          </div>
+        )}
+
         {/* Course Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-          {courses.map((course, index) => {
+          {sortedCourses.map((course, index) => {
             const currentHours = selectedHours[course.id] || 1;
             const totalPrice = (course.price || 0) * currentHours;
 

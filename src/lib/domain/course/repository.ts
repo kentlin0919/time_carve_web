@@ -1,6 +1,7 @@
 import { Course } from "./entity";
 
 export interface CourseRepository {
+  getAllPublicCourses(): Promise<Course[]>;
   getTeacherCourses(teacherId: string): Promise<Course[]>;
   getCourse(id: string): Promise<Course | null>;
   getByIds(ids: string[]): Promise<Course[]>;

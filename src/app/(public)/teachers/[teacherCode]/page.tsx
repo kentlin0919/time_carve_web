@@ -6,6 +6,8 @@ import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import type { Portfolio } from "@/lib/domain/portfolio/entity";
+import { Course } from "@/lib/domain/course/entity";
+import { SupabaseCourseRepository } from "@/lib/infrastructure/course/SupabaseCourseRepository";
 
 type PublicTeacherProfile = {
     teacher_code: string;
@@ -56,6 +58,7 @@ export default function TeacherProfilePage() {
     const [loading, setLoading] = useState(false);
     const [profile, setProfile] = useState<PublicTeacherProfile | null>(null);
     const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
+    const [courses, setCourses] = useState<Course[]>([]);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -85,8 +88,23 @@ export default function TeacherProfilePage() {
                     setProfile(null);
                     setError("找不到公開頁面");
                 } else {
-                    setProfile(result as PublicTeacherProfile);
+                    const profileData = result as PublicTeacherProfile;
+                    setProfile(profileData);
                     setError(null);
+
+                    // Fetch courses using teacher_id from another source or by joining
+                    // Since RPC only returns some fields, let's find the ID
+                    const { data: teacherInfo } = await supabase
+                        .from('teacher_info')
+                        .select('id')
+                        .eq('teacher_code', teacherCode)
+                        .single();
+                    
+                    if (teacherInfo) {
+                        const courseRepo = new SupabaseCourseRepository();
+                        const teacherCourses = await courseRepo.getTeacherCourses(teacherInfo.id);
+                        setCourses(teacherCourses.filter(c => c.isActive));
+                    }
                 }
             }
 
@@ -415,6 +433,67 @@ export default function TeacherProfilePage() {
                             </div>
                         </section>
                     )}
+
+                    <section className="py-16 sm:py-24 border-t border-gray-100 dark:border-gray-800" id="courses">
+                        <div className="flex flex-col gap-10">
+                            <div className="flex flex-col gap-3 max-w-2xl">
+                                <span className="text-primary font-bold tracking-wider text-xs uppercase">
+                                    Courses
+                                </span>
+                                <h2 className="text-3xl sm:text-4xl font-black text-[#111618] dark:text-white tracking-tight">
+                                    開設課程
+                                </h2>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {courses.length > 0 ? (
+                                    courses.map((course) => (
+                                        <div 
+                                            key={course.id} 
+                                            className="group bg-white dark:bg-[#1a2c32] rounded-2xl overflow-hidden shadow-soft border border-gray-100 dark:border-gray-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                                        >
+                                            <div className="aspect-video relative overflow-hidden bg-gray-100 dark:bg-gray-800">
+                                                {course.imageUrl ? (
+                                                    <Image src={course.imageUrl} alt={course.title} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                        <span className="material-symbols-outlined text-5xl">school</span>
+                                                    </div>
+                                                )}
+                                                <div className="absolute top-4 right-4">
+                                                    <span className="bg-white/90 dark:bg-black/70 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-primary shadow-sm">
+                                                        {course.courseType === 'online' ? '線上' : '實體'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="p-6">
+                                                <h3 className="text-lg font-bold text-[#111618] dark:text-white mb-2 line-clamp-1 group-hover:text-primary transition-colors">
+                                                    {course.title}
+                                                </h3>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-4 h-8">
+                                                    {course.desc || "暫無描述"}
+                                                </p>
+                                                <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50 dark:border-gray-800">
+                                                    <span className="text-lg font-black text-primary">
+                                                        NT$ {course.price?.toLocaleString()}
+                                                    </span>
+                                                    <Link 
+                                                        href={`/student/booking/create?courseId=${course.id}`}
+                                                        className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary-dark transition-colors shadow-glow"
+                                                    >
+                                                        預約
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="col-span-full py-12 text-center text-gray-500 dark:text-gray-400">
+                                        <p>老師目前尚無公開課程。</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </section>
 
                     <section
                         className="py-16 sm:py-24 border-t border-gray-100 dark:border-gray-800"

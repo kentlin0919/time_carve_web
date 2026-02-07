@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useModal } from "@/components/providers/ModalContext";
 import { useStudentCourseDetail } from "../../courses/useStudentTeacherCourses";
 import { getAvailableSlots, createBooking } from "@/app/actions/booking";
-import { getStudentPurchases } from "@/app/actions/purchase";
+import { getStudentPurchases, purchaseCourse } from "@/app/actions/purchase";
 import { Purchase } from "@/lib/domain/purchase/entity";
 
 // Helper to get days in month
@@ -41,6 +41,7 @@ export default function StudentBookingCreatePage() {
   const [hours, setHours] = useState(Math.max(1, hoursParam));
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [buyNewPack, setBuyNewPack] = useState(false);
 
   // Purchase State
   const [purchases, setPurchases] = useState<Purchase[]>([]);
@@ -80,14 +81,19 @@ export default function StudentBookingCreatePage() {
     return purchases.find(p => p.courseId === courseId && p.status === 'active');
   }, [purchases, courseId]);
 
-  // Auto-select if applicable purchase has enough hours
+  // Auto-select or set default buy mode
   useEffect(() => {
     if (applicablePurchase) {
       if (applicablePurchase.remainingHours >= hours) {
         setSelectedPurchaseId(applicablePurchase.id);
+        setBuyNewPack(false);
       } else {
         setSelectedPurchaseId(null);
+        setBuyNewPack(true); // Default to buy new if existing is insufficient
       }
+    } else {
+      setSelectedPurchaseId(null);
+      setBuyNewPack(true); // Default to buy new if no pack exists
     }
   }, [applicablePurchase, hours]);
 
@@ -275,11 +281,27 @@ export default function StudentBookingCreatePage() {
     });
   };
 
+  const packHours = useMemo(() => {
+    if (!course?.durationMinutes) return 0;
+    return course.durationMinutes / 60;
+  }, [course]);
+
   const totalPrice = useMemo(() => {
     if (selectedPurchaseId) return 0;
+    if (buyNewPack) return course?.price || 0;
     if (!course?.price) return 0;
     return course.price * hours;
-  }, [course?.price, hours, selectedPurchaseId]);
+  }, [course?.price, hours, selectedPurchaseId, buyNewPack]);
+
+  const remainingAfterBooking = useMemo(() => {
+    if (selectedPurchaseId && applicablePurchase) {
+      return applicablePurchase.remainingHours - hours;
+    }
+    if (buyNewPack) {
+      return packHours - hours;
+    }
+    return 0;
+  }, [selectedPurchaseId, applicablePurchase, buyNewPack, hours, packHours]);
 
   const formattedSelectedDate = selectedDate
     ? `${selectedDate.getFullYear()}年 ${selectedDate.getMonth() + 1
@@ -290,18 +312,33 @@ export default function StudentBookingCreatePage() {
   const selectedCount = selectedSlots.length;
   const requiredCount = hours * 2;
   const isComplete = selectedCount === requiredCount;
+  const isPurchaseOnly = selectedDate && availableSlots.length === 0 && buyNewPack;
 
   const handleConfirm = async () => {
-    if (!course || !context || !selectedDate || !isComplete) return;
+    if (!course || !context || !selectedDate) return;
+    if (!isComplete && !isPurchaseOnly) return;
 
     if (submitting) return;
     setSubmitting(true);
 
-    const dateStr = `${selectedDate.getFullYear()}-${String(
-      selectedDate.getMonth() + 1
-    ).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
-
     try {
+      if (isPurchaseOnly) {
+        // Just buy the pack and init progress
+        await purchaseCourse(course.id, packHours, course.price || 0);
+        
+        showModal({
+          title: "方案購買成功",
+          description: `您已成功購買 ${course.title} 方案 (${packHours} 小時)。老師目前尚未設定預約時段，時數已存入您的帳戶，待老師設定後即可預約。`,
+          confirmText: "查看進度",
+          onConfirm: () => router.push("/student/progress"),
+        });
+        return;
+      }
+
+      const dateStr = `${selectedDate.getFullYear()}-${String(
+        selectedDate.getMonth() + 1
+      ).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+
       // 1. Group selectedSlots into contiguous chunks
       const sorted = [...selectedSlots].sort(
         (a, b) => toMinutes(a) - toMinutes(b)
@@ -326,8 +363,11 @@ export default function StudentBookingCreatePage() {
       chunks.push({ start: currentStart, end: toTimeStr(currentEndMins) });
 
       // 2. Submit bookings sequentially
+      let activePurchaseId = selectedPurchaseId;
+      let isFirstCall = true;
+
       for (const chunk of chunks) {
-        await createBooking({
+        const result = await createBooking({
           studentId: context.studentId,
           courseId: course.id,
           teacherId: context.teacherId,
@@ -335,13 +375,23 @@ export default function StudentBookingCreatePage() {
           startTime: chunk.start,
           endTime: chunk.end,
           notes: notes.trim() || null,
-          purchaseId: selectedPurchaseId
+          purchaseId: activePurchaseId
+        }, {
+          buyNewPack: isFirstCall ? buyNewPack : false // Only buy on first call
         });
+
+        // Capture newly created purchaseId for subsequent chunks
+        if (isFirstCall && buyNewPack && result.purchaseId) {
+          activePurchaseId = result.purchaseId;
+        }
+        isFirstCall = false;
       }
 
       showModal({
         title: "預約已送出",
-        description: `已成功預約 ${course.title}，共 ${chunks.length} 個時段。`,
+        description: buyNewPack 
+          ? `已成功購買方案並預約 ${course.title}，剩餘時數已存入您的帳戶。`
+          : `已成功預約 ${course.title}，共 ${chunks.length} 個時段。`,
         confirmText: "查看預約",
         onConfirm: () => router.push("/student/bookings"),
       });
@@ -456,8 +506,13 @@ export default function StudentBookingCreatePage() {
                 請先選擇日期
               </div>
             ) : availableSlots.length === 0 ? (
-              <div className="text-center py-10 text-slate-400">
-                當日無可用時段
+              <div className="text-center py-10">
+                <p className="text-slate-500 mb-4">老師目前尚未設定可預約時段。</p>
+                {buyNewPack && (
+                  <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 text-sm text-primary">
+                    您可以先完成方案購買，系統將為您建立學習進度，待老師開放時段後即可進行預約。
+                  </div>
+                )}
               </div>
             ) : (
               <div className="space-y-4">
@@ -536,60 +591,92 @@ export default function StudentBookingCreatePage() {
             <h3 className="font-bold text-lg mb-4">預約確認</h3>
 
             {/* Payment Method Selection */}
-            {applicablePurchase && (
+            <div className="space-y-3 mb-6">
+              {applicablePurchase && (
+                <div
+                  className={`p-3 rounded-xl border ${selectedPurchaseId === applicablePurchase.id
+                    ? "border-teal-500 bg-teal-50 dark:bg-teal-900/10"
+                    : "border-slate-200"
+                    } transition-all cursor-pointer`}
+                  onClick={() => {
+                    setSelectedPurchaseId(applicablePurchase.id);
+                    setBuyNewPack(false);
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-4 h-4 rounded-full border flex items-center justify-center ${selectedPurchaseId === applicablePurchase.id
+                          ? "border-teal-500"
+                          : "border-slate-400"
+                          }`}
+                      >
+                        {selectedPurchaseId === applicablePurchase.id && (
+                          <div className="w-2.5 h-2.5 rounded-full bg-teal-500"></div>
+                        )}
+                      </div>
+                      <span className="font-bold text-sm text-slate-800 dark:text-white">
+                        使用現有課程包
+                      </span>
+                    </div>
+                    <span className="text-xs font-bold bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">
+                      剩餘 {applicablePurchase.remainingHours} hr
+                    </span>
+                  </div>
+                </div>
+              )}
+
               <div
-                className={`mb-4 p-3 rounded-lg border ${selectedPurchaseId === applicablePurchase.id
-                  ? "border-teal-500 bg-teal-50 dark:bg-teal-900/10"
+                className={`p-3 rounded-xl border ${buyNewPack
+                  ? "border-primary bg-primary/5 dark:bg-primary/10"
                   : "border-slate-200"
                   } transition-all cursor-pointer`}
                 onClick={() => {
-                  if (selectedPurchaseId === applicablePurchase.id) {
-                    setSelectedPurchaseId(null);
-                  } else {
-                    if (applicablePurchase.remainingHours >= hours) {
-                      setSelectedPurchaseId(applicablePurchase.id);
-                    } else {
-                      showModal({
-                        title: "時數不足",
-                        description: `您的課程包剩餘 ${applicablePurchase.remainingHours} 小時，不足以支付此次 ${hours} 小時的預約。請選擇單次付費或購買新課程包。`,
-                        confirmText: "了解",
-                      });
-                    }
-                  }
+                  setSelectedPurchaseId(null);
+                  setBuyNewPack(true);
                 }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div
-                      className={`w-4 h-4 rounded-full border flex items-center justify-center ${selectedPurchaseId === applicablePurchase.id
-                        ? "border-teal-500"
+                      className={`w-4 h-4 rounded-full border flex items-center justify-center ${buyNewPack
+                        ? "border-primary"
                         : "border-slate-400"
                         }`}
                     >
-                      {selectedPurchaseId === applicablePurchase.id && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-teal-500"></div>
+                      {buyNewPack && (
+                        <div className="w-2.5 h-2.5 rounded-full bg-primary"></div>
                       )}
                     </div>
-                    <span className="font-bold text-sm text-slate-800 dark:text-white">
-                      使用課程包扣點
-                    </span>
+                    <div className="flex flex-col">
+                      <span className="font-bold text-sm text-slate-800 dark:text-white">
+                        購買新課程方案
+                      </span>
+                      <span className="text-[10px] text-slate-500">包含 {packHours} 小時時數</span>
+                    </div>
                   </div>
-                  <span className="text-xs font-bold bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">
-                    剩餘 {applicablePurchase.remainingHours} hr
+                  <span className="text-xs font-bold text-primary">
+                    NT$ {course.price?.toLocaleString()}
                   </span>
                 </div>
               </div>
-            )}
+
+              {!applicablePurchase && !buyNewPack && (
+                <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl text-[10px] text-amber-700">
+                  * 建議購買課程方案以獲得更完整的學習追蹤與時數優惠。
+                </div>
+              )}
+            </div>
 
             <div className="space-y-4 mb-6">
               <div className="flex justify-between">
-                <span className="text-slate-500">日期</span>
+                <span className="text-slate-500">預約日期</span>
                 <span className="font-bold">
                   {formattedSelectedDate || "-"}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">時數</span>
+                <span className="text-slate-500">本次預約時數</span>
                 <span className="font-bold">{hours} 小時</span>
               </div>
               <div className="flex justify-between">
@@ -603,8 +690,14 @@ export default function StudentBookingCreatePage() {
                     : "-"}
                 </span>
               </div>
+              {(selectedPurchaseId || buyNewPack) && (
+                <div className="flex justify-between text-teal-600 dark:text-teal-400 text-sm font-medium">
+                  <span>預估剩餘時數</span>
+                  <span className="font-bold">{remainingAfterBooking} hr</span>
+                </div>
+              )}
               <div className="flex justify-between text-lg border-t pt-4 mt-2">
-                <span className="font-bold">總金額</span>
+                <span className="font-bold">總付款金額</span>
                 <span className="font-black text-primary">
                   {selectedPurchaseId ? (
                     <span>
@@ -616,6 +709,8 @@ export default function StudentBookingCreatePage() {
                         (扣除 {hours} hr)
                       </span>
                     </span>
+                  ) : buyNewPack ? (
+                    `NT$ ${course.price?.toLocaleString()}`
                   ) : (
                     `NT$ ${totalPrice.toLocaleString()}`
                   )}
@@ -637,10 +732,10 @@ export default function StudentBookingCreatePage() {
 
             <button
               onClick={handleConfirm}
-              disabled={!isComplete || submitting}
+              disabled={(!isComplete && !isPurchaseOnly) || submitting}
               className="w-full py-4 rounded-xl bg-slate-900 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-800 transition-colors"
             >
-              {submitting ? "處理中..." : "確認預約"}
+              {submitting ? "處理中..." : isPurchaseOnly ? "購買方案" : "確認預約"}
             </button>
           </div>
         </div>

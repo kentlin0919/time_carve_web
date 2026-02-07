@@ -130,11 +130,6 @@ export default function PaymentManagementPage() {
               </span>
             </button>
           </div>
-          <div className="h-8 w-px bg-border-light dark:bg-border-dark mx-1"></div>
-          <button className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/30 text-sm font-bold transition-all active:scale-95">
-            <span className="material-symbols-outlined text-[20px]">add</span>
-            <span>新增收款記錄</span>
-          </button>
         </div>
       </header>
 

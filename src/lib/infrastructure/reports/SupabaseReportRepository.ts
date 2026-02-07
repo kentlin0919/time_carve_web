@@ -208,16 +208,11 @@ export class SupabaseReportRepository implements ReportRepository {
       `, { count: 'exact' })
       .eq('teacher_id', teacherId);
 
-    // Filter by completed status for "Transactions" report usually? Or all?
-    // "Revenue Details" usually implies money received.
+    // Filter by completed status for "Transactions" report
     query = query.in('booking_statuses.status_key', ['completed', 'confirmed']);
 
     if (filter.startDate) query = query.gte('booking_date', filter.startDate.toISOString().slice(0, 10));
     if (filter.endDate) query = query.lte('booking_date', filter.endDate.toISOString().slice(0, 10));
-    // Search? Supabase doesn't easily search across joined tables deep nested.
-    // We can search course title or student name if we flatten or text search is setup.
-    // For now, simple client side filter or assuming minimal search needed?
-    // Actually, listing recent transactions is key.
 
     // Pagination
     const page = filter.page || 1;
@@ -230,7 +225,7 @@ export class SupabaseReportRepository implements ReportRepository {
     const { data, error, count } = await query;
     if (error) throw new Error(`Failed to fetch transactions: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
 
-    const transactions = (data || []).map((b: any) => ({
+    let transactions = (data || []).map((b: any) => ({
       id: b.id,
       date: b.booking_date,
       studentName: b.student?.user?.name || 'Unknown',
@@ -242,6 +237,23 @@ export class SupabaseReportRepository implements ReportRepository {
       courseId: b.course_id,
       statusKey: Array.isArray(b.booking_statuses) ? b.booking_statuses[0]?.status_key : b.booking_statuses?.status_key,
     }));
+
+    // Client-side filtering for search query (course title or student name)
+    if (filter.searchQuery && filter.searchQuery.trim()) {
+      const q = filter.searchQuery.toLowerCase();
+      transactions = transactions.filter(
+        (t) =>
+          t.courseTitle.toLowerCase().includes(q) ||
+          t.studentName.toLowerCase().includes(q)
+      );
+    }
+
+    // Client-side filtering for course type
+    if (filter.courseType && filter.courseType.trim()) {
+      transactions = transactions.filter(
+        (t) => t.courseType === filter.courseType
+      );
+    }
 
     return { data: transactions, total: count || 0 };
   }

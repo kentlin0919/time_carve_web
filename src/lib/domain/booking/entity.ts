@@ -30,5 +30,9 @@ export interface Booking {
   paymentStatus?: "paid" | "pending" | "refunded";
   paymentMethod?: string; // e.g. "信用卡 (Visa **** 4242)" - likely need to mock or fetch from payment logs
   teacherNotes?: string; // Mapped from booking.notes or separate field?
+  homework?: string | null;
+  teacherFeedback?: string | null;
+  teacherFeedbackVisible?: boolean;
+  feedbackUpdatedAt?: string | null;
   rescheduleRequests?: RescheduleRequest[];
 }

@@ -69,26 +69,23 @@ export function Modal({
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex items-center justify-center px-4 sm:px-6 transition-opacity duration-300 ${
-        isOpen ? "opacity-100" : "opacity-0"
-      }`}
+      className={`fixed inset-0 z-[100] flex items-center justify-center px-4 sm:px-6 transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0"
+        }`}
     >
       <div
         className="absolute inset-0 bg-slate-900/40 backdrop-blur-[6px]"
         onClick={onClose}
       ></div>
       <div
-        className={`relative w-full transform rounded-[32px] bg-white dark:bg-gray-800 p-8 text-left shadow-2xl transition-all duration-300 border border-slate-100 dark:border-gray-700 ${
-          isOpen ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
-        } ${
-          size === "sm"
+        className={`relative w-full transform rounded-[32px] bg-white dark:bg-gray-800 p-8 text-left shadow-2xl transition-all duration-300 border border-slate-100 dark:border-gray-700 ${isOpen ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
+          } ${size === "sm"
             ? "max-w-[360px]"
             : size === "lg"
-            ? "max-w-[720px]"
-            : size === "xl"
-            ? "max-w-[900px]"
-            : "max-w-[420px]"
-        }`}
+              ? "max-w-[720px]"
+              : size === "xl"
+                ? "max-w-[900px]"
+                : "max-w-[420px]"
+          }`}
       >
         <div className="flex flex-col items-center justify-center mb-6">
           <div className="size-14 text-primary bg-blue-50 dark:bg-slate-700/50 rounded-2xl flex items-center justify-center mb-4 p-2.5 shadow-sm">
@@ -130,14 +127,14 @@ export function Modal({
           {showCancel && (
             <button
               onClick={handleCancel}
-              className="flex-1 px-4 py-3.5 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="flex-1 px-4 py-2 sm:py-2 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               {cancelText}
             </button>
           )}
           <button
             onClick={handleConfirm}
-            className="group w-full bg-primary hover:bg-primary-dark text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-primary/25 hover:shadow-primary/40 active:scale-[0.98] flex items-center justify-center gap-2"
+            className="group w-full bg-primary hover:bg-primary-dark text-white font-bold py-2 sm:py-2 rounded-xl transition-all shadow-lg shadow-primary/25 hover:shadow-primary/40 active:scale-[0.98] flex items-center justify-center gap-2"
           >
             <span>{confirmText}</span>
             <span className="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-1">

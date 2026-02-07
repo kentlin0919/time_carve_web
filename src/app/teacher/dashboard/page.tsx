@@ -11,8 +11,11 @@ import { Booking } from "@/lib/domain/booking/entity";
 import { Course } from "@/lib/domain/course/entity";
 import { Portfolio } from "@/lib/domain/portfolio/entity";
 import Link from "next/link";
+import { updateBookingStatus } from "@/app/actions/booking";
+import { useModal } from "@/components/providers/ModalContext";
 
 export default function TeacherDashboardPage() {
+  const { showModal } = useModal();
   const [name, setName] = useState("");
   const [stats, setStats] = useState({
     revenue: 0,
@@ -26,87 +29,130 @@ export default function TeacherDashboardPage() {
   const [recentPortfolios, setRecentPortfolios] = useState<Portfolio[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchData = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Repositories
+      const bookingRepo = new SupabaseBookingRepository();
+      const courseRepo = new SupabaseCourseRepository();
+      const portfolioRepo = new SupabasePortfolioRepository(supabase);
+      const teacherRepo = new SupabaseTeacherRepository();
+
+      // 1. Get User Info & Teacher Info
+      const { data: userInfo } = await supabase
+        .from("user_info")
+        .select("name")
+        .eq("id", user.id)
+        .single();
+      if (userInfo) setName(userInfo.name);
+
+      // Get teacher_id (assuming user.id is teacher_id for now, or fetch from teacher_info)
+      // Actually teacher_info.id is strictly linked to user_info.id 1:1 usually, but let's confirm
+      const { data: teacherInfo } = await supabase
+        .from("teacher_info")
+        .select("id")
+        .eq("id", user.id)
+        .single();
+
+      if (!teacherInfo) return;
+      const teacherId = teacherInfo.id;
+
+      // 2. Fetch Stats
+      // Date range for this month
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
+
+      const bookings = await bookingRepo.getBookings(teacherId, startOfMonth, endOfMonth);
+      const students = await teacherRepo.getStudents(teacherId);
+      const courses = await courseRepo.getTeacherCourses(teacherId);
+      const portfolios = await portfolioRepo.getByTeacherId(teacherId);
+
+      // Calculate Stats
+      const revenue = bookings
+        .filter(b => b.status === "completed") // Assuming 'completed' status exists/is used
+        .reduce((sum, b) => sum + (b.coursePrice || 0), 0);
+
+      const pendingCount = bookings.filter(b => b.status === "pending").length;
+
+      setStats({
+        revenue,
+        pendingBookings: pendingCount,
+        activeStudents: students.length,
+        totalCourses: courses.length,
+      });
+
+      // 3. Set Lists
+      // Only show pending bookings in the "待確認預約" section
+      const pendingBookings = bookings
+        .filter(b => b.status === 'pending')
+        .sort((a, b) => new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime());
+      setRecentBookings(pendingBookings.slice(0, 5));
+
+      // Filter for Today's Courses
+      const todayStr = new Date().toISOString().split('T')[0];
+      const todayBookings = bookings
+        .filter(b => b.bookingDate === todayStr && b.status !== 'cancelled' && b.status !== 'rejected')
+        .sort((a, b) => a.startTime.localeCompare(b.startTime));
+      setTodaysCourses(todayBookings);
+
+      setActiveCourses(courses.slice(0, 3)); // Just take top 3 for now
+      setRecentPortfolios(portfolios.slice(0, 4));
+
+    } catch (error) {
+      console.error("Error loading dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) return;
-
-        // Repositories
-        const bookingRepo = new SupabaseBookingRepository();
-        const courseRepo = new SupabaseCourseRepository();
-        const portfolioRepo = new SupabasePortfolioRepository(supabase);
-        const teacherRepo = new SupabaseTeacherRepository();
-
-        // 1. Get User Info & Teacher Info
-        const { data: userInfo } = await supabase
-          .from("user_info")
-          .select("name")
-          .eq("id", user.id)
-          .single();
-        if (userInfo) setName(userInfo.name);
-
-        // Get teacher_id (assuming user.id is teacher_id for now, or fetch from teacher_info)
-        // Actually teacher_info.id is strictly linked to user_info.id 1:1 usually, but let's confirm
-        const { data: teacherInfo } = await supabase
-          .from("teacher_info")
-          .select("id")
-          .eq("id", user.id)
-          .single();
-
-        if (!teacherInfo) return;
-        const teacherId = teacherInfo.id;
-
-        // 2. Fetch Stats
-        // Date range for this month
-        const now = new Date();
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
-
-        const bookings = await bookingRepo.getBookings(teacherId, startOfMonth, endOfMonth);
-        const students = await teacherRepo.getStudents(teacherId);
-        const courses = await courseRepo.getTeacherCourses(teacherId);
-        const portfolios = await portfolioRepo.getByTeacherId(teacherId);
-
-        // Calculate Stats
-        const revenue = bookings
-          .filter(b => b.status === "completed") // Assuming 'completed' status exists/is used
-          .reduce((sum, b) => sum + (b.coursePrice || 0), 0);
-
-        const pendingCount = bookings.filter(b => b.status === "pending").length;
-
-        setStats({
-          revenue,
-          pendingBookings: pendingCount,
-          activeStudents: students.length,
-          totalCourses: courses.length,
-        });
-
-        // 3. Set Lists
-        // Sort bookings by date desc for "Recent"
-        const sortedBookings = [...bookings].sort((a, b) => new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime());
-        setRecentBookings(sortedBookings.slice(0, 5));
-
-        // Filter for Today's Courses
-        const todayStr = new Date().toISOString().split('T')[0];
-        const todayBookings = bookings
-          .filter(b => b.bookingDate === todayStr && b.status !== 'cancelled' && b.status !== 'rejected')
-          .sort((a, b) => a.startTime.localeCompare(b.startTime));
-        setTodaysCourses(todayBookings);
-
-        setActiveCourses(courses.slice(0, 3)); // Just take top 3 for now
-        setRecentPortfolios(portfolios.slice(0, 4));
-
-      } catch (error) {
-        console.error("Error loading dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
   }, []);
+
+  const handleConfirm = async (bookingId: string) => {
+    try {
+      await updateBookingStatus(bookingId, "confirmed");
+      showModal({
+        type: "success",
+        title: "預約已確認",
+        description: "已成功確認該筆預約。",
+        confirmText: "確定",
+      });
+      fetchData(); // Refresh data
+    } catch (error) {
+      console.error("Failed to confirm booking:", error);
+      showModal({
+        type: "error",
+        title: "操作失敗",
+        description: "無法確認預約，請稍後再試。",
+        confirmText: "確定",
+      });
+    }
+  };
+
+  const handleReject = async (bookingId: string) => {
+    showModal({
+      type: "error",
+      title: "取消預約",
+      description: "您確定要取消這筆預約嗎？此動作無法復原。",
+      confirmText: "確定取消",
+      showCancel: true,
+      cancelText: "保留預約",
+      onConfirm: async () => {
+        try {
+          await updateBookingStatus(bookingId, "cancelled");
+          fetchData(); // Refresh data
+        } catch (error) {
+          console.error("Failed to cancel booking:", error);
+        }
+      },
+    });
+  };
 
   return (
     <div className="flex flex-col h-full bg-background-light dark:bg-background-dark">
@@ -348,6 +394,7 @@ export default function TeacherDashboardPage() {
                                 {item.status === "pending" && (
                                   <>
                                     <button
+                                      onClick={() => handleReject(item.id)}
                                       className="p-2 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors tooltip-trigger"
                                       title="婉拒預約"
                                     >
@@ -355,7 +402,10 @@ export default function TeacherDashboardPage() {
                                         close
                                       </span>
                                     </button>
-                                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium transition-all shadow-sm hover:shadow active:scale-95">
+                                    <button 
+                                      onClick={() => handleConfirm(item.id)}
+                                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium transition-all shadow-sm hover:shadow active:scale-95"
+                                    >
                                       <span className="material-symbols-outlined text-[18px]">
                                         check
                                       </span>

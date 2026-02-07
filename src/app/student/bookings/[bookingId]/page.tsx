@@ -433,6 +433,49 @@ export default async function BookingDetailPage({ params }: BookingDetailProps) 
               </div>
             </div>
           </div>
+
+          {/* Teacher Feedback */}
+          <div className="bg-surface-light dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-700 shadow-soft p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                課後回饋
+              </h3>
+              {booking.teacherFeedbackVisible === false && (
+                <span className="text-xs font-bold text-slate-500">
+                  尚未公開
+                </span>
+              )}
+            </div>
+
+            {booking.teacherFeedbackVisible === false ? (
+              <div className="text-sm text-slate-500 dark:text-slate-400">
+                教師尚未開放本次回饋內容。
+              </div>
+            ) : booking.homework || booking.teacherFeedback ? (
+              <div className="space-y-4">
+                <div>
+                  <p className="text-xs font-bold text-slate-500 mb-2">
+                    回家作業
+                  </p>
+                  <div className="text-sm text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 border border-slate-100 dark:border-slate-700">
+                    {booking.homework || "未提供"}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-500 mb-2">
+                    教師評語
+                  </p>
+                  <div className="text-sm text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 border border-slate-100 dark:border-slate-700">
+                    {booking.teacherFeedback || "未提供"}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-sm text-slate-500 dark:text-slate-400">
+                教師尚未填寫回饋內容。
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

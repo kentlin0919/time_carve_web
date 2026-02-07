@@ -2,13 +2,15 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { getTeacherBookings, getTeacherPendingBookings } from "@/app/actions/booking";
+import { getTeacherBookings, getTeacherPendingBookings, updateBookingFeedback } from "@/app/actions/booking";
 import { getTeacherProfile } from "@/app/actions/teacher";
+import { getTeacherAvailability } from "@/app/teacher/availability/actions";
 import { Booking } from "@/lib/domain/booking/entity";
 import { TeacherProfile } from "@/lib/domain/teacher/entity";
 import { EditBookingDialog } from "@/components/teacher/bookings/EditBookingDialog";
 import { CreateBookingDialog } from "@/components/teacher/bookings/CreateBookingDialog";
 import { ReviewRescheduleDialog } from "@/components/bookings/ReviewRescheduleDialog";
+import { useModal } from "@/components/providers/ModalContext";
 
 export default function TeacherBookingsPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -20,6 +22,14 @@ export default function TeacherBookingsPage() {
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
   const [reviewingBooking, setReviewingBooking] = useState<Booking | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const { showModal } = useModal();
+  const [viewMode, setViewMode] = useState<"month" | "week">("month");
+  const [availability, setAvailability] = useState<
+    { date: string; slots: { start: string; end: string }[]; isUnavailable: boolean }[]
+  >([]);
+  const [feedbackDrafts, setFeedbackDrafts] = useState<
+    Record<string, { homework: string; feedback: string; visible: boolean; saving?: boolean }>
+  >({});
 
   // Fetch profile on mount
   useEffect(() => {
@@ -51,15 +61,46 @@ export default function TeacherBookingsPage() {
     days.push({ day: i, type: "current", date: new Date(year, month, i) });
   }
 
-  // Fetch bookings when month changes
-  async function refreshBookings() {
+  const WEEK_START_HOUR = 7;
+  const WEEK_END_HOUR = 22;
+  const SLOT_INTERVAL_MIN = 30;
+  const SLOT_HEIGHT = 36;
+
+  const toDateString = (date: Date) => date.toISOString().split("T")[0];
+
+  const getStartOfWeek = (date: Date) => {
+    const d = new Date(date);
+    const day = d.getDay(); // 0-6, Sunday=0
+    const diff = (day + 6) % 7; // Monday=0
+    d.setDate(d.getDate() - diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  };
+
+  const addDays = (date: Date, daysToAdd: number) => {
+    const d = new Date(date);
+    d.setDate(d.getDate() + daysToAdd);
+    return d;
+  };
+
+  const timeToMinutes = (time: string) => {
+    const [h, m] = time.split(":").map((v) => parseInt(v, 10));
+    return h * 60 + (m || 0);
+  };
+
+  const clamp = (value: number, min: number, max: number) =>
+    Math.min(Math.max(value, min), max);
+
+  const weekStart = getStartOfWeek(currentDate);
+  const weekDays = Array.from({ length: 7 }, (_, idx) => addDays(weekStart, idx));
+  const weekEnd = addDays(weekStart, 6);
+
+  // Fetch bookings when date range changes
+  async function refreshBookings(startDate: Date, endDate: Date) {
     setLoading(true);
     try {
-      const start = new Date(year, month, 1);
-      const end = new Date(year, month + 1, 0); // Last day of month
-
       const [data, pendingData] = await Promise.all([
-        getTeacherBookings(start, end),
+        getTeacherBookings(startDate, endDate),
         getTeacherPendingBookings()
       ]);
 
@@ -72,9 +113,53 @@ export default function TeacherBookingsPage() {
     }
   }
 
+  const refreshBookingsForCurrentView = () => {
+    if (viewMode === "month") {
+      const start = new Date(year, month, 1);
+      const end = new Date(year, month + 1, 0);
+      refreshBookings(start, end);
+    } else {
+      refreshBookings(weekStart, weekEnd);
+    }
+  };
+
   useEffect(() => {
-    refreshBookings();
-  }, [year, month]);
+    refreshBookingsForCurrentView();
+  }, [year, month, viewMode, currentDate.getTime()]);
+
+  useEffect(() => {
+    if (!bookings.length) return;
+    setFeedbackDrafts((prev) => {
+      const next = { ...prev };
+      bookings.forEach((booking) => {
+        if (!next[booking.id]) {
+          next[booking.id] = {
+            homework: booking.homework || "",
+            feedback: booking.teacherFeedback || "",
+            visible: booking.teacherFeedbackVisible ?? true,
+          };
+        }
+      });
+      return next;
+    });
+  }, [bookings]);
+
+  useEffect(() => {
+    async function fetchAvailability() {
+      if (!profile || viewMode !== "week") return;
+      try {
+        const data = await getTeacherAvailability(
+          profile.id,
+          toDateString(weekStart),
+          toDateString(weekEnd)
+        );
+        setAvailability(data);
+      } catch (error) {
+        console.error("Failed to fetch availability:", error);
+      }
+    }
+    fetchAvailability();
+  }, [profile, viewMode, currentDate.getTime()]);
 
   // Group bookings by day
   const events = useMemo(() => {
@@ -125,11 +210,125 @@ export default function TeacherBookingsPage() {
     setCurrentDate(new Date(year, month + 1, 1));
   };
 
+  const handlePrevWeek = () => {
+    setCurrentDate(addDays(currentDate, -7));
+  };
+
+  const handleNextWeek = () => {
+    setCurrentDate(addDays(currentDate, 7));
+  };
+
   const handleToday = () => {
     const now = new Date();
     setCurrentDate(now);
     setSelectedDate(now);
   };
+
+  const weekBookings = useMemo(() => {
+    const startStr = toDateString(weekStart);
+    const endStr = toDateString(weekEnd);
+    return bookings.filter(
+      (b) => b.bookingDate >= startStr && b.bookingDate <= endStr
+    );
+  }, [bookings, weekStart.getTime(), weekEnd.getTime()]);
+
+  const handleSaveFeedback = async (bookingId: string) => {
+    const draft = feedbackDrafts[bookingId];
+    if (!draft) return;
+    setFeedbackDrafts((prev) => ({
+      ...prev,
+      [bookingId]: { ...draft, saving: true },
+    }));
+    try {
+      await updateBookingFeedback(bookingId, {
+        homework: draft.homework.trim() || null,
+        teacherFeedback: draft.feedback.trim() || null,
+        teacherFeedbackVisible: draft.visible,
+      });
+      showModal({
+        type: "success",
+        title: "已儲存課後回饋",
+        description: "回家作業與評語已更新。",
+        confirmText: "確定",
+      });
+      refreshBookingsForCurrentView();
+    } catch (error: any) {
+      showModal({
+        type: "error",
+        title: "儲存失敗",
+        description: error?.message || "請稍後再試。",
+        confirmText: "確定",
+      });
+    } finally {
+      setFeedbackDrafts((prev) => ({
+        ...prev,
+        [bookingId]: { ...draft, saving: false },
+      }));
+    }
+  };
+
+  const availabilityMap = useMemo(() => {
+    const map: Record<string, { slots: { start: string; end: string }[]; isUnavailable: boolean }> = {};
+    availability.forEach((item) => {
+      map[item.date] = { slots: item.slots, isUnavailable: item.isUnavailable };
+    });
+    return map;
+  }, [availability]);
+
+  const getDayBookings = (date: Date) => {
+    const dateStr = toDateString(date);
+    return weekBookings.filter((booking) => booking.bookingDate === dateStr);
+  };
+
+  const minutesToTime = (minutes: number) => {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  };
+
+  const subtractIntervals = (
+    availabilitySlots: { start: string; end: string }[],
+    bookingSlots: { start: string; end: string }[]
+  ) => {
+    const result: { start: string; end: string }[] = [];
+    const sortedBookings = bookingSlots
+      .map((slot) => ({
+        start: timeToMinutes(slot.start),
+        end: timeToMinutes(slot.end),
+      }))
+      .sort((a, b) => a.start - b.start);
+
+    availabilitySlots.forEach((slot) => {
+      const start = timeToMinutes(slot.start);
+      const end = timeToMinutes(slot.end);
+      let cursor = start;
+
+      sortedBookings.forEach((b) => {
+        if (b.end <= cursor || b.start >= end) return;
+        if (b.start > cursor) {
+          result.push({
+            start: minutesToTime(cursor),
+            end: minutesToTime(b.start),
+          });
+        }
+        cursor = Math.max(cursor, b.end);
+      });
+
+      if (cursor < end) {
+        result.push({
+          start: minutesToTime(cursor),
+          end: minutesToTime(end),
+        });
+      }
+    });
+
+    return result;
+  };
+
+  const timeSlots = Array.from(
+    { length: ((WEEK_END_HOUR - WEEK_START_HOUR) * 60) / SLOT_INTERVAL_MIN + 1 },
+    (_, idx) => WEEK_START_HOUR * 60 + idx * SLOT_INTERVAL_MIN
+  );
 
   return (
     <div className="flex flex-col h-full bg-background-light dark:bg-background-dark">
@@ -250,13 +449,27 @@ export default function TeacherBookingsPage() {
             </div>
             <div className="flex items-center gap-3 ml-auto">
               <div className="flex bg-white dark:bg-surface-dark rounded-lg p-1 shadow-sm ring-1 ring-border-light dark:ring-border-dark">
-                <button className="px-3 py-1.5 rounded-md bg-primary/10 text-primary-dark dark:text-primary font-medium text-sm transition-colors flex items-center gap-1">
+                <button
+                  onClick={() => setViewMode("month")}
+                  className={`px-3 py-1.5 rounded-md font-medium text-sm transition-colors flex items-center gap-1 ${
+                    viewMode === "month"
+                      ? "bg-primary/10 text-primary-dark dark:text-primary"
+                      : "text-text-sub hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-400"
+                  }`}
+                >
                   <span className="material-symbols-outlined text-[18px]">
                     calendar_view_month
                   </span>
                   月視圖
                 </button>
-                <button className="px-3 py-1.5 rounded-md text-text-sub hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-400 font-medium text-sm transition-colors flex items-center gap-1">
+                <button
+                  onClick={() => setViewMode("week")}
+                  className={`px-3 py-1.5 rounded-md font-medium text-sm transition-colors flex items-center gap-1 ${
+                    viewMode === "week"
+                      ? "bg-primary/10 text-primary-dark dark:text-primary"
+                      : "text-text-sub hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-400"
+                  }`}
+                >
                   <span className="material-symbols-outlined text-[18px]">
                     calendar_view_week
                   </span>
@@ -288,86 +501,87 @@ export default function TeacherBookingsPage() {
         {/* Content Area */}
         <div className="flex-1 flex flex-col xl:flex-row gap-6 p-8 pt-4 overflow-hidden">
           {/* Calendar Grid */}
-          <div className="flex-1 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border-light dark:border-border-dark">
-              <div className="flex items-center gap-4">
-                <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                  {year}年 {month + 1}月
-                  <span className="text-xs font-normal text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 ml-2">
-                    {bookings.length} 筆預約
-                  </span>
-                </h2>
-                <div className="flex items-center rounded-lg border border-border-light dark:border-border-dark p-0.5 bg-slate-50 dark:bg-slate-800">
-                  <button
-                    onClick={handlePrevMonth}
-                    className="p-1 rounded hover:bg-white dark:hover:bg-surface-dark text-slate-500 hover:shadow-sm transition-all"
-                  >
-                    <span className="material-symbols-outlined text-[20px]">
-                      chevron_left
+          {viewMode === "month" ? (
+            <div className="flex-1 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border-light dark:border-border-dark">
+                <div className="flex items-center gap-4">
+                  <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    {year}年 {month + 1}月
+                    <span className="text-xs font-normal text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 ml-2">
+                      {bookings.length} 筆預約
                     </span>
-                  </button>
-                  <button
-                    onClick={handleNextMonth}
-                    className="p-1 rounded hover:bg-white dark:hover:bg-surface-dark text-slate-500 hover:shadow-sm transition-all"
-                  >
-                    <span className="material-symbols-outlined text-[20px]">
-                      chevron_right
-                    </span>
-                  </button>
-                </div>
-              </div>
-              <button
-                onClick={handleToday}
-                className="px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors"
-              >
-                回到今天
-              </button>
-            </div>
-
-            {/* Weekday Header */}
-            <div className="grid grid-cols-7 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-slate-800/50">
-              {["週日", "週一", "週二", "週三", "週四", "週五", "週六"].map(
-                (d) => (
-                  <div
-                    key={d}
-                    className="py-3 text-center text-xs font-bold text-text-sub uppercase tracking-wider"
-                  >
-                    {d}
+                  </h2>
+                  <div className="flex items-center rounded-lg border border-border-light dark:border-border-dark p-0.5 bg-slate-50 dark:bg-slate-800">
+                    <button
+                      onClick={handlePrevMonth}
+                      className="p-1 rounded hover:bg-white dark:hover:bg-surface-dark text-slate-500 hover:shadow-sm transition-all"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">
+                        chevron_left
+                      </span>
+                    </button>
+                    <button
+                      onClick={handleNextMonth}
+                      className="p-1 rounded hover:bg-white dark:hover:bg-surface-dark text-slate-500 hover:shadow-sm transition-all"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">
+                        chevron_right
+                      </span>
+                    </button>
                   </div>
-                )
-              )}
-            </div>
-
-            {/* Days */}
-            <div className="flex-1 grid grid-cols-7 grid-rows-5 overflow-y-auto bg-slate-50/20 dark:bg-slate-900/20">
-              {loading ? (
-                <div className="col-span-7 row-span-5 flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
-              ) : (
-                days.map((d, index) => {
-                  if (d.type === "empty") {
+                <button
+                  onClick={handleToday}
+                  className="px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors"
+                >
+                  回到今天
+                </button>
+              </div>
+
+              {/* Weekday Header */}
+              <div className="grid grid-cols-7 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-slate-800/50">
+                {["週日", "週一", "週二", "週三", "週四", "週五", "週六"].map(
+                  (d) => (
+                    <div
+                      key={d}
+                      className="py-3 text-center text-xs font-bold text-text-sub uppercase tracking-wider"
+                    >
+                      {d}
+                    </div>
+                  )
+                )}
+              </div>
+
+              {/* Days */}
+              <div className="flex-1 grid grid-cols-7 grid-rows-5 overflow-y-auto bg-slate-50/20 dark:bg-slate-900/20">
+                {loading ? (
+                  <div className="col-span-7 row-span-5 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                ) : (
+                  days.map((d, index) => {
+                    if (d.type === "empty") {
+                      return (
+                        <div
+                          key={index}
+                          className="border-b border-r border-border-light dark:border-border-dark p-2 min-h-[100px] bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors cursor-pointer group"
+                        ></div>
+                      );
+                    }
+
+                    // @ts-ignore
+                    const dayEvents = events[d.day] || [];
+                    // @ts-ignore
+                    const isSelected = isSameDay(d.date, selectedDate);
+
                     return (
                       <div
                         key={index}
-                        className="border-b border-r border-border-light dark:border-border-dark p-2 min-h-[100px] bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors cursor-pointer group"
-                      ></div>
-                    );
-                  }
-
-                  // @ts-ignore
-                  const dayEvents = events[d.day] || [];
-                  // @ts-ignore
-                  const isSelected = isSameDay(d.date, selectedDate);
-
-                  return (
-                    <div
-                      key={index}
-                      onClick={() => {
-                        // @ts-ignore
-                        setSelectedDate(d.date);
-                      }}
-                      className={`
+                        onClick={() => {
+                          // @ts-ignore
+                          setSelectedDate(d.date);
+                        }}
+                        className={`
                                     border-b border-r border-border-light dark:border-border-dark p-2 min-h-[100px] 
                                     transition-colors cursor-pointer group relative
                                     ${isSelected
@@ -375,23 +589,23 @@ export default function TeacherBookingsPage() {
                           : "bg-white dark:bg-surface-dark hover:bg-slate-50 dark:hover:bg-slate-800/30"
                         }
                                 `}
-                    >
-                      <span
-                        className={`
+                      >
+                        <span
+                          className={`
                                     flex items-center justify-center w-7 h-7 rounded-full text-sm font-bold 
                                     ${isSelected
                             ? "bg-primary text-white shadow-sm"
                             : "text-slate-700 dark:text-slate-300"
                           }
                                 `}
-                      >
-                        {d.day}
-                      </span>
-                      <div className="mt-2 flex flex-col gap-1">
-                        {dayEvents.map((ev: any, evIdx: number) => (
-                          <div
-                            key={evIdx}
-                            className={`
+                        >
+                          {d.day}
+                        </span>
+                        <div className="mt-2 flex flex-col gap-1">
+                          {dayEvents.map((ev: any, evIdx: number) => (
+                            <div
+                              key={evIdx}
+                              className={`
                                             px-2 py-1 rounded text-[11px] font-medium truncate shadow-sm
                                             ${ev.color === "red"
                                 ? "bg-red-100 text-red-700 border border-red-200 opacity-70"
@@ -402,17 +616,271 @@ export default function TeacherBookingsPage() {
                                     : "bg-slate-100 text-slate-700 border border-slate-200"
                               }
                                         `}
-                          >
-                            {ev.time} {ev.name}
-                          </div>
-                        ))}
+                            >
+                              {ev.time} {ev.name}
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })
-              )}
+                    );
+                  })
+                )}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex-1 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border-light dark:border-border-dark">
+                <div className="flex items-center gap-4">
+                  <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    本週：{weekStart.getMonth() + 1}/{weekStart.getDate()} -
+                    {weekEnd.getMonth() + 1}/{weekEnd.getDate()}
+                    <span className="text-xs font-normal text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 ml-2">
+                      {weekBookings.length} 筆預約
+                    </span>
+                  </h2>
+                  <div className="flex items-center rounded-lg border border-border-light dark:border-border-dark p-0.5 bg-slate-50 dark:bg-slate-800">
+                    <button
+                      onClick={handlePrevWeek}
+                      className="p-1 rounded hover:bg-white dark:hover:bg-surface-dark text-slate-500 hover:shadow-sm transition-all"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">
+                        chevron_left
+                      </span>
+                    </button>
+                    <button
+                      onClick={handleNextWeek}
+                      className="p-1 rounded hover:bg-white dark:hover:bg-surface-dark text-slate-500 hover:shadow-sm transition-all"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">
+                        chevron_right
+                      </span>
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="hidden md:flex items-center gap-3 text-xs text-slate-500">
+                    <span className="flex items-center gap-1">
+                      <span className="w-3 h-3 rounded-sm bg-emerald-200 border border-emerald-300"></span>
+                      空檔
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-3 h-3 rounded-sm border border-emerald-400 border-dashed"></span>
+                      可預約時段
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-3 h-3 rounded-sm bg-blue-500"></span>
+                      已預約
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleToday}
+                    className="px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors"
+                  >
+                    回到今天
+                  </button>
+                </div>
+              </div>
+
+              {/* Week Header */}
+              <div className="grid grid-cols-[72px_repeat(7,minmax(0,1fr))] border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-slate-800/50">
+                <div className="py-3 text-center text-xs font-bold text-text-sub uppercase tracking-wider">
+                  時間
+                </div>
+                {weekDays.map((day) => {
+                  const isToday = isSameDay(day, new Date());
+                  const isSelected = isSameDay(day, selectedDate);
+                  return (
+                    <button
+                      key={day.toISOString()}
+                      onClick={() => setSelectedDate(day)}
+                      className={`py-3 text-center text-xs font-bold tracking-wider transition-colors ${
+                        isSelected
+                          ? "bg-primary/10 text-primary"
+                          : isToday
+                          ? "text-slate-900 dark:text-white"
+                          : "text-text-sub"
+                      }`}
+                    >
+                      <div>{["週一", "週二", "週三", "週四", "週五", "週六", "週日"][day.getDay() === 0 ? 6 : day.getDay() - 1]}</div>
+                      <div className="text-[11px] font-medium text-slate-500">
+                        {day.getMonth() + 1}/{day.getDate()}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex-1 overflow-auto">
+                <div className="grid grid-cols-[72px_repeat(7,minmax(0,1fr))]">
+                  {/* Time Column */}
+                  <div className="border-r border-border-light dark:border-border-dark bg-slate-50/30 dark:bg-slate-800/30">
+                    {timeSlots.map((minutes, idx) => {
+                      const isHour = minutes % 60 === 0;
+                      return (
+                        <div
+                          key={idx}
+                          className="border-b border-border-light dark:border-border-dark flex items-start justify-center text-[10px] text-slate-400"
+                          style={{ height: SLOT_HEIGHT }}
+                        >
+                          {isHour ? (
+                            <span className="mt-1">
+                              {String(Math.floor(minutes / 60)).padStart(2, "0")}:00
+                            </span>
+                          ) : null}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {weekDays.map((day) => {
+                    const dateStr = toDateString(day);
+                    const dayAvailability = availabilityMap[dateStr];
+                    const dayBookings = getDayBookings(day);
+                    const bookingSlots = dayBookings.map((b) => ({
+                      start: b.startTime.slice(0, 5),
+                      end: b.endTime.slice(0, 5),
+                    }));
+                    const freeSlots = dayAvailability?.slots
+                      ? subtractIntervals(dayAvailability.slots, bookingSlots)
+                      : [];
+                    const dayHeight = timeSlots.length * SLOT_HEIGHT;
+
+                    return (
+                      <div
+                        key={dateStr}
+                        className="relative border-r border-border-light dark:border-border-dark bg-white dark:bg-surface-dark"
+                        style={{ height: dayHeight }}
+                      >
+                        {/* Grid Lines */}
+                        <div className="absolute inset-0">
+                          {timeSlots.map((_, idx) => (
+                            <div
+                              key={idx}
+                              className="border-b border-border-light dark:border-border-dark"
+                              style={{ height: SLOT_HEIGHT }}
+                            ></div>
+                          ))}
+                        </div>
+
+                        {dayAvailability?.isUnavailable && (
+                          <div className="absolute inset-0 bg-slate-100/70 dark:bg-slate-800/50 flex items-center justify-center z-10">
+                            <span className="text-xs font-bold text-slate-500">
+                              休假
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Availability Outline */}
+                        {!dayAvailability?.isUnavailable &&
+                          (dayAvailability?.slots || []).map((slot, idx) => {
+                            const startMin = clamp(
+                              timeToMinutes(slot.start),
+                              WEEK_START_HOUR * 60,
+                              WEEK_END_HOUR * 60
+                            );
+                            const endMin = clamp(
+                              timeToMinutes(slot.end),
+                              WEEK_START_HOUR * 60,
+                              WEEK_END_HOUR * 60
+                            );
+                            if (endMin <= startMin) return null;
+                            const top =
+                              ((startMin - WEEK_START_HOUR * 60) / SLOT_INTERVAL_MIN) *
+                              SLOT_HEIGHT;
+                            const height =
+                              ((endMin - startMin) / SLOT_INTERVAL_MIN) *
+                              SLOT_HEIGHT;
+                            return (
+                              <div
+                                key={idx}
+                                className="absolute left-2 right-2 border border-emerald-400 border-dashed rounded-lg z-10"
+                                style={{ top, height }}
+                              ></div>
+                            );
+                          })}
+
+                        {/* Free Slots */}
+                        {!dayAvailability?.isUnavailable &&
+                          freeSlots.map((slot, idx) => {
+                            const startMin = clamp(
+                              timeToMinutes(slot.start),
+                              WEEK_START_HOUR * 60,
+                              WEEK_END_HOUR * 60
+                            );
+                            const endMin = clamp(
+                              timeToMinutes(slot.end),
+                              WEEK_START_HOUR * 60,
+                              WEEK_END_HOUR * 60
+                            );
+                            if (endMin <= startMin) return null;
+                            const top =
+                              ((startMin - WEEK_START_HOUR * 60) / SLOT_INTERVAL_MIN) *
+                              SLOT_HEIGHT;
+                            const height =
+                              ((endMin - startMin) / SLOT_INTERVAL_MIN) *
+                              SLOT_HEIGHT;
+                            return (
+                              <div
+                                key={idx}
+                                className="absolute left-3 right-3 bg-emerald-200/70 text-emerald-700 text-[10px] font-bold rounded-md px-2 py-1 z-20"
+                                style={{ top: top + 2, height: height - 4 }}
+                              >
+                                可預約
+                              </div>
+                            );
+                          })}
+
+                        {/* Bookings */}
+                        {dayBookings.map((booking, idx) => {
+                          const startMin = clamp(
+                            timeToMinutes(booking.startTime),
+                            WEEK_START_HOUR * 60,
+                            WEEK_END_HOUR * 60
+                          );
+                          const endMin = clamp(
+                            timeToMinutes(booking.endTime),
+                            WEEK_START_HOUR * 60,
+                            WEEK_END_HOUR * 60
+                          );
+                          if (endMin <= startMin) return null;
+                          const top =
+                            ((startMin - WEEK_START_HOUR * 60) / SLOT_INTERVAL_MIN) *
+                            SLOT_HEIGHT;
+                          const height =
+                            ((endMin - startMin) / SLOT_INTERVAL_MIN) *
+                            SLOT_HEIGHT;
+                          const statusColor =
+                            booking.status === "confirmed"
+                              ? "bg-blue-500"
+                              : booking.status === "pending"
+                              ? "bg-orange-500"
+                              : "bg-slate-500";
+                          return (
+                            <div
+                              key={idx}
+                              className={`absolute left-3 right-3 ${statusColor} text-white text-[10px] font-bold rounded-lg px-2 py-1 shadow-md z-30`}
+                              style={{ top: top + 2, height: height - 4 }}
+                            >
+                              <div className="flex items-center justify-between">
+                                <span>
+                                  {booking.startTime.slice(0, 5)}-
+                                  {booking.endTime.slice(0, 5)}
+                                </span>
+                                <span className="opacity-90">
+                                  {booking.studentName?.[0] || "學"}
+                                </span>
+                              </div>
+                              <div className="truncate">{booking.studentName}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Sidebar Schedule */}
           <div className="w-full xl:w-[360px] flex-shrink-0 flex flex-col gap-5 h-full">
@@ -443,7 +911,10 @@ export default function TeacherBookingsPage() {
                 {/* @ts-ignore */}
                 {events[selectedDate.getDate()] ? (
                   // @ts-ignore
-                  events[selectedDate.getDate()].map((ev, idx) => (
+                  events[selectedDate.getDate()].map((ev, idx) => {
+                    const booking = bookings.find((b) => b.id === ev.id);
+                    const draft = booking ? feedbackDrafts[booking.id] : undefined;
+                    return (
                     <div key={idx} className="group relative">
                       <div className="absolute -left-5 top-0 bottom-0 w-1 bg-primary rounded-r-full"></div>
                       <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 dark:bg-primary/10 shadow-sm transition-all hover:shadow-md hover:border-primary/40">
@@ -531,9 +1002,81 @@ export default function TeacherBookingsPage() {
                             </button>
                           )}
                         </div>
+
+                        {booking && draft && (
+                          <div className="mt-4 pt-4 border-t border-slate-200/70 dark:border-slate-700/60 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <h5 className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                                課後回饋
+                              </h5>
+                              <label className="flex items-center gap-2 text-[11px] text-slate-500">
+                                <input
+                                  type="checkbox"
+                                  checked={draft.visible}
+                                  onChange={(e) =>
+                                    setFeedbackDrafts((prev) => ({
+                                      ...prev,
+                                      [booking.id]: {
+                                        ...draft,
+                                        visible: e.target.checked,
+                                      },
+                                    }))
+                                  }
+                                  className="h-3.5 w-3.5 rounded border-slate-300 dark:border-slate-600"
+                                />
+                                對學生公開
+                              </label>
+                            </div>
+                            <div className="space-y-2">
+                              <textarea
+                                value={draft.homework}
+                                onChange={(e) =>
+                                  setFeedbackDrafts((prev) => ({
+                                    ...prev,
+                                    [booking.id]: {
+                                      ...draft,
+                                      homework: e.target.value,
+                                    },
+                                  }))
+                                }
+                                placeholder="回家作業（可留空）"
+                                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/40 px-3 py-2 text-xs text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                rows={2}
+                              />
+                              <textarea
+                                value={draft.feedback}
+                                onChange={(e) =>
+                                  setFeedbackDrafts((prev) => ({
+                                    ...prev,
+                                    [booking.id]: {
+                                      ...draft,
+                                      feedback: e.target.value,
+                                    },
+                                  }))
+                                }
+                                placeholder="教師評語（可留空）"
+                                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/40 px-3 py-2 text-xs text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                rows={3}
+                              />
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] text-slate-400">
+                                允許修改歷史紀錄
+                              </span>
+                              <button
+                                onClick={() => handleSaveFeedback(booking.id)}
+                                disabled={draft.saving}
+                                className="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold shadow-sm hover:bg-primary-dark disabled:opacity-60 disabled:cursor-not-allowed"
+                              >
+                                {draft.saving ? "儲存中..." : "儲存回饋"}
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <div className="text-center text-text-sub py-10">
                     <span className="material-symbols-outlined text-4xl mb-2 opacity-50">
@@ -622,7 +1165,7 @@ export default function TeacherBookingsPage() {
         onOpenChange={(open) => {
           if (!open) setEditingBooking(null);
         }}
-        onSuccess={refreshBookings}
+        onSuccess={refreshBookingsForCurrentView}
       />
 
       {reviewingBooking && (() => {
@@ -643,7 +1186,7 @@ export default function TeacherBookingsPage() {
             requestedBy={reviewingBooking.studentName || "學生"}
             onSuccess={() => {
               setReviewingBooking(null);
-              refreshBookings();
+              refreshBookingsForCurrentView();
             }}
           />
         );
@@ -653,7 +1196,7 @@ export default function TeacherBookingsPage() {
         <CreateBookingDialog
           open={isCreateOpen}
           onOpenChange={setIsCreateOpen}
-          onSuccess={refreshBookings}
+          onSuccess={refreshBookingsForCurrentView}
           teacherId={profile.id}
         />
       )}

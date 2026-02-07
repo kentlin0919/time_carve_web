@@ -2,7 +2,8 @@ import { Booking } from "@/lib/domain/booking/entity";
 import { BookingRepository } from "@/lib/domain/booking/repository";
 import { AvailabilityRepository } from "@/lib/domain/teacher/AvailabilityRepository";
 import { NotificationRepository } from "@/lib/domain/notification/repository";
-
+import { CourseRepository } from "@/lib/domain/course/repository";
+import { ProgressRepository } from "@/lib/domain/progress/types";
 import { PurchaseRepository } from "@/lib/domain/purchase/entity";
 
 export class CreateBookingUseCase {
@@ -10,33 +11,65 @@ export class CreateBookingUseCase {
     private bookingRepository: BookingRepository,
     private availabilityRepository: AvailabilityRepository,
     private notificationRepository?: NotificationRepository,
-    private purchaseRepository?: PurchaseRepository
+    private purchaseRepository?: PurchaseRepository,
+    private courseRepository?: CourseRepository,
+    private progressRepository?: ProgressRepository
   ) { }
 
   async execute(
-    booking: Omit<Booking, "id" | "status" | "studentName" | "studentEmail" | "courseTitle">
+    booking: Omit<Booking, "id" | "status" | "studentName" | "studentEmail" | "courseTitle">,
+    options: { buyNewPack?: boolean } = {}
   ): Promise<Booking> {
-    // 0. Check for Unpaid Bookings (Only block if not using a valid purchase)
-    if (!booking.purchaseId) {
-      const unpaidCount = await this.bookingRepository.getUnpaidBookingsCount(booking.studentId);
-      if (unpaidCount > 0) {
-        throw new Error("您有尚未付款的課程，請先完成付款後再預約新課程。");
+    // 0. Calculate Duration for the current booking
+    const startParts = booking.startTime.split(':').map(Number);
+    const endParts = booking.endTime.split(':').map(Number);
+    const startMins = startParts[0] * 60 + startParts[1];
+    const endMins = endParts[0] * 60 + endParts[1];
+    const durationHours = (endMins - startMins) / 60;
+
+    // 1. Handle Auto-Purchase if requested
+    if (options.buyNewPack && this.purchaseRepository && this.courseRepository) {
+      const course = await this.courseRepository.getCourse(booking.courseId);
+      if (!course) throw new Error("找不到課程資訊");
+
+      // Calculate pack hours from course duration_minutes (as standard pack size)
+      const totalPackHours = (course.durationMinutes || 60) / 60;
+      
+      // Create new purchase
+      const newPurchase = await this.purchaseRepository.createPurchase({
+        studentId: booking.studentId,
+        courseId: booking.courseId,
+        totalHours: totalPackHours,
+        remainingHours: totalPackHours, // Initial full hours
+        pricePaid: course.price || 0
+      });
+
+      booking.purchaseId = newPurchase.id;
+
+      // 1.5 Initialize Progress if not exists
+      if (this.progressRepository) {
+        const existingProgress = await this.progressRepository.getByStudentAndCourse(booking.studentId, booking.courseId);
+        if (!existingProgress) {
+          await this.progressRepository.create({
+            student_id: booking.studentId,
+            course_id: booking.courseId,
+            teacher_id: booking.teacherId,
+            status: 'in_progress',
+            progress_percentage: 0,
+            current_section_id: null,
+            completed_section_ids: [],
+            teacher_notes: '',
+          });
+        }
       }
     }
 
-    // 0.5. Validate & Deduct Purchase (if applicable)
+    // 2. Validate & Deduct Purchase (Existing or Newly created above)
     if (booking.purchaseId && this.purchaseRepository) {
       const purchase = await this.purchaseRepository.getPurchaseById(booking.purchaseId);
       if (!purchase) throw new Error("無效的課程包代碼");
       if (purchase.status !== 'active') throw new Error("此課程包已過期或失效");
       if (purchase.studentId !== booking.studentId) throw new Error("無法使用他人的課程包");
-
-      // Calculate Duration
-      const startParts = booking.startTime.split(':').map(Number);
-      const endParts = booking.endTime.split(':').map(Number);
-      const startMins = startParts[0] * 60 + startParts[1];
-      const endMins = endParts[0] * 60 + endParts[1];
-      const durationHours = (endMins - startMins) / 60;
 
       if (purchase.remainingHours < durationHours) {
         throw new Error(`課程包剩餘時數不足 (剩餘: ${purchase.remainingHours}小時, 需: ${durationHours}小時)`);
@@ -55,10 +88,10 @@ export class CreateBookingUseCase {
       booking.paidAt = new Date().toISOString();
     }
 
-    // 1. Validate Availability
+    // 3. Validate Availability
     await this.validateAvailability(booking);
 
-    // 2. Create Booking
+    // 4. Create Booking
     const newBooking = await this.bookingRepository.createBooking(booking);
 
     if (this.notificationRepository) {
