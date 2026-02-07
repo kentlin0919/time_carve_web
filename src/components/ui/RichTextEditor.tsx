@@ -6,15 +6,16 @@ import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import Youtube from "@tiptap/extension-youtube";
-import React from "react";
+import React, { useCallback, useRef } from "react";
 
 interface RichTextEditorProps {
   content: string;
   onChange: (html: string) => void;
   editable?: boolean;
+  onImageUpload?: (file: File) => Promise<string>;
 }
 
-const MenuBar = ({ editor }: { editor: any }) => {
+const MenuBar = ({ editor, onImageUpload }: { editor: any; onImageUpload?: (file: File) => Promise<string> }) => {
   if (!editor) {
     return null;
   }
@@ -36,10 +37,29 @@ const MenuBar = ({ editor }: { editor: any }) => {
     </button>
   );
 
-  const addImage = () => {
-    const url = window.prompt("輸入圖片網址");
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
+  const addImage = async () => {
+    if (onImageUpload) {
+      // Create file input and trigger click
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          try {
+            const url = await onImageUpload(file);
+            editor.chain().focus().setImage({ src: url }).run();
+          } catch (error) {
+            console.error('Image upload failed:', error);
+          }
+        }
+      };
+      input.click();
+    } else {
+      const url = window.prompt("輸入圖片網址");
+      if (url) {
+        editor.chain().focus().setImage({ src: url }).run();
+      }
     }
   };
 
@@ -133,14 +153,26 @@ export default function RichTextEditor({
   content,
   onChange,
   editable = true,
+  onImageUpload,
 }: RichTextEditorProps) {
+  // Use ref to store upload handler for access in editorProps
+  const uploadHandlerRef = useRef<((file: File) => Promise<string>) | undefined>(onImageUpload);
+  uploadHandlerRef.current = onImageUpload;
+
+  // Use ref to store editor instance for external handlers
+  const editorRef = useRef<any>(null);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         // 停用 StarterKit 內建的 Link (TipTap v3+)，使用自訂配置
         link: false,
       }),
-      Image,
+      Image.configure({
+        HTMLAttributes: {
+          class: 'max-w-full h-auto rounded-lg my-4',
+        },
+      }),
       Link.configure({
         openOnClick: false,
         autolink: true,
@@ -149,7 +181,7 @@ export default function RichTextEditor({
         },
       }),
       Placeholder.configure({
-        placeholder: "開始撰寫精彩的內容...",
+        placeholder: "開始撰寫精彩的內容...（可直接拖放或貼上圖片）",
       }),
       Youtube.configure({
         controls: false,
@@ -165,13 +197,76 @@ export default function RichTextEditor({
         class:
           "prose prose-slate dark:prose-invert max-w-none focus:outline-none min-h-[300px] p-4",
       },
+      handleDrop: (view, event, slice, moved) => {
+        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+          const file = event.dataTransfer.files[0];
+          if (file.type.startsWith('image/') && uploadHandlerRef.current && editorRef.current) {
+            event.preventDefault();
+            const currentEditor = editorRef.current;
+            uploadHandlerRef.current(file).then((url) => {
+              currentEditor.chain().focus().setImage({ src: url }).run();
+            }).catch((error) => {
+              console.error('Image upload failed:', error);
+            });
+            return true;
+          }
+        }
+        return false;
+      },
+      handlePaste: (view, event) => {
+        if (event.clipboardData && event.clipboardData.files && event.clipboardData.files.length > 0) {
+          const file = event.clipboardData.files[0];
+          if (file.type.startsWith('image/') && uploadHandlerRef.current && editorRef.current) {
+            event.preventDefault();
+            const currentEditor = editorRef.current;
+            uploadHandlerRef.current(file).then((url) => {
+              currentEditor.chain().focus().setImage({ src: url }).run();
+            }).catch((error) => {
+              console.error('Image upload failed:', error);
+            });
+            return true;
+          }
+        }
+        return false;
+      },
     },
     immediatelyRender: false,
   });
 
+  // Update editor ref when editor changes
+  React.useEffect(() => {
+    editorRef.current = editor;
+  }, [editor]);
+
+  // Handle drag over for visual feedback
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0 && onImageUpload && editor) {
+      const file = e.dataTransfer.files[0];
+      if (file.type.startsWith('image/')) {
+        onImageUpload(file).then((url) => {
+          editor.chain().focus().setImage({ src: url }).run();
+        }).catch((error) => {
+          console.error('Image upload failed:', error);
+        });
+      }
+    }
+  }, [onImageUpload, editor]);
+
   return (
-    <div className="border border-border-light dark:border-border-dark rounded-xl overflow-hidden bg-white dark:bg-surface-dark shadow-sm">
-      {editable && <MenuBar editor={editor} />}
+    <div
+      className="border border-border-light dark:border-border-dark rounded-xl overflow-hidden bg-white dark:bg-surface-dark shadow-sm"
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
+      {editable && <MenuBar editor={editor} onImageUpload={onImageUpload} />}
       <EditorContent editor={editor} />
     </div>
   );

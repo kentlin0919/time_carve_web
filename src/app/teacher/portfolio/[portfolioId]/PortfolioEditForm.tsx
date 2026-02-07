@@ -14,6 +14,7 @@ import {
   createPortfolio,
   uploadPortfolioMedia,
   getPortfolioTypes,
+  uploadContentImage,
 } from "@/app/actions/portfolio";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -148,6 +149,12 @@ export default function PortfolioEditForm({
     }
   };
 
+  const handleContentImageUpload = async (file: File): Promise<string> => {
+    const uploadFormData = new FormData();
+    uploadFormData.append("file", file);
+    return await uploadContentImage(uploadFormData);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-8 pb-20">
       {/* ... keeping header ... */}
@@ -219,6 +226,7 @@ export default function PortfolioEditForm({
               <RichTextEditor
                 content={formData.content || ""}
                 onChange={(html) => setFormData({ ...formData, content: html })}
+                onImageUpload={handleContentImageUpload}
               />
             </div>
           </div>

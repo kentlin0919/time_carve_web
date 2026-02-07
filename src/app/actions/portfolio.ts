@@ -155,3 +155,34 @@ export async function deletePortfolioType(id: string) {
   revalidatePath('/teacher/portfolio/types');
   revalidatePath('/teacher/portfolio');
 }
+
+/**
+ * Upload an image from rich text editor content
+ * Returns the public URL of the uploaded image
+ */
+export async function uploadContentImage(formData: FormData): Promise<string> {
+  const file = formData.get('file') as File;
+
+  if (!file) throw new Error('Missing file');
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) throw new Error('Unauthorized');
+
+  const fileName = `content/${user.id}/${Date.now()}-${file.name}`;
+
+  const { error } = await supabase.storage
+    .from('portfolio-media')
+    .upload(fileName, file, {
+      upsert: true
+    });
+
+  if (error) throw error;
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('portfolio-media')
+    .getPublicUrl(fileName);
+
+  return publicUrl;
+}

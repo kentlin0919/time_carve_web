@@ -266,7 +266,7 @@ export default function TeacherPortfolioGalleryPage() {
                 </div>
 
                 {/* Portfolio Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
                     {filteredPortfolios.length > 0 ? (
                         filteredPortfolios.map((portfolio) => {
                             const catStyle = getCategoryStyle(portfolio.category);
@@ -274,40 +274,41 @@ export default function TeacherPortfolioGalleryPage() {
                                 <Link
                                     key={portfolio.id}
                                     href={`/portfolio/${portfolio.id}`}
-                                    className="portfolio-card group cursor-pointer"
+                                    className="portfolio-card group cursor-pointer bg-white dark:bg-[#1a2e36] rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
                                 >
-                                    <div className="relative overflow-hidden rounded-2xl aspect-[4/3] mb-4 shadow-md bg-gray-100">
+                                    <div className="relative overflow-hidden aspect-[4/3] min-h-[200px] bg-gray-100 dark:bg-gray-800">
                                         {portfolio.cover_image_url ? (
                                             <Image
                                                 alt={portfolio.title}
                                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                                 src={portfolio.cover_image_url}
                                                 fill
+                                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                                             />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-400">
-                                                <span className="material-symbols-outlined text-5xl">image</span>
+                                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 text-gray-400">
+                                                <span className="material-symbols-outlined text-6xl">image</span>
                                             </div>
                                         )}
-                                        <div className="hover-overlay absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <span className="bg-white/95 text-[#111618] px-6 py-2.5 rounded-full text-sm font-bold uppercase tracking-wider shadow-lg">
+                                        <div className="hover-overlay absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-6">
+                                            <span className="bg-white text-[#111618] px-6 py-2.5 rounded-full text-sm font-bold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform">
                                                 探索作品
                                             </span>
                                         </div>
-                                    </div>
-                                    <div className="px-1">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <h4 className="text-[#111618] dark:text-white text-lg font-bold group-hover:text-primary transition-colors line-clamp-1">
-                                                {portfolio.title}
-                                            </h4>
-                                            {portfolio.category && (
+                                        {portfolio.category && (
+                                            <div className="absolute top-3 left-3">
                                                 <span
-                                                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${catStyle.bg} ${catStyle.text}`}
+                                                    className={`text-xs font-bold px-3 py-1.5 rounded-full backdrop-blur-sm ${catStyle.bg} ${catStyle.text}`}
                                                 >
                                                     {portfolio.category}
                                                 </span>
-                                            )}
-                                        </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="p-5">
+                                        <h4 className="text-[#111618] dark:text-white text-lg font-bold group-hover:text-primary transition-colors line-clamp-1 mb-2">
+                                            {portfolio.title}
+                                        </h4>
                                         <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed line-clamp-2">
                                             {portfolio.description || "暫無描述"}
                                         </p>
@@ -317,10 +318,10 @@ export default function TeacherPortfolioGalleryPage() {
                         })
                     ) : (
                         <div className="col-span-full py-20 text-center text-gray-500 dark:text-gray-400">
-                            <span className="material-symbols-outlined text-5xl mb-4 block">
+                            <span className="material-symbols-outlined text-6xl mb-4 block">
                                 inventory_2
                             </span>
-                            <p>目前沒有作品</p>
+                            <p className="text-lg">目前沒有作品</p>
                         </div>
                     )}
                 </div>
