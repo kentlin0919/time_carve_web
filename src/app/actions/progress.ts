@@ -92,28 +92,70 @@ export async function getMyCoursesWithProgress() {
     if (progresses.length === 0) return [];
 
     const courseIds = progresses.map(p => p.course_id);
-    
+
     // Fetch courses and purchases in parallel
     const courseRepo = new SupabaseCourseRepository(supabase);
     const [courses, purchases] = await Promise.all([
         courseRepo.getByIds(courseIds),
-        supabase.from('course_purchases').select('*').eq('student_id', user.id).eq('status', 'active')
+        supabase.from('course_purchases')
+            .select('*')
+            .eq('student_id', user.id)
+            .in('status', ['active', 'pending_payment']) // Fetch both active and pending
     ]);
 
     return progresses.map(p => {
         const course = courses.find(c => c.id === p.course_id);
-        const purchase = purchases.data?.find(pur => pur.course_id === p.course_id);
-        return { 
-            ...p, 
+
+        // Filter purchases for this course
+        const coursePurchases = purchases.data?.filter(pur => pur.course_id === p.course_id) || [];
+
+        // Calculate active details
+        const activePurchase = coursePurchases.find(pur => pur.status === 'active');
+
+        // Calculate total pending hours
+        const pendingHours = coursePurchases
+            .filter(pur => pur.status === 'pending_payment')
+            .reduce((sum, pur) => sum + pur.total_hours, 0);
+
+        return {
+            ...p,
             course,
-            purchase: purchase ? {
-                totalHours: purchase.total_hours,
-                remainingHours: purchase.remaining_hours,
-                id: purchase.id
-            } : null
+            purchase: {
+                totalHours: activePurchase?.total_hours || 0,
+                remainingHours: activePurchase?.remaining_hours || 0,
+                pendingHours: pendingHours,
+                id: activePurchase?.id || ''
+            }
         };
-    }).filter(item => item.course !== undefined) as (StudentCourseProgress & { 
-        course: Course, 
-        purchase: { totalHours: number, remainingHours: number, id: string } | null 
+    }).filter(item => item.course !== undefined) as (StudentCourseProgress & {
+        course: Course,
+        purchase: {
+            totalHours: number;
+            remainingHours: number;
+            pendingHours: number;
+            id: string;
+        } | null
     })[];
+}
+
+export async function getPendingHoursForCourse(courseId: string): Promise<number> {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+        return 0;
+    }
+
+    const { data: purchases } = await supabase
+        .from('course_purchases')
+        .select('total_hours')
+        .eq('student_id', user.id)
+        .eq('course_id', courseId)
+        .eq('status', 'pending_payment');
+
+    if (!purchases || purchases.length === 0) {
+        return 0;
+    }
+
+    return purchases.reduce((sum, pur) => sum + pur.total_hours, 0);
 }

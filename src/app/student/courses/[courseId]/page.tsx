@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useStudentCourseDetail } from "../useStudentTeacherCourses";
 import StudentCourseDetailView from "./StudentCourseDetailView";
+import { getPendingHoursForCourse } from "@/app/actions/progress";
 
 export default function StudentCourseDetailPage() {
   const router = useRouter();
@@ -11,11 +12,15 @@ export default function StudentCourseDetailPage() {
   const courseId = typeof params.courseId === "string" ? params.courseId : "";
   const { course, context, loading, error } = useStudentCourseDetail(courseId);
   const [selectedHours, setSelectedHours] = useState(1);
+  const [pendingHours, setPendingHours] = useState(0);
 
   useEffect(() => {
     if (!course) return;
     const baseHours = Math.max(1, Math.ceil((course.durationMinutes || 60) / 60));
     setSelectedHours(baseHours);
+
+    // Fetch pending hours for this course
+    getPendingHoursForCourse(course.id).then(hours => setPendingHours(hours));
   }, [course]);
 
   const handleBooking = () => {
@@ -70,6 +75,7 @@ export default function StudentCourseDetailPage() {
       onBooking={handleBooking}
       backHref="/student/courses"
       backLabel="返回課程列表"
+      pendingHours={pendingHours}
     />
   );
 }

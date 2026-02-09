@@ -9,6 +9,12 @@ import { StudentProgressSection } from "./components/StudentProgressSection";
 
 type StudentWithInfo = Database["public"]["Tables"]["student_info"]["Row"] & {
   user_info: Database["public"]["Tables"]["user_info"]["Row"] | null;
+  course_purchases?: {
+    remaining_hours: number;
+    courses: {
+      title: string;
+    } | null;
+  }[];
 };
 
 export default function TeacherStudentManagementPage() {
@@ -60,7 +66,16 @@ export default function TeacherStudentManagementPage() {
 
       const { data: studentsData, error: studentsError } = await supabase
         .from("student_info")
-        .select(`*, user_info (*)`)
+        .select(`
+          *,
+          user_info (*),
+          course_purchases (
+            remaining_hours,
+            courses (
+              title
+            )
+          )
+        `)
         .eq("teacher_code", teacherData.teacher_code);
 
       if (studentsError) throw studentsError;
@@ -239,8 +254,8 @@ export default function TeacherStudentManagementPage() {
                         key={student.id}
                         onClick={() => setSelectedStudentId(student.id)}
                         className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors border-l-4 ${isSelected
-                            ? "border-primary bg-blue-50/50 dark:bg-blue-900/10"
-                            : "border-transparent"
+                          ? "border-primary bg-blue-50/50 dark:bg-blue-900/10"
+                          : "border-transparent"
                           }`}
                       >
                         <div className="flex items-center gap-3">
@@ -265,6 +280,27 @@ export default function TeacherStudentManagementPage() {
                             <p className="text-xs text-text-sub truncate mt-0.5">
                               {userInfo.email}
                             </p>
+                            {/* Display Remaining Hours */}
+                            {student.course_purchases &&
+                              student.course_purchases.length > 0 && (
+                                <div className="mt-1.5 flex flex-wrap gap-1">
+                                  {student.course_purchases
+                                    .filter((p) => p.remaining_hours > 0)
+                                    .map((p, index) => (
+                                      <span
+                                        key={index}
+                                        className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-100 dark:border-blue-800"
+                                      >
+                                        <span className="truncate max-w-[80px]">
+                                          {p.courses?.title}
+                                        </span>
+                                        <span className="ml-1 font-bold">
+                                          {p.remaining_hours}h
+                                        </span>
+                                      </span>
+                                    ))}
+                                </div>
+                              )}
                           </div>
                           <span className="material-symbols-outlined text-slate-400 lg:hidden">
                             chevron_right
@@ -354,8 +390,8 @@ export default function TeacherStudentManagementPage() {
                                 <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
                                 <span
                                   className={`ml-2 text-sm font-bold ${editForm.isActive
-                                      ? "text-primary"
-                                      : "text-slate-400"
+                                    ? "text-primary"
+                                    : "text-slate-400"
                                     }`}
                                 >
                                   {editForm.isActive ? "啟用中" : "已停用"}
@@ -682,11 +718,10 @@ export default function TeacherStudentManagementPage() {
                               <div className="flex items-center justify-between">
                                 <span className="text-text-sub">帳號狀態</span>
                                 <span
-                                  className={`text-xs font-bold px-2.5 py-1 rounded-full border ${
-                                    selectedStudent.user_info.is_active
+                                  className={`text-xs font-bold px-2.5 py-1 rounded-full border ${selectedStudent.user_info.is_active
                                       ? "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-900/40"
                                       : "bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
-                                  }`}
+                                    }`}
                                 >
                                   {selectedStudent.user_info.is_active
                                     ? "啟用中"
@@ -698,8 +733,8 @@ export default function TeacherStudentManagementPage() {
                                 <span className="font-medium text-slate-800 dark:text-slate-200">
                                   {selectedStudent.created_at
                                     ? new Date(
-                                        selectedStudent.created_at
-                                      ).toLocaleDateString()
+                                      selectedStudent.created_at
+                                    ).toLocaleDateString()
                                     : "N/A"}
                                 </span>
                               </div>
@@ -708,8 +743,8 @@ export default function TeacherStudentManagementPage() {
                                 <span className="font-medium text-slate-800 dark:text-slate-200">
                                   {selectedStudent.updated_at
                                     ? new Date(
-                                        selectedStudent.updated_at
-                                      ).toLocaleDateString()
+                                      selectedStudent.updated_at
+                                    ).toLocaleDateString()
                                     : "N/A"}
                                 </span>
                               </div>

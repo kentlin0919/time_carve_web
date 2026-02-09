@@ -357,14 +357,14 @@ export default async function BookingDetailPage({ params }: BookingDetailProps) 
                   href={
                     teacherEmail
                       ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
-                          teacherEmail
-                        )}&su=${encodeURIComponent(
-                          `關於課程「${booking.courseTitle}」的詢問`
-                        )}&body=${encodeURIComponent(
-                          `老師您好：\n\n我想詢問「${booking.courseTitle}」的課程內容與上課安排。\n預約日期：${formatDate(
-                            booking.bookingDate
-                          )}\n上課時間：${booking.startTime} - ${booking.endTime}\n\n謝謝老師！`
-                        )}`
+                        teacherEmail
+                      )}&su=${encodeURIComponent(
+                        `關於課程「${booking.courseTitle}」的詢問`
+                      )}&body=${encodeURIComponent(
+                        `老師您好：\n\n我想詢問「${booking.courseTitle}」的課程內容與上課安排。\n預約日期：${formatDate(
+                          booking.bookingDate
+                        )}\n上課時間：${booking.startTime} - ${booking.endTime}\n\n謝謝老師！`
+                      )}`
                       : "#"
                   }
                   target={teacherEmail ? "_blank" : undefined}
@@ -398,8 +398,8 @@ export default async function BookingDetailPage({ params }: BookingDetailProps) 
               </h3>
               <span
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold ${booking.paymentStatus === "paid"
-                    ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
-                    : "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400"
+                  ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
+                  : "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400"
                   }`}
               >
                 {booking.paymentStatus === "paid" ? "已付款" : "待付款"}
@@ -489,9 +489,12 @@ export default async function BookingDetailPage({ params }: BookingDetailProps) 
             取消預約
           </button>
           <div className="flex items-center gap-3 w-full md:w-auto">
-            <button className="flex-1 md:flex-none px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+            <Link
+              href={`/student/bookings/${bookingId}/reschedule`}
+              className="flex-1 md:flex-none px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-center flex items-center justify-center"
+            >
               申請改期
-            </button>
+            </Link>
             <Link
               href="/student/bookings"
               className="flex-1 md:flex-none px-6 py-2.5 rounded-xl bg-slate-900 dark:bg-primary text-white dark:text-slate-900 font-bold text-sm hover:bg-slate-800 dark:hover:bg-primary-dark shadow-lg shadow-slate-200 dark:shadow-none transition-all text-center"

@@ -402,7 +402,7 @@ export default function TeacherDashboardPage() {
                                         close
                                       </span>
                                     </button>
-                                    <button 
+                                    <button
                                       onClick={() => handleConfirm(item.id)}
                                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium transition-all shadow-sm hover:shadow active:scale-95"
                                     >
@@ -516,11 +516,13 @@ export default function TeacherDashboardPage() {
                               {booking.startTime?.slice(0, 5)} - {booking.endTime?.slice(0, 5)} • 學生: {booking.studentName || "未知"}
                             </p>
                           </div>
-                          <button className="p-2 text-text-sub hover:text-primary transition-colors">
-                            <span className="material-symbols-outlined">
-                              videocam
-                            </span>
-                          </button>
+                          {booking.courseType === 'online' && (
+                            <button className="p-2 text-text-sub hover:text-primary transition-colors">
+                              <span className="material-symbols-outlined">
+                                videocam
+                              </span>
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>

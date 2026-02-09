@@ -5,7 +5,7 @@ export interface Purchase {
     totalHours: number;
     remainingHours: number;
     pricePaid: number;
-    status: 'active' | 'completed' | 'expired';
+    status: 'active' | 'completed' | 'expired' | 'pending_payment';
     createdAt: string;
     updatedAt: string;
     // Relations (optional)

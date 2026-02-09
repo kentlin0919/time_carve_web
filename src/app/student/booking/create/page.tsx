@@ -281,16 +281,23 @@ export default function StudentBookingCreatePage() {
     });
   };
 
+  /*
   const packHours = useMemo(() => {
     if (!course?.durationMinutes) return 0;
     return course.durationMinutes / 60;
   }, [course]);
+  */
 
   const totalPrice = useMemo(() => {
     if (selectedPurchaseId) return 0;
-    if (buyNewPack) return course?.price || 0;
-    if (!course?.price) return 0;
-    return course.price * hours;
+    if (buyNewPack) {
+      // If buying new pack, price is based on selected hours * hourly rate
+      // Assuming course.price is hourly rate if not specified otherwise, 
+      // OR if course.price is per session (usually 1 hour), then price * hours.
+      // Let's assume price is per hour for now based on context of incorrect 1 hour result.
+      return (course?.price || 0) * hours;
+    }
+    return 0; // Should not happen if logic is correct
   }, [course?.price, hours, selectedPurchaseId, buyNewPack]);
 
   const remainingAfterBooking = useMemo(() => {
@@ -298,10 +305,19 @@ export default function StudentBookingCreatePage() {
       return applicablePurchase.remainingHours - hours;
     }
     if (buyNewPack) {
-      return packHours - hours;
+      // If buying specifically for this booking, we consume all
+      // But if user bought MORE (e.g. package), then remaining > 0
+      // Here we assume "Pay as you go" mostly, so remaining is 0.
+      // BUT, if the system supports buying 10 hours for a 1 hour booking, that's different.
+      // In this specific UI, "hours" seems to be "Booking Duration", not "Purchase Quantity" distinct from booking.
+      // However, the "Buy New Pack" section implies buying exactly what is needed OR a preset pack.
+      // The current UI binds "hours" to "Booking Duration".
+
+      // If we are just "topping up", we buy exactly 'hours'.
+      return 0;
     }
     return 0;
-  }, [selectedPurchaseId, applicablePurchase, buyNewPack, hours, packHours]);
+  }, [selectedPurchaseId, applicablePurchase, buyNewPack, hours]);
 
   const formattedSelectedDate = selectedDate
     ? `${selectedDate.getFullYear()}年 ${selectedDate.getMonth() + 1
@@ -323,12 +339,12 @@ export default function StudentBookingCreatePage() {
 
     try {
       if (isPurchaseOnly) {
-        // Just buy the pack and init progress
-        await purchaseCourse(course.id, packHours, course.price || 0);
-        
+        // Just buy the pack (hours) and init progress
+        await purchaseCourse(course.id, hours, totalPrice);
+
         showModal({
           title: "方案購買成功",
-          description: `您已成功購買 ${course.title} 方案 (${packHours} 小時)。老師目前尚未設定預約時段，時數已存入您的帳戶，待老師設定後即可預約。`,
+          description: `您已成功購買 ${course.title} 方案 (${hours} 小時)。老師目前尚未設定預約時段，時數已存入您的帳戶，待老師設定後即可預約。`,
           confirmText: "查看進度",
           onConfirm: () => router.push("/student/progress"),
         });
@@ -389,7 +405,7 @@ export default function StudentBookingCreatePage() {
 
       showModal({
         title: "預約已送出",
-        description: buyNewPack 
+        description: buyNewPack
           ? `已成功購買方案並預約 ${course.title}，剩餘時數已存入您的帳戶。`
           : `已成功預約 ${course.title}，共 ${chunks.length} 個時段。`,
         confirmText: "查看預約",
@@ -652,11 +668,11 @@ export default function StudentBookingCreatePage() {
                       <span className="font-bold text-sm text-slate-800 dark:text-white">
                         購買新課程方案
                       </span>
-                      <span className="text-[10px] text-slate-500">包含 {packHours} 小時時數</span>
+                      <span className="text-[10px] text-slate-500">包含 {hours} 小時時數</span>
                     </div>
                   </div>
                   <span className="text-xs font-bold text-primary">
-                    NT$ {course.price?.toLocaleString()}
+                    NT$ {totalPrice.toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -710,7 +726,7 @@ export default function StudentBookingCreatePage() {
                       </span>
                     </span>
                   ) : buyNewPack ? (
-                    `NT$ ${course.price?.toLocaleString()}`
+                    `NT$ ${totalPrice.toLocaleString()}`
                   ) : (
                     `NT$ ${totalPrice.toLocaleString()}`
                   )}

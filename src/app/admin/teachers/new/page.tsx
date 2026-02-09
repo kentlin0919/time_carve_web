@@ -70,7 +70,7 @@ export default function AddTeacherPage() {
       // We do this to avoid logging out the current admin user.
       const tempSupabase = createClient<Database>(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key',
         {
           auth: {
             persistSession: false, // Critical: Do not persist this session

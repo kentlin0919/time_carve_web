@@ -34,6 +34,7 @@ type StudentCourseDetailViewProps = {
   backHref: string;
   backLabel: string;
   hideActions?: boolean;
+  pendingHours?: number;
 };
 
 export default function StudentCourseDetailView({
@@ -45,6 +46,7 @@ export default function StudentCourseDetailView({
   backHref,
   backLabel,
   hideActions = false,
+  pendingHours = 0,
 }: StudentCourseDetailViewProps) {
   const heroImage = useMemo(() => getHeroImage(course.id), [course.id]);
 
@@ -206,9 +208,8 @@ export default function StudentCourseDetailView({
 
                     return (
                       <div
-                        className={`relative pl-10 ${
-                          isLast ? "" : "pb-10"
-                        } before:content-[''] before:absolute before:top-8 before:bottom-0 before:left-5 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-700`}
+                        className={`relative pl-10 ${isLast ? "" : "pb-10"
+                          } before:content-[''] before:absolute before:top-8 before:bottom-0 before:left-5 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-700`}
                         key={sectionKey}
                       >
                         <div className="absolute left-0 top-0 bg-white dark:bg-slate-800 border-4 border-slate-200 dark:border-slate-600 rounded-full size-10 flex items-center justify-center z-10 shadow-sm">
@@ -342,16 +343,23 @@ export default function StudentCourseDetailView({
                   </p>
                 </div>
                 {!hideActions && (
-                  <button
-                    className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-secondary dark:hover:bg-secondary/90 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-secondary/20 transition-all transform active:scale-95 flex items-center justify-center gap-2 mb-4"
-                    onClick={onBooking}
-                    type="button"
-                  >
-                    立即預約
-                    <span className="material-symbols-outlined text-[20px]">
-                      calendar_add_on
-                    </span>
-                  </button>
+                  pendingHours > 0 ? (
+                    <div className="w-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 py-3.5 rounded-xl font-bold text-center mb-4">
+                      <span className="material-symbols-outlined text-[18px] mr-2 align-text-bottom">warning</span>
+                      尚有未付款時數 ({pendingHours} hr)，請先完成付款
+                    </div>
+                  ) : (
+                    <button
+                      className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-secondary dark:hover:bg-secondary/90 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-secondary/20 transition-all transform active:scale-95 flex items-center justify-center gap-2 mb-4"
+                      onClick={onBooking}
+                      type="button"
+                    >
+                      立即預約
+                      <span className="material-symbols-outlined text-[20px]">
+                        calendar_add_on
+                      </span>
+                    </button>
+                  )
                 )}
                 <div className="text-center">
                   <a
@@ -371,13 +379,12 @@ export default function StudentCourseDetailView({
                   href={
                     context?.teacherCode
                       ? `/teachers?teacher_code=${encodeURIComponent(
-                          context.teacherCode
-                        )}`
+                        context.teacherCode
+                      )}`
                       : "#"
                   }
-                  className={`bg-surface-light dark:bg-surface-dark rounded-2xl p-5 border border-slate-200 dark:border-slate-700 flex gap-4 items-start transition-all hover:shadow-md hover:border-primary/30 group ${
-                    !context?.teacherCode && "pointer-events-none"
-                  }`}
+                  className={`bg-surface-light dark:bg-surface-dark rounded-2xl p-5 border border-slate-200 dark:border-slate-700 flex gap-4 items-start transition-all hover:shadow-md hover:border-primary/30 group ${!context?.teacherCode && "pointer-events-none"
+                    }`}
                 >
                   <div
                     className="size-14 rounded-full bg-cover bg-center flex-shrink-0 border-2 border-white dark:border-slate-600 shadow-sm"
@@ -467,7 +474,7 @@ export default function StudentCourseDetailView({
         </div>
       </div>
 
-      {!hideActions && (
+      {!hideActions && pendingHours === 0 && (
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-surface-dark border-t border-slate-200 dark:border-slate-800 p-4 pb-6 z-50 flex items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
           <div className="flex flex-col">
             <span className="text-xs text-slate-500">總費用</span>

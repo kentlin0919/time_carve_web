@@ -25,7 +25,10 @@ export default function AdminSidebar({
   };
 
   // Filter modules for admin role (Identity ID 1) and only active ones
-  const adminModules = getModulesByIdentity(1).filter((m) => m.is_active);
+  // Also filter out 'audit' as the page doesn't exist yet
+  const adminModules = getModulesByIdentity(1)
+    .filter((m) => m.is_active)
+    .filter((m) => m.route !== "/admin/audit");
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -36,9 +39,8 @@ export default function AdminSidebar({
     <>
       {/* Mobile Overlay */}
       <div
-        className={`fixed inset-0 bg-black/50 z-20 lg:hidden transition-opacity duration-300 ${
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 bg-black/50 z-20 lg:hidden transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
         onClick={onClose}
       />
 
@@ -82,27 +84,26 @@ export default function AdminSidebar({
           {adminModules.map((module) => {
             const route = normalizeRoute(module.route);
             return (
-            <Link
-              key={module.id}
-              href={route || "#"}
-              onClick={() => onClose()}
-              className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg group transition-colors ${
-                isActive(route)
-                  ? "bg-sky-50 dark:bg-sky-500/20 text-sky-500"
-                  : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
-              }`}
-            >
-              <span
-                className={`material-symbols-outlined text-xl ${
-                  !isActive(module.route || "") &&
-                  "group-hover:text-sky-500 transition-colors"
-                }`}
+              <Link
+                key={module.id}
+                href={route || "#"}
+                onClick={() => onClose()}
+                className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg group transition-colors ${isActive(route)
+                    ? "bg-sky-50 dark:bg-sky-500/20 text-sky-500"
+                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
+                  }`}
               >
-                {module.icon || "circle"}
-              </span>
-              <span className="font-medium text-sm">{module.label}</span>
-            </Link>
-          )})}
+                <span
+                  className={`material-symbols-outlined text-xl ${!isActive(module.route || "") &&
+                    "group-hover:text-sky-500 transition-colors"
+                    }`}
+                >
+                  {module.icon || "circle"}
+                </span>
+                <span className="font-medium text-sm">{module.label}</span>
+              </Link>
+            )
+          })}
 
           {/* Always show Module Management if it's not in the list for some reason, 
               but ideally it should be in the DB list. 

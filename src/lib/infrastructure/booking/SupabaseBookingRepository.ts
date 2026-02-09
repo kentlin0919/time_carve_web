@@ -15,7 +15,7 @@ export class SupabaseBookingRepository implements BookingRepository {
       .from("bookings")
       .select(`
         *,
-        booking_status:booking_statuses!fk_booking_status (
+        booking_status:booking_statuses!fk_booking_status!inner (
           status_key
         ),
         teacher:teacher_info (
@@ -51,7 +51,7 @@ export class SupabaseBookingRepository implements BookingRepository {
       .from("bookings")
       .select(`
         *,
-        booking_status:booking_statuses!fk_booking_status (
+        booking_status:booking_statuses!fk_booking_status!inner (
           status_key
         ),
         student:student_info (
@@ -207,7 +207,7 @@ export class SupabaseBookingRepository implements BookingRepository {
       .from("bookings")
       .select(`
         *,
-        booking_status:booking_statuses!fk_booking_status (
+        booking_status:booking_statuses!fk_booking_status!inner (
           status_key
         ),
         student:student_info (
@@ -314,7 +314,7 @@ export class SupabaseBookingRepository implements BookingRepository {
       .from("bookings")
       .select(`
         *,
-        booking_status:booking_statuses!fk_booking_status (
+        booking_status:booking_statuses!fk_booking_status!inner (
           status_key
         ),
         student:student_info (
@@ -380,10 +380,17 @@ export class SupabaseBookingRepository implements BookingRepository {
     booking.location = data.course?.location || "";
     booking.teacherNotes = data.notes || ""; // Booking notes often used as teacher notes
 
-    // Mocking payment status/method for now as per entity definition
-    // In real scenario, would join with payment tables
-    booking.paymentStatus = data.paid_at ? "paid" : "pending";
-    booking.paymentMethod = data.paid_at ? "線上付款" : "尚未付款";
+    // Payment Logic
+    if (data.purchase_id) {
+      booking.paymentStatus = 'paid';
+      booking.paymentMethod = '時數扣抵 (Credits)';
+    } else if (data.paid_at) {
+      booking.paymentStatus = 'paid';
+      booking.paymentMethod = '線上付款';
+    } else {
+      booking.paymentStatus = 'pending';
+      booking.paymentMethod = '尚未付款';
+    }
 
     return booking;
   }

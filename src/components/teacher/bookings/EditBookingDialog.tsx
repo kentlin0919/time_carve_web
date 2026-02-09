@@ -102,6 +102,24 @@ export function EditBookingDialog({
               {booking.bookingDate} {booking.startTime.substring(0, 5)}
             </div>
           </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right text-slate-500">
+              付款狀態
+            </Label>
+            <div className="col-span-3 flex items-center gap-2">
+              {booking.paymentStatus === 'paid' ? (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                  <span className="w-1.5 h-1.5 mr-1.5 bg-green-500 rounded-full"></span>
+                  已付款 ({booking.paymentMethod || '線上付款'})
+                </span>
+              ) : (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                  <span className="w-1.5 h-1.5 mr-1.5 bg-amber-500 rounded-full"></span>
+                  尚未付款
+                </span>
+              )}
+            </div>
+          </div>
           <div className="grid gap-2">
             <Label
               htmlFor="status"

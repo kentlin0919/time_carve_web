@@ -98,9 +98,9 @@ export async function createBooking(
   const notificationRepo = new SupabaseNotificationRepository(adminSupabase);
 
   const useCase = new CreateBookingUseCase(
-    bookingRepo, 
-    availRepo, 
-    notificationRepo, 
+    bookingRepo,
+    availRepo,
+    notificationRepo,
     purchaseRepo,
     courseRepo,
     progressRepo
@@ -191,4 +191,27 @@ export async function getTeacherPendingBookings() {
 
   const repo = new SupabaseBookingRepository(supabase);
   return await repo.getPendingBookings(user.id);
+}
+
+export async function getBookingById(bookingId: string) {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error("Unauthorized");
+  }
+
+  const bookingRepo = new SupabaseBookingRepository(supabase);
+  const booking = await bookingRepo.getBookingById(bookingId);
+
+  // Security check: only student or teacher of the booking can view/reschedule
+  // Ideally repo or RLS handles this, but explicit check is safer if repo just fetches by ID.
+  // getBookingById typically joins tables.
+  if (!booking) return null;
+
+  if (booking.studentId !== user.id && booking.teacherId !== user.id) {
+    throw new Error("Unauthorized access to booking");
+  }
+
+  return booking;
 }

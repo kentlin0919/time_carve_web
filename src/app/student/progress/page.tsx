@@ -2,29 +2,23 @@
 
 import React, { useEffect, useState } from 'react';
 import { getMyCoursesWithProgress } from '@/app/actions/progress';
-import { purchaseCourse } from '@/app/actions/purchase';
 import { StudentCourseProgress } from '@/lib/domain/progress/types';
 import { Course } from '@/lib/domain/course/entity';
-import { Modal } from '@/components/ui/Modal';
-import { useModal } from '@/components/providers/ModalContext';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
-type ProgressWithCourse = StudentCourseProgress & { 
+type ProgressWithCourse = StudentCourseProgress & {
   course: Course;
-  purchase: { totalHours: number, remainingHours: number, id: string } | null;
+  purchase: {
+    totalHours: number;
+    remainingHours: number;
+    pendingHours: number;
+    id: string;
+  } | null;
 };
 
 export default function StudentProgressPage() {
-  const router = useRouter();
-  const { showModal } = useModal();
   const [loading, setLoading] = useState(true);
   const [progressList, setProgressList] = useState<ProgressWithCourse[]>([]);
-  
-  // Purchase Modal State
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const [purchaseHours, setPurchaseHours] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -38,33 +32,6 @@ export default function StudentProgressPage() {
       console.error(error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDirectPurchase = async () => {
-    if (!selectedCourse) return;
-    setIsSubmitting(true);
-    try {
-      const totalPrice = (selectedCourse.price || 0) * purchaseHours;
-      await purchaseCourse(selectedCourse.id, purchaseHours, totalPrice);
-      
-      setSelectedCourse(null);
-      showModal({
-        title: "方案購買成功",
-        description: `您已成功加購 ${selectedCourse.title} ${purchaseHours} 小時。時數已存入您的帳戶，您可以隨時進行預約。`,
-        type: "success",
-        confirmText: "確定",
-        onConfirm: () => fetchData() // Refresh the list
-      });
-    } catch (err) {
-      console.error(err);
-      showModal({
-        title: "購買失敗",
-        description: "無法完成購買，請稍後再試。",
-        type: "error"
-      });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -154,6 +121,14 @@ export default function StudentProgressPage() {
                     {progressList.reduce((acc, curr) => acc + (curr.purchase?.remainingHours || 0), 0)} hr
                   </span>
                 </div>
+                {progressList.reduce((acc, curr) => acc + (curr.purchase?.pendingHours || 0), 0) > 0 && (
+                  <div className="px-4 py-2 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/30 flex flex-col text-center min-w-[80px]">
+                    <span className="text-xs text-amber-600 dark:text-amber-400 font-bold mb-0.5">待付款時數</span>
+                    <span className="text-lg font-black text-amber-600 dark:text-amber-400">
+                      {progressList.reduce((acc, curr) => acc + (curr.purchase?.pendingHours || 0), 0)} hr
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -180,7 +155,7 @@ export default function StudentProgressPage() {
             <span className="material-symbols-outlined text-teal-500">my_location</span>
             我的課程方案
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {progressList.length === 0 && (
               <div className="col-span-full py-20 text-center bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
@@ -192,7 +167,8 @@ export default function StudentProgressPage() {
             {progressList.map(item => {
               const isCompleted = item.progress_percentage === 100 || item.status === 'completed';
               const remaining = item.purchase?.remainingHours || 0;
-              const total = item.purchase?.totalHours || 1;
+              const pending = item.purchase?.pendingHours || 0; // New field
+              const total = item.purchase?.totalHours || 0;     // Fallback to 0 if null
 
               return (
                 <div key={item.id} className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 overflow-hidden shadow-soft group hover:shadow-lg transition-all duration-300 flex flex-col">
@@ -200,9 +176,8 @@ export default function StudentProgressPage() {
                   <div className="p-6 pb-4">
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex flex-col gap-1">
-                        <span className={`w-fit text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          isCompleted ? 'bg-green-100 text-green-700' : 'bg-teal-100 text-teal-700'
-                        }`}>
+                        <span className={`w-fit text-[10px] font-bold px-2 py-0.5 rounded-full ${isCompleted ? 'bg-green-100 text-green-700' : 'bg-teal-100 text-teal-700'
+                          }`}>
                           {item.course.courseType === 'online' ? '線上' : '實體'} · {isCompleted ? '已完成' : '學習中'}
                         </span>
                         <h3 className="text-xl font-black text-slate-800 dark:text-white group-hover:text-primary transition-colors">{item.course.title}</h3>
@@ -215,7 +190,7 @@ export default function StudentProgressPage() {
 
                     {/* Progress Bar (Course Completion) */}
                     <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 mb-6">
-                      <div 
+                      <div
                         className={`h-full rounded-full transition-all duration-1000 ${isCompleted ? 'bg-green-500' : 'bg-teal-500 shadow-[0_0_10px_rgba(20,184,166,0.4)]'}`}
                         style={{ width: `${item.progress_percentage}%` }}
                       ></div>
@@ -229,7 +204,15 @@ export default function StudentProgressPage() {
                       </div>
                       <div className="flex flex-col border-l border-slate-200 dark:border-slate-700 pl-4">
                         <span className="text-[10px] font-bold text-slate-400 uppercase mb-1">剩餘時數</span>
-                        <span className={`text-lg font-black ${remaining > 0 ? 'text-teal-500' : 'text-rose-500'}`}>{remaining} <span className="text-xs font-normal">hr</span></span>
+                        <div className="flex items-baseline gap-1">
+                          <span className={`text-lg font-black ${remaining > 0 ? 'text-teal-500' : 'text-rose-500'}`}>{remaining} <span className="text-xs font-normal">hr</span></span>
+                        </div>
+                        {pending > 0 && (
+                          <div className="mt-1 inline-flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 px-2 py-0.5 rounded-md w-fit">
+                            <span className="material-symbols-outlined text-[14px] text-amber-600 dark:text-amber-400">pending</span>
+                            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">待付款: {pending} hr</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -256,24 +239,21 @@ export default function StudentProgressPage() {
                   </div>
 
                   {/* Bottom Actions */}
-                  <div className="p-6 pt-0 mt-auto flex gap-3">
-                    <button 
-                      onClick={() => {
-                        setSelectedCourse(item.course);
-                        setPurchaseHours(1);
-                      }}
-                      className="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center gap-2"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">add_circle</span>
-                      加購時數
-                    </button>
-                    <Link 
-                      href={`/student/booking/create?courseId=${item.course.id}`}
-                      className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:scale-[1.02] shadow-lg`}
-                    >
-                      <span className="material-symbols-outlined text-[18px]">calendar_month</span>
-                      預約時段
-                    </Link>
+                  <div className="p-6 pt-0 mt-auto">
+                    {pending > 0 ? (
+                      <div className="w-full py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 font-bold text-sm flex items-center justify-center gap-2">
+                        <span className="material-symbols-outlined text-[18px]">warning</span>
+                        尚未付款 ({pending} hr)
+                      </div>
+                    ) : (
+                      <Link
+                        href={`/student/booking/create?courseId=${item.course.id}`}
+                        className="w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:scale-[1.02] shadow-lg"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">calendar_month</span>
+                        預約時段
+                      </Link>
+                    )}
                   </div>
                 </div>
               );
@@ -282,61 +262,7 @@ export default function StudentProgressPage() {
         </div>
       </div>
 
-      {/* Custom Purchase Modal */}
-      <Modal
-        isOpen={!!selectedCourse}
-        onClose={() => setSelectedCourse(null)}
-        title="方案時數加購"
-        description={`請設定您要為「${selectedCourse?.title}」加購的時數。`}
-        confirmText={isSubmitting ? "處理中..." : "確認加購 (線下付款)"}
-        onConfirm={handleDirectPurchase}
-        showCancel
-        cancelText="取消"
-        onCancel={() => setSelectedCourse(null)}
-      >
-        <div className="space-y-6 py-2">
-          {/* Hour Selector */}
-          <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 text-center">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 block">選擇加購時數</label>
-            <div className="flex items-center justify-center gap-8">
-              <button 
-                onClick={() => setPurchaseHours(prev => Math.max(1, prev - 1))}
-                className="size-12 rounded-full border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center hover:border-primary hover:text-primary transition-all text-2xl font-light"
-              >
-                -
-              </button>
-              <div className="flex flex-col items-center">
-                <span className="text-5xl font-black text-slate-800 dark:text-white leading-none">{purchaseHours}</span>
-                <span className="text-sm font-bold text-slate-400 mt-1">小時 hr</span>
-              </div>
-              <button 
-                onClick={() => setPurchaseHours(prev => Math.min(100, prev + 1))}
-                className="size-12 rounded-full border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center hover:border-primary hover:text-primary transition-all text-2xl font-light"
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          {/* Pricing Info */}
-          <div className="space-y-3 px-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-500">單位時數費用</span>
-              <span className="font-bold text-slate-700 dark:text-slate-200">NT$ {selectedCourse?.price?.toLocaleString()} / hr</span>
-            </div>
-            <div className="flex justify-between text-lg pt-3 border-t border-slate-100 dark:border-slate-800">
-              <span className="font-bold text-slate-800 dark:text-white">預估總金額</span>
-              <span className="font-black text-primary text-2xl">NT$ {((selectedCourse?.price || 0) * purchaseHours).toLocaleString()}</span>
-            </div>
-          </div>
-
-          <div className="p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl">
-            <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
-              * 注意：點擊確認後，系統將建立一筆加購紀錄。請依照您與老師私下約定的方式完成付款，老師核實後時數才會正式入帳。
-            </p>
-          </div>
-        </div>
-      </Modal>
+      {/* Removed Custom Purchase Modal */}
     </div>
   );
 }
