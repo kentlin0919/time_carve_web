@@ -26,9 +26,7 @@ export default function ForgotPasswordPage() {
 
       if (error) throw error;
 
-      router.push(
-        `/auth/verify?email=${encodeURIComponent(email)}&type=recovery`
-      );
+      router.push('/');
     } catch (err: any) {
       setError(err.message || "發送失敗，請稍後再試。");
     } finally {
