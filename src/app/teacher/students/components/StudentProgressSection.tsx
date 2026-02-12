@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Course } from '@/lib/domain/course/entity';
 import { StudentCourseProgress } from '@/lib/domain/progress/types';
-import { getTeacherCourses } from '@/app/actions/teacher';
+import { getTeacherCourses, getStudentCoursePurchases } from '@/app/actions/teacher';
 import { getStudentCourseProgress, updateProgress, initializeProgress } from '@/app/actions/progress';
 import { useModal } from '@/components/providers/ModalContext';
 
@@ -15,6 +15,7 @@ interface Props {
 export function StudentProgressSection({ studentId, teacherId }: Props) {
     const [courses, setCourses] = useState<Course[]>([]);
     const [progressMap, setProgressMap] = useState<Record<string, StudentCourseProgress>>({});
+    const [purchasesMap, setPurchasesMap] = useState<Record<string, { total_hours: number; remaining_hours: number }>>({});
     const [loading, setLoading] = useState(true);
     const [expandedCourseId, setExpandedCourseId] = useState<string | null>(null);
     const { showModal } = useModal();
@@ -29,9 +30,10 @@ export function StudentProgressSection({ studentId, teacherId }: Props) {
     const loadData = async () => {
         try {
             setLoading(true);
-            const [coursesData, progressData] = await Promise.all([
+            const [coursesData, progressData, purchasesData] = await Promise.all([
                 getTeacherCourses(teacherId),
-                getStudentCourseProgress(studentId)
+                getStudentCourseProgress(studentId),
+                getStudentCoursePurchases(studentId)
             ]);
 
             setCourses(coursesData as unknown as Course[]); // Cast if needed, assuming action returns compatible type
@@ -43,6 +45,17 @@ export function StudentProgressSection({ studentId, teacherId }: Props) {
                 });
             }
             setProgressMap(newProgressMap);
+
+            const newPurchasesMap: Record<string, { total_hours: number; remaining_hours: number }> = {};
+            if (purchasesData) {
+                purchasesData.forEach((p: any) => {
+                    newPurchasesMap[p.course_id] = {
+                        total_hours: p.total_hours,
+                        remaining_hours: p.remaining_hours
+                    };
+                });
+            }
+            setPurchasesMap(newPurchasesMap);
         } catch (error) {
             console.error("Failed to load progress data", error);
         } finally {
@@ -140,100 +153,148 @@ export function StudentProgressSection({ studentId, teacherId }: Props) {
                                         {progress.progress_percentage === 100 ? 'verified' : 'analytics'}
                                     </span>
                                 </div>
-                                <div className="flex-1">
-                                    <div className="flex items-center justify-between mb-1">
-                                        <h4 className="font-bold text-slate-800 dark:text-white text-sm">{course.title}</h4>
-                                        <span className="text-xs font-black text-primary">{progress.progress_percentage}%</span>
-                                    </div>
-                                    <div className="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
-                                        <div className="bg-primary h-full rounded-full transition-all duration-500" style={{ width: `${progress.progress_percentage}%` }}></div>
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex items-center justify-between mb-1">
+                                    <h4 className="font-bold text-slate-800 dark:text-white text-sm">
+                                        {course.title}
+                                    </h4>
+                                    <div className="flex items-center gap-2">
+                                        {purchasesMap[course.id] && (
+                                            <span className="text-xs font-medium text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-md whitespace-nowrap">
+                                                剩餘 {purchasesMap[course.id].remaining_hours} 小時
+                                            </span>
+                                        )}
+                                        <span className="text-xs font-black text-primary min-w-[32px] text-right">{progress.progress_percentage}%</span>
                                     </div>
                                 </div>
+                                <div className="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                                    <div className="bg-primary h-full rounded-full transition-all duration-500" style={{ width: `${progress.progress_percentage}%` }}></div>
+                                </div>
                             </div>
-                            <span className={`material-symbols-outlined ml-4 text-slate-400 transition-transform ${isExpanded ? 'active:rotate-180' : ''} ${isExpanded ? 'rotate-180' : ''}`}>expand_more</span>
                         </div>
+                        <span className={`material-symbols-outlined ml-4 text-slate-400 transition-transform ${isExpanded ? 'active:rotate-180' : ''} ${isExpanded ? 'rotate-180' : ''}`}>expand_more</span>
 
                         {/* Editing Area */}
-                        {isExpanded && (
-                            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-border-light dark:border-border-dark space-y-6 animate-in slide-in-from-top-2">
-                                {/* 1. Status & Percentage */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-text-sub uppercase">學習狀態</label>
-                                        <select
-                                            value={progress.status}
-                                            onChange={(e) => handleUpdate(progress.id, course.id, { status: e.target.value as any })}
-                                            className="w-full px-3 py-2 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
-                                        >
-                                            <option value="not_started">未開始</option>
-                                            <option value="in_progress">進行中</option>
-                                            <option value="completed">已完成</option>
-                                        </select>
+                        {
+                            isExpanded && (
+                                <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-border-light dark:border-border-dark space-y-6 animate-in slide-in-from-top-2">
+                                    {/* 0. Course Info Card (Remaining Hours) */}
+                                    {purchasesMap[course.id] && (
+                                        <div className="bg-white dark:bg-slate-700 p-4 rounded-lg border border-border-light dark:border-border-dark grid grid-cols-3 gap-4 shadow-sm relative overflow-hidden">
+                                            {/* Decorative Background */}
+                                            <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-slate-100 to-transparent dark:from-slate-600/20 rounded-bl-full -mr-4 -mt-4 pointer-events-none"></div>
+
+                                            {/* Remaining */}
+                                            <div className="flex items-center gap-3 col-span-1">
+                                                <div className="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 rounded-lg shrink-0">
+                                                    <span className="material-symbols-outlined">schedule</span>
+                                                </div>
+                                                <div>
+                                                    <h5 className="text-[10px] font-bold text-text-sub uppercase mb-0.5 tracking-wider">剩餘</h5>
+                                                    <p className="text-lg font-bold text-slate-800 dark:text-white leading-none">
+                                                        {purchasesMap[course.id].remaining_hours}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Used */}
+                                            <div className="flex flex-col justify-center items-center col-span-1 border-l border-r border-border-light dark:border-border-dark/50">
+                                                <h5 className="text-[10px] font-bold text-text-sub uppercase mb-0.5 tracking-wider">已上課</h5>
+                                                <p className="text-lg font-bold text-slate-700 dark:text-slate-200 leading-none">
+                                                    {purchasesMap[course.id].total_hours - purchasesMap[course.id].remaining_hours}
+                                                </p>
+                                            </div>
+
+                                            {/* Total */}
+                                            <div className="flex flex-col justify-center items-end col-span-1">
+                                                <h5 className="text-[10px] font-bold text-text-sub uppercase mb-0.5 tracking-wider">總時數</h5>
+                                                <p className="text-lg font-bold text-slate-500 dark:text-slate-400 leading-none">
+                                                    {purchasesMap[course.id].total_hours}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* 1. Status & Percentage */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold text-text-sub uppercase">學習狀態</label>
+                                            <select
+                                                value={progress.status}
+                                                onChange={(e) => handleUpdate(progress.id, course.id, { status: e.target.value as any })}
+                                                className="w-full px-3 py-2 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
+                                            >
+                                                <option value="not_started">未開始</option>
+                                                <option value="in_progress">進行中</option>
+                                                <option value="completed">已完成</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold text-text-sub uppercase">總進度 ({progress.progress_percentage}%)</label>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="100"
+                                                step="5"
+                                                value={progress.progress_percentage}
+                                                onChange={(e) => handleUpdate(progress.id, course.id, { progress_percentage: parseInt(e.target.value) })}
+                                                className="w-full accent-primary h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                                            />
+                                        </div>
                                     </div>
+
+                                    {/* 2. Section Checklist */}
+                                    {course.sections && course.sections.length > 0 && (
+                                        <div className="space-y-3">
+                                            <label className="text-xs font-bold text-text-sub uppercase flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-sm">checklist</span>
+                                                章節完成檢核
+                                            </label>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                {course.sections.map(section => {
+                                                    const isCompleted = (progress.completed_section_ids || []).includes(section.id);
+                                                    return (
+                                                        <div
+                                                            key={section.id}
+                                                            onClick={() => toggleSectionComplete(progress, section.id)}
+                                                            className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${isCompleted
+                                                                ? 'bg-green-50/50 dark:bg-green-900/10 border-green-200 dark:border-green-800/30'
+                                                                : 'bg-white dark:bg-slate-700 border-border-light dark:border-border-dark hover:border-primary/50'
+                                                                }`}
+                                                        >
+                                                            <div className={`size-5 rounded flex items-center justify-center border ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'border-slate-300 dark:border-slate-500'}`}>
+                                                                {isCompleted && <span className="material-symbols-outlined text-sm font-bold">check</span>}
+                                                            </div>
+                                                            <span className={`text-sm ${isCompleted ? 'text-green-700 dark:text-green-400 font-medium' : 'text-slate-600 dark:text-slate-300'}`}>
+                                                                {section.title}
+                                                            </span>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* 3. Teacher Notes */}
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold text-text-sub uppercase">總進度 ({progress.progress_percentage}%)</label>
-                                        <input
-                                            type="range"
-                                            min="0"
-                                            max="100"
-                                            step="5"
-                                            value={progress.progress_percentage}
-                                            onChange={(e) => handleUpdate(progress.id, course.id, { progress_percentage: parseInt(e.target.value) })}
-                                            className="w-full accent-primary h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                                        <label className="text-xs font-bold text-text-sub uppercase flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-sm">edit_note</span>
+                                            教學筆記 (僅教師可見)
+                                        </label>
+                                        <textarea
+                                            value={progress.teacher_notes || ''}
+                                            onChange={(e) => handleUpdate(progress.id, course.id, { teacher_notes: e.target.value })}
+                                            className="w-full px-3 py-3 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-primary/20 outline-none resize-y min-h-[100px]"
+                                            placeholder="紀錄學生的學習狀況、弱點或需要加強的部分..."
                                         />
                                     </div>
                                 </div>
-
-                                {/* 2. Section Checklist */}
-                                {course.sections && course.sections.length > 0 && (
-                                    <div className="space-y-3">
-                                        <label className="text-xs font-bold text-text-sub uppercase flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-sm">checklist</span>
-                                            章節完成檢核
-                                        </label>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                            {course.sections.map(section => {
-                                                const isCompleted = (progress.completed_section_ids || []).includes(section.id);
-                                                return (
-                                                    <div
-                                                        key={section.id}
-                                                        onClick={() => toggleSectionComplete(progress, section.id)}
-                                                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${isCompleted
-                                                                ? 'bg-green-50/50 dark:bg-green-900/10 border-green-200 dark:border-green-800/30'
-                                                                : 'bg-white dark:bg-slate-700 border-border-light dark:border-border-dark hover:border-primary/50'
-                                                            }`}
-                                                    >
-                                                        <div className={`size-5 rounded flex items-center justify-center border ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'border-slate-300 dark:border-slate-500'}`}>
-                                                            {isCompleted && <span className="material-symbols-outlined text-sm font-bold">check</span>}
-                                                        </div>
-                                                        <span className={`text-sm ${isCompleted ? 'text-green-700 dark:text-green-400 font-medium' : 'text-slate-600 dark:text-slate-300'}`}>
-                                                            {section.title}
-                                                        </span>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* 3. Teacher Notes */}
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-text-sub uppercase flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-sm">edit_note</span>
-                                        教學筆記 (僅教師可見)
-                                    </label>
-                                    <textarea
-                                        value={progress.teacher_notes || ''}
-                                        onChange={(e) => handleUpdate(progress.id, course.id, { teacher_notes: e.target.value })}
-                                        className="w-full px-3 py-3 rounded-lg border border-border-light dark:border-border-dark bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-primary/20 outline-none resize-y min-h-[100px]"
-                                        placeholder="紀錄學生的學習狀況、弱點或需要加強的部分..."
-                                    />
-                                </div>
-                            </div>
-                        )}
+                            )
+                        }
                     </div>
                 );
             })}
-        </div>
+        </div >
     );
 }

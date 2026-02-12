@@ -5,6 +5,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Portfolio } from "@/lib/domain/portfolio/entity";
 import Footer from "@/components/Footer";
+import PortfolioGalleryViewer from "./PortfolioGalleryViewer";
 
 interface PublicPortfolioPageProps {
   params: Promise<{
@@ -148,35 +149,10 @@ export default async function PublicPortfolioPage({
                 )}
 
                 {/* Thumbnail Gallery */}
+                {/* Thumbnail Gallery & Lightbox */}
+                {/* Gallery Cards Grid - Student View */}
                 {galleryImages.length > 0 && (
-                  <div className="grid grid-cols-3 gap-4">
-                    {galleryImages.map((media: any) => (
-                      <div
-                        key={media.id}
-                        className="aspect-square rounded-xl overflow-hidden shadow-sm cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all bg-slate-100 relative group"
-                      >
-                        {media.file_type === "video" ? (
-                          <>
-                            <video
-                              src={media.file_url}
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                              <span className="material-symbols-outlined text-white text-3xl opacity-80 group-hover:opacity-100 transition-opacity">
-                                play_circle
-                              </span>
-                            </div>
-                          </>
-                        ) : (
-                          <img
-                            src={media.file_url}
-                            alt="Gallery Item"
-                            className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                  <PortfolioGalleryViewer media={galleryImages} />
                 )}
               </div>
 

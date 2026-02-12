@@ -6,6 +6,7 @@ export interface PortfolioMedia {
   portfolio_id: string;
   file_url: string;
   file_type: 'image' | 'video' | null;
+  description: string | null;
   sort_order: number | null;
   created_at: string | null;
 }

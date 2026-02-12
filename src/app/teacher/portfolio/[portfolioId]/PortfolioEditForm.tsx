@@ -12,10 +12,12 @@ const RichTextEditor = dynamic(() => import("@/components/ui/RichTextEditor"), {
 import {
   updatePortfolio,
   createPortfolio,
-  uploadPortfolioMedia,
   getPortfolioTypes,
+  uploadPortfolioCoverImage, // Make sure this is exported
   uploadContentImage,
+  deletePortfolio,
 } from "@/app/actions/portfolio";
+import PortfolioMediaManager from "./PortfolioMediaManager";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -100,34 +102,33 @@ export default function PortfolioEditForm({
     }
   };
 
-  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.length || !initialData?.id) return;
+  const handleDelete = async () => {
+    if (!initialData?.id) return;
 
-    // Handle multiple files
-    const files = Array.from(e.target.files);
-    setLoading(true);
-
-    try {
-      // Parallel uploads
-      await Promise.all(
-        files.map(async (file) => {
-          const formData = new FormData();
-          formData.append("file", file);
-          formData.append("portfolioId", initialData.id);
-          await uploadPortfolioMedia(formData);
-        })
-      );
-
-      router.refresh();
-    } catch (error) {
-      console.error("Upload failed:", error);
-      showModal({ type: "error", title: "上傳失敗", description: "部分檔案上傳失敗，請重試", confirmText: "確定" });
-    } finally {
-      // Clear input value to allow re-uploading same file if needed
-      e.target.value = '';
-      setLoading(false);
-    }
+    showModal({
+      type: "warning",
+      title: "確定要刪除嗎？",
+      description: "此動作無法復原，確定要刪除這個作品集嗎？",
+      confirmText: "確認刪除",
+      cancelText: "取消",
+      showCancel: true,
+      onConfirm: async () => {
+        setLoading(true);
+        try {
+          await deletePortfolio(initialData.id!);
+          showModal({ type: "success", title: "已刪除", description: "作品集已成功刪除", confirmText: "確定" });
+          router.push("/teacher/portfolio");
+          router.refresh();
+        } catch (error) {
+          console.error("Delete failed:", error);
+          showModal({ type: "error", title: "刪除失敗", description: "請稍後重試", confirmText: "確定" });
+          setLoading(false);
+        }
+      }
+    });
   };
+
+
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
@@ -138,8 +139,8 @@ export default function PortfolioEditForm({
 
     try {
       setLoading(true);
-      const { uploadPortfolioCoverImage } = await import("@/app/actions/portfolio");
-      const url = await uploadPortfolioCoverImage(uploadFormData);
+      const { uploadPortfolioCoverImage: uploadAction } = await import("@/app/actions/portfolio");
+      const url = await uploadAction(uploadFormData);
       setFormData({ ...formData, cover_image_url: url });
     } catch (error) {
       console.error("Cover upload failed:", error);
@@ -234,54 +235,10 @@ export default function PortfolioEditForm({
           {/* Media Gallery Section */}
           {!isCreating && initialData && (
             <div className="bg-white dark:bg-surface-dark p-6 rounded-2xl border border-border-light dark:border-border-dark shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-lg">詳細觀看（多圖作品集）</h3>
-                <label className="cursor-pointer px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[18px]">
-                    add_photo_alternate
-                  </span>
-                  上傳多張圖片
-                  <input
-                    type="file"
-                    multiple
-                    className="hidden"
-                    accept="image/*,video/*"
-                    onChange={handleMediaUpload}
-                    disabled={loading}
-                  />
-                </label>
-              </div>
-
-              {initialData.media && initialData.media.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {initialData.media.map((media) => (
-                    <div
-                      key={media.id}
-                      className="relative group aspect-square rounded-xl overflow-hidden bg-slate-100"
-                    >
-                      <img
-                        src={media.file_url}
-                        alt="media"
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <button
-                          type="button"
-                          className="text-white hover:text-red-400"
-                        >
-                          <span className="material-symbols-outlined">
-                            delete
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="py-10 text-center text-text-sub border-2 border-dashed border-border-light dark:border-border-dark rounded-xl">
-                  尚未上傳詳細圖片
-                </div>
-              )}
+              <PortfolioMediaManager
+                portfolioId={initialData.id}
+                media={initialData.media || []}
+              />
             </div>
           )}
 
@@ -470,6 +427,19 @@ export default function PortfolioEditForm({
               </span>
               {isCreating ? "儲存後即可預覽" : "預覽公開頁面"}
             </button>
+
+            {!isCreating && initialData?.id && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="w-full py-2.5 mt-4 rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-bold flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-[20px]">
+                  delete
+                </span>
+                刪除作品
+              </button>
+            )}
           </div>
         </div>
       </div>

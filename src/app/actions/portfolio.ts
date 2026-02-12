@@ -11,6 +11,23 @@ async function getRepository() {
   return new SupabasePortfolioRepository(supabase);
 }
 
+// Helper to sanitize filenames for Supabase Storage
+function sanitizeFileName(originalName: string): string {
+  // Extract extension
+  const parts = originalName.split('.');
+  const ext = parts.length > 1 ? parts.pop() : '';
+  const name = parts.join('.');
+
+  // Sanitize name: keep only a-z A-Z 0-9 - _
+  const safeName = name.replace(/[^a-zA-Z0-9\-_]/g, '');
+
+  // If safeName is empty (e.g. all Chinese), use a default
+  // We use a short random string to avoid collisions if multiple files are named "image.png" (though timestamp helps)
+  const finalName = safeName || 'unnamed';
+
+  return ext ? `${finalName}.${ext}` : finalName;
+}
+
 export async function getTeacherPortfolios(teacherId: string) {
   const repository = await getRepository();
   return await repository.getByTeacherId(teacherId);
@@ -63,11 +80,12 @@ export async function deletePortfolio(id: string) {
 export async function uploadPortfolioMedia(formData: FormData) {
   const file = formData.get('file') as File;
   const portfolioId = formData.get('portfolioId') as string;
+  const description = formData.get('description') as string | null;
 
   if (!file || !portfolioId) throw new Error('Missing file or portfolio ID');
 
   const supabase = await createClient();
-  const fileName = `${portfolioId}/${Date.now()}-${file.name}`;
+  const fileName = `${portfolioId}/${Date.now()}-${sanitizeFileName(file.name)}`;
 
   const { data, error } = await supabase.storage
     .from('portfolio-media')
@@ -84,8 +102,44 @@ export async function uploadPortfolioMedia(formData: FormData) {
     portfolio_id: portfolioId,
     file_url: publicUrl,
     file_type: file.type.startsWith('video') ? 'video' : 'image',
+    description: description || null,
     sort_order: 0
   });
+}
+
+export async function updatePortfolioMedia(mediaId: string, data: { description?: string | null, sort_order?: number }) {
+  const repository = await getRepository();
+  // We need to extend repository to support updateMedia, but for now let's see if we can add it to repo or use direct supbase
+  // Since we are in actions, we can just use repository. 
+  // Wait, I need to check if repository has updateMedia. If not I should add it.
+  // For now I'll use repository.updateMedia if it exists or add it.
+  // actually let's check repository first. 
+  // Assuming I will add it to repository.
+
+  // Let's implement it directly here if repository doesn't have it, OR better, add to repository.
+  // But to be safe and quick, I can use the supabase client directly here for the update if repository is strict.
+  // However, sticking to pattern:
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('portfolio_media')
+    .update(data)
+    .eq('id', mediaId);
+
+  if (error) throw error;
+
+  revalidatePath('/teacher/portfolio');
+}
+
+export async function deletePortfolioMedia(mediaId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('portfolio_media')
+    .delete()
+    .eq('id', mediaId);
+
+  if (error) throw error;
+
+  revalidatePath('/teacher/portfolio');
 }
 
 export async function uploadPortfolioCoverImage(formData: FormData) {
@@ -98,7 +152,7 @@ export async function uploadPortfolioCoverImage(formData: FormData) {
 
   if (!user) throw new Error('Unauthorized');
 
-  const fileName = `covers/${user.id}/${Date.now()}-${file.name}`;
+  const fileName = `covers/${user.id}/${Date.now()}-${sanitizeFileName(file.name)}`;
 
   const { data, error } = await supabase.storage
     .from('portfolio-media')
@@ -170,7 +224,7 @@ export async function uploadContentImage(formData: FormData): Promise<string> {
 
   if (!user) throw new Error('Unauthorized');
 
-  const fileName = `content/${user.id}/${Date.now()}-${file.name}`;
+  const fileName = `content/${user.id}/${Date.now()}-${sanitizeFileName(file.name)}`;
 
   const { error } = await supabase.storage
     .from('portfolio-media')

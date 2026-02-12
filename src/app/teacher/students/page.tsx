@@ -9,12 +9,6 @@ import { StudentProgressSection } from "./components/StudentProgressSection";
 
 type StudentWithInfo = Database["public"]["Tables"]["student_info"]["Row"] & {
   user_info: Database["public"]["Tables"]["user_info"]["Row"] | null;
-  course_purchases?: {
-    remaining_hours: number;
-    courses: {
-      title: string;
-    } | null;
-  }[];
 };
 
 export default function TeacherStudentManagementPage() {
@@ -68,13 +62,7 @@ export default function TeacherStudentManagementPage() {
         .from("student_info")
         .select(`
           *,
-          user_info (*),
-          course_purchases (
-            remaining_hours,
-            courses (
-              title
-            )
-          )
+          user_info (*)
         `)
         .eq("teacher_code", teacherData.teacher_code);
 
@@ -280,27 +268,7 @@ export default function TeacherStudentManagementPage() {
                             <p className="text-xs text-text-sub truncate mt-0.5">
                               {userInfo.email}
                             </p>
-                            {/* Display Remaining Hours */}
-                            {student.course_purchases &&
-                              student.course_purchases.length > 0 && (
-                                <div className="mt-1.5 flex flex-wrap gap-1">
-                                  {student.course_purchases
-                                    .filter((p) => p.remaining_hours > 0)
-                                    .map((p, index) => (
-                                      <span
-                                        key={index}
-                                        className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-100 dark:border-blue-800"
-                                      >
-                                        <span className="truncate max-w-[80px]">
-                                          {p.courses?.title}
-                                        </span>
-                                        <span className="ml-1 font-bold">
-                                          {p.remaining_hours}h
-                                        </span>
-                                      </span>
-                                    ))}
-                                </div>
-                              )}
+                            {/* Display Remaining Hours - REMOVED */}
                           </div>
                           <span className="material-symbols-outlined text-slate-400 lg:hidden">
                             chevron_right
@@ -719,8 +687,8 @@ export default function TeacherStudentManagementPage() {
                                 <span className="text-text-sub">帳號狀態</span>
                                 <span
                                   className={`text-xs font-bold px-2.5 py-1 rounded-full border ${selectedStudent.user_info.is_active
-                                      ? "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-900/40"
-                                      : "bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
+                                    ? "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-900/40"
+                                    : "bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
                                     }`}
                                 >
                                   {selectedStudent.user_info.is_active
