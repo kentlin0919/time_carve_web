@@ -28,8 +28,10 @@ export function DatePicker({
   className,
   placeholder = "選擇日期",
 }: DatePickerProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
+
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
           variant={"outline"}
@@ -51,7 +53,10 @@ export function DatePicker({
         <Calendar
           mode="single"
           selected={date}
-          onSelect={setDate}
+          onSelect={(d) => {
+            setDate(d);
+            setIsOpen(false);
+          }}
           initialFocus
         />
       </PopoverContent>

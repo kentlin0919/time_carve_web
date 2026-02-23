@@ -196,23 +196,45 @@ export function CreateBookingDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="startTime">開始時間</Label>
-              <input
+              <select
                 id="startTime"
-                type="time"
                 className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-950"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-              />
+              >
+                <option value="">選擇時間</option>
+                {Array.from({ length: 48 }).map((_, i) => {
+                  const h = Math.floor(i / 2).toString().padStart(2, "0");
+                  const m = i % 2 === 0 ? "00" : "30";
+                  const time = `${h}:${m}`;
+                  return (
+                    <option key={`start-${time}`} value={time}>
+                      {time}
+                    </option>
+                  );
+                })}
+              </select>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="endTime">結束時間</Label>
-              <input
+              <select
                 id="endTime"
-                type="time"
                 className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary dark:border-slate-700 dark:bg-slate-950"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-              />
+              >
+                <option value="">選擇時間</option>
+                {Array.from({ length: 48 }).map((_, i) => {
+                  const h = Math.floor(i / 2).toString().padStart(2, "0");
+                  const m = i % 2 === 0 ? "00" : "30";
+                  const time = `${h}:${m}`;
+                  return (
+                    <option key={`end-${time}`} value={time}>
+                      {time}
+                    </option>
+                  );
+                })}
+              </select>
             </div>
           </div>
 
