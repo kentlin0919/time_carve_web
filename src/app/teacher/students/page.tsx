@@ -156,7 +156,7 @@ export default function TeacherStudentManagementPage() {
   return (
     <div className="flex-1 flex flex-col h-full bg-background-light dark:bg-background-dark overflow-hidden">
       {/* Header */}
-      <header className="w-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-10 transition-all">
+      <header className="w-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark px-4 md:px-8 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 z-10 transition-all">
         <div className="flex flex-col">
           <h2 className="text-slate-800 dark:text-white text-xl font-bold tracking-tight flex items-center gap-2">
             學生資訊管理
@@ -167,10 +167,10 @@ export default function TeacherStudentManagementPage() {
             位活躍學生
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative group">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative group w-full">
             <input
-              className="pl-10 pr-4 py-2 w-64 rounded-lg border-border-light dark:border-border-dark bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all outline-none"
+              className="pl-10 pr-4 py-2 w-full sm:w-64 rounded-lg border-border-light dark:border-border-dark bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all outline-none"
               placeholder="搜尋學生姓名、Email..."
               type="text"
               value={searchQuery}

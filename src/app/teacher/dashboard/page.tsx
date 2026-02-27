@@ -157,21 +157,21 @@ export default function TeacherDashboardPage() {
   return (
     <div className="flex flex-col h-full bg-background-light dark:bg-background-dark">
       {/* Header */}
-      <header className="w-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-10 transition-all">
-        <div className="flex flex-col">
-          <h2 className="text-slate-800 dark:text-white text-xl font-bold tracking-tight flex items-center gap-2">
+      <header className="w-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark px-4 md:px-8 py-4 flex justify-between items-start md:items-center sticky top-0 z-10 transition-all gap-4">
+        <div className="flex flex-col flex-1 min-w-0">
+          <h2 className="text-slate-800 dark:text-white text-xl font-bold tracking-tight flex items-center gap-2 truncate">
             早安，{name || "老師"}
-            <span className="text-xl">👋</span>
+            <span className="text-xl shrink-0">👋</span>
           </h2>
-          <p className="text-text-sub dark:text-gray-400 text-sm mt-0.5">
+          <p className="text-text-sub dark:text-gray-400 text-sm mt-0.5 line-clamp-2 md:line-clamp-none">
             今日有 <span className="text-primary font-bold">{stats.pendingBookings}</span>{" "}
             筆新預約待處理，<span className="text-primary font-bold">{
-              recentBookings.filter(b => b.bookingDate === new Date().toISOString().split('T')[0]).length
+              todaysCourses.length
             }</span>{" "}
             堂課程即將開始
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3 shrink-0 mt-1 md:mt-0">
           <div className="relative hidden md:block">
             <input
               className="pl-10 pr-4 py-2 w-64 rounded-lg border-border-light dark:border-border-dark bg-slate-50 dark:bg-slate-800 text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all outline-none"
@@ -183,12 +183,13 @@ export default function TeacherDashboardPage() {
             </span>
           </div>
           <div className="h-8 w-px bg-border-light dark:bg-border-dark mx-1 hidden md:block"></div>
-          <div className="relative">
+          <div className="relative shrink-0">
             <NotificationBell />
           </div>
-          <Link href="/teacher/courses?new=true" className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/30 text-sm font-bold transition-all active:scale-95">
-            <span className="material-symbols-outlined text-[20px]">add</span>
-            <span>新增課程</span>
+          <Link href="/teacher/courses?new=true" className="flex items-center justify-center gap-1.5 md:gap-2 rounded-lg h-9 md:h-10 px-3 md:px-5 bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/30 text-sm font-bold transition-all active:scale-95 shrink-0 whitespace-nowrap">
+            <span className="material-symbols-outlined text-[18px] md:text-[20px]">add</span>
+            <span className="hidden sm:inline">新增課程</span>
+            <span className="inline sm:hidden">新增</span>
           </Link>
         </div>
       </header>

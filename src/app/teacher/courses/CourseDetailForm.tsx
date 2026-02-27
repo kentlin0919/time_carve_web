@@ -313,9 +313,9 @@ export default function CourseDetailForm({
               返回課程列表
             </button>
           </div>
-          <h2 className="text-slate-800 dark:text-white text-xl font-bold tracking-tight flex items-center gap-2">
-            {isCreating ? "新增課程方案" : "編輯課程方案"}
-            <span className="text-text-sub font-normal text-base ml-2">
+          <h2 className="text-slate-800 dark:text-white text-xl font-bold tracking-tight flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+            <span>{isCreating ? "新增課程方案" : "編輯課程方案"}</span>
+            <span className="text-text-sub font-normal text-sm sm:text-base sm:ml-2">
               {isCreating ? "創建全新的教學計畫" : "修改您的課程內容與設定"}
             </span>
           </h2>
@@ -522,10 +522,9 @@ export default function CourseDetailForm({
                         key={tag.id}
                         onClick={() => handleAddTag(null, tag.name)} // Pass tag name directly
                         className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                          ${
-                            form.tags?.some((t) => t.text === tag.name)
-                              ? "bg-primary text-white"
-                              : "bg-gray-100 text-gray-700 hover:bg-primary/20 hover:text-primary dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-primary/50"
+                          ${form.tags?.some((t) => t.text === tag.name)
+                            ? "bg-primary text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-primary/20 hover:text-primary dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-primary/50"
                           } transition-colors`}
                         disabled={form.tags?.some((t) => t.text === tag.name)}
                       >

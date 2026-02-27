@@ -331,9 +331,9 @@ export default function TeacherBookingsPage() {
   );
 
   return (
-    <div className="flex flex-col h-full bg-background-light dark:bg-background-dark">
+    <div className="flex flex-col min-h-full xl:h-full bg-background-light dark:bg-background-dark">
       {/* Header */}
-      <header className="w-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark px-8 py-4 flex justify-between items-center sticky top-0 z-10 transition-all">
+      <header className="w-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark px-4 md:px-8 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 z-10 transition-all">
         <div className="flex flex-col">
           <h2 className="text-slate-800 dark:text-white text-xl font-bold tracking-tight flex items-center gap-2">
             預約管理中心
@@ -342,25 +342,25 @@ export default function TeacherBookingsPage() {
             管理您的教學日程，確認學生預約與付款狀態
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="p-2.5 rounded-full text-text-sub dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-slate-700 relative transition-colors">
+        <div className="flex items-center gap-3 self-end sm:self-auto">
+          <button className="p-2.5 rounded-full text-text-sub dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-slate-700 relative transition-colors flex-shrink-0">
             <span className="material-symbols-outlined">notifications</span>
             <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-surface-dark"></span>
           </button>
           <div className="h-8 w-px bg-border-light dark:bg-border-dark mx-1"></div>
-          <div className="flex items-center gap-3 px-2">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+          <div className="flex items-center gap-3 px-2 flex-shrink-0">
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-200 whitespace-nowrap">
               {profile?.name || "Loading..."} 老師
             </span>
             {profile?.avatarUrl ? (
               <div
-                className="w-8 h-8 rounded-full bg-cover bg-center"
+                className="w-8 h-8 rounded-full bg-cover bg-center flex-shrink-0"
                 style={{
                   backgroundImage: `url("${profile.avatarUrl}")`,
                 }}
               ></div>
             ) : (
-              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
+              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex justify-center items-center font-bold flex-shrink-0">
                 {profile?.name?.[0] || "?"}
               </div>
             )}
@@ -369,7 +369,7 @@ export default function TeacherBookingsPage() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
+      <div className="flex-1 flex flex-col xl:overflow-hidden">
         {/* Pending Banner */}
         {pendingBookings.length > 0 && (
           <div className="bg-orange-50 border-b border-orange-100 px-8 py-3 flex items-center justify-between">
@@ -405,10 +405,10 @@ export default function TeacherBookingsPage() {
         )}
 
         {/* Toolbar */}
-        <div className="px-8 py-6 pb-2">
+        <div className="px-4 md:px-8 py-6 pb-2">
           <div className="flex flex-col xl:flex-row justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-3 flex-1">
-              <div className="relative group w-full sm:w-64">
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 flex-1">
+              <div className="relative group w-full sm:flex-1 md:max-w-xs">
                 <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">
                   search
                 </span>
@@ -418,7 +418,7 @@ export default function TeacherBookingsPage() {
                   type="text"
                 />
               </div>
-              <div className="relative group w-full sm:w-48">
+              <div className="relative group w-full sm:flex-1 md:max-w-[200px]">
                 <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">
                   calendar_month
                 </span>
@@ -435,7 +435,7 @@ export default function TeacherBookingsPage() {
                   }}
                 />
               </div>
-              <div className="relative w-full sm:w-48">
+              <div className="relative w-full sm:flex-1 md:max-w-[180px]">
                 <select className="pl-3 pr-8 py-2 w-full rounded-xl border border-transparent bg-white dark:bg-surface-dark shadow-sm ring-1 ring-border-light dark:ring-border-dark focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none text-sm text-slate-700 dark:text-slate-200 transition-all cursor-pointer appearance-none">
                   <option value="">所有付款狀態</option>
                   <option value="unpaid">待付款</option>
@@ -447,15 +447,14 @@ export default function TeacherBookingsPage() {
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-3 ml-auto">
+            <div className="flex flex-wrap items-center gap-3 xl:ml-auto">
               <div className="flex bg-white dark:bg-surface-dark rounded-lg p-1 shadow-sm ring-1 ring-border-light dark:ring-border-dark">
                 <button
                   onClick={() => setViewMode("month")}
-                  className={`px-3 py-1.5 rounded-md font-medium text-sm transition-colors flex items-center gap-1 ${
-                    viewMode === "month"
-                      ? "bg-primary/10 text-primary-dark dark:text-primary"
-                      : "text-text-sub hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-400"
-                  }`}
+                  className={`px-3 py-1.5 rounded-md font-medium text-sm transition-colors flex items-center gap-1 ${viewMode === "month"
+                    ? "bg-primary/10 text-primary-dark dark:text-primary"
+                    : "text-text-sub hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-400"
+                    }`}
                 >
                   <span className="material-symbols-outlined text-[18px]">
                     calendar_view_month
@@ -464,11 +463,10 @@ export default function TeacherBookingsPage() {
                 </button>
                 <button
                   onClick={() => setViewMode("week")}
-                  className={`px-3 py-1.5 rounded-md font-medium text-sm transition-colors flex items-center gap-1 ${
-                    viewMode === "week"
-                      ? "bg-primary/10 text-primary-dark dark:text-primary"
-                      : "text-text-sub hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-400"
-                  }`}
+                  className={`px-3 py-1.5 rounded-md font-medium text-sm transition-colors flex items-center gap-1 ${viewMode === "week"
+                    ? "bg-primary/10 text-primary-dark dark:text-primary"
+                    : "text-text-sub hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-400"
+                    }`}
                 >
                   <span className="material-symbols-outlined text-[18px]">
                     calendar_view_week
@@ -478,31 +476,31 @@ export default function TeacherBookingsPage() {
               </div>
               <Link
                 href="/teacher/availability"
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-surface-dark text-slate-700 dark:text-slate-200 font-medium border border-border-light dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
+                className="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-surface-dark text-slate-700 dark:text-slate-200 font-medium border border-border-light dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
               >
                 <span className="material-symbols-outlined text-[20px]">
                   calendar_clock
                 </span>
-                <span className="text-sm">設定預約時間</span>
+                <span className="text-sm min-w-max">設定預約時間</span>
               </Link>
               <button
                 onClick={() => setIsCreateOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary hover:bg-primary-dark text-white font-medium shadow-lg shadow-primary/20 transition-all active:scale-95 group"
+                className="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2 rounded-xl bg-primary hover:bg-primary-dark text-white font-medium shadow-lg shadow-primary/20 transition-all active:scale-95 group"
               >
                 <span className="material-symbols-outlined text-[20px] group-hover:rotate-90 transition-transform">
                   add
                 </span>
-                <span className="text-sm">新增預約</span>
+                <span className="text-sm min-w-max">新增預約</span>
               </button>
             </div>
           </div>
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 flex flex-col xl:flex-row gap-6 p-8 pt-4 overflow-hidden">
+        <div className="flex-1 flex flex-col xl:flex-row gap-6 p-4 md:p-8 pt-4 xl:overflow-hidden">
           {/* Calendar Grid */}
           {viewMode === "month" ? (
-            <div className="flex-1 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col overflow-hidden">
+            <div className="flex-1 min-h-[500px] xl:min-h-0 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col overflow-hidden">
               <div className="flex items-center justify-between px-6 py-4 border-b border-border-light dark:border-border-dark">
                 <div className="flex items-center gap-4">
                   <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
@@ -585,18 +583,18 @@ export default function TeacherBookingsPage() {
                                     border-b border-r border-border-light dark:border-border-dark p-2 min-h-[100px] 
                                     transition-colors cursor-pointer group relative
                                     ${isSelected
-                          ? "bg-blue-50/40 dark:bg-primary/5 hover:bg-blue-50/60 dark:hover:bg-primary/10 ring-1 ring-inset ring-primary/30 z-10"
-                          : "bg-white dark:bg-surface-dark hover:bg-slate-50 dark:hover:bg-slate-800/30"
-                        }
+                            ? "bg-blue-50/40 dark:bg-primary/5 hover:bg-blue-50/60 dark:hover:bg-primary/10 ring-1 ring-inset ring-primary/30 z-10"
+                            : "bg-white dark:bg-surface-dark hover:bg-slate-50 dark:hover:bg-slate-800/30"
+                          }
                                 `}
                       >
                         <span
                           className={`
                                     flex items-center justify-center w-7 h-7 rounded-full text-sm font-bold 
                                     ${isSelected
-                            ? "bg-primary text-white shadow-sm"
-                            : "text-slate-700 dark:text-slate-300"
-                          }
+                              ? "bg-primary text-white shadow-sm"
+                              : "text-slate-700 dark:text-slate-300"
+                            }
                                 `}
                         >
                           {d.day}
@@ -608,13 +606,13 @@ export default function TeacherBookingsPage() {
                               className={`
                                             px-2 py-1 rounded text-[11px] font-medium truncate shadow-sm
                                             ${ev.color === "red"
-                                ? "bg-red-100 text-red-700 border border-red-200 opacity-70"
-                                : ev.color === "orange"
-                                  ? "bg-orange-100 text-orange-700 border border-orange-200"
-                                  : ev.color === "emerald"
-                                    ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-                                    : "bg-slate-100 text-slate-700 border border-slate-200"
-                              }
+                                  ? "bg-red-100 text-red-700 border border-red-200 opacity-70"
+                                  : ev.color === "orange"
+                                    ? "bg-orange-100 text-orange-700 border border-orange-200"
+                                    : ev.color === "emerald"
+                                      ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                                      : "bg-slate-100 text-slate-700 border border-slate-200"
+                                }
                                         `}
                             >
                               {ev.time} {ev.name}
@@ -628,7 +626,7 @@ export default function TeacherBookingsPage() {
               </div>
             </div>
           ) : (
-            <div className="flex-1 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col overflow-hidden">
+            <div className="flex-1 min-h-[600px] xl:min-h-0 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col overflow-hidden">
               <div className="flex items-center justify-between px-6 py-4 border-b border-border-light dark:border-border-dark">
                 <div className="flex items-center gap-4">
                   <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
@@ -693,13 +691,12 @@ export default function TeacherBookingsPage() {
                     <button
                       key={day.toISOString()}
                       onClick={() => setSelectedDate(day)}
-                      className={`py-3 text-center text-xs font-bold tracking-wider transition-colors ${
-                        isSelected
-                          ? "bg-primary/10 text-primary"
-                          : isToday
+                      className={`py-3 text-center text-xs font-bold tracking-wider transition-colors ${isSelected
+                        ? "bg-primary/10 text-primary"
+                        : isToday
                           ? "text-slate-900 dark:text-white"
                           : "text-text-sub"
-                      }`}
+                        }`}
                     >
                       <div>{["週一", "週二", "週三", "週四", "週五", "週六", "週日"][day.getDay() === 0 ? 6 : day.getDay() - 1]}</div>
                       <div className="text-[11px] font-medium text-slate-500">
@@ -853,8 +850,8 @@ export default function TeacherBookingsPage() {
                             booking.status === "confirmed"
                               ? "bg-blue-500"
                               : booking.status === "pending"
-                              ? "bg-orange-500"
-                              : "bg-slate-500";
+                                ? "bg-orange-500"
+                                : "bg-slate-500";
                           return (
                             <div
                               key={idx}
@@ -883,8 +880,8 @@ export default function TeacherBookingsPage() {
           )}
 
           {/* Sidebar Schedule */}
-          <div className="w-full xl:w-[360px] flex-shrink-0 flex flex-col gap-5 h-full">
-            <div className="bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col h-full overflow-hidden">
+          <div className="w-full xl:w-[360px] flex-shrink-0 flex flex-col gap-5 xl:h-full">
+            <div className="bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col h-auto xl:h-full overflow-hidden">
               <div className="p-5 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
                 <div>
                   <h3 className="font-bold text-slate-800 dark:text-white text-base">
@@ -915,166 +912,166 @@ export default function TeacherBookingsPage() {
                     const booking = bookings.find((b) => b.id === ev.id);
                     const draft = booking ? feedbackDrafts[booking.id] : undefined;
                     return (
-                    <div key={idx} className="group relative">
-                      <div className="absolute -left-5 top-0 bottom-0 w-1 bg-primary rounded-r-full"></div>
-                      <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 dark:bg-primary/10 shadow-sm transition-all hover:shadow-md hover:border-primary/40">
-                        <div className="flex justify-between items-start mb-2">
-                          <div className="flex items-center gap-1.5 text-primary">
-                            <span className="material-symbols-outlined text-[16px]">
-                              schedule
-                            </span>
-                            <span className="text-xs font-bold tracking-wide">
-                              {ev.time}
-                            </span>
-                          </div>
-                          <span
-                            className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${ev.status === "confirmed"
-                              ? "bg-emerald-100 text-emerald-700 border-emerald-200"
-                              : ev.status === "pending"
-                                ? "bg-orange-100 text-orange-700 border-orange-200"
-                                : "bg-slate-100 text-slate-700 border-slate-200"
-                              }`}
-                          >
-                            {ev.status === "confirmed"
-                              ? "已確認"
-                              : ev.status === "pending"
-                                ? "待確認"
-                                : ev.status}
-                          </span>
-                        </div>
-                        <h4 className="text-sm font-bold text-slate-800 dark:text-white mb-1">
-                          {ev.courseTitle || "課程"}
-                        </h4>
-                        <div className="flex items-center gap-2 mt-3">
-                          <div className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 flex items-center justify-center text-xs font-bold ring-2 ring-white dark:ring-surface-dark">
-                            {ev.name[0]}
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                              {ev.name}
-                            </span>
-                            <span className="text-[10px] text-text-sub">
-                              {ev.email}
+                      <div key={idx} className="group relative">
+                        <div className="absolute -left-5 top-0 bottom-0 w-1 bg-primary rounded-r-full"></div>
+                        <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 dark:bg-primary/10 shadow-sm transition-all hover:shadow-md hover:border-primary/40">
+                          <div className="flex justify-between items-start mb-2">
+                            <div className="flex items-center gap-1.5 text-primary">
+                              <span className="material-symbols-outlined text-[16px]">
+                                schedule
+                              </span>
+                              <span className="text-xs font-bold tracking-wide">
+                                {ev.time}
+                              </span>
+                            </div>
+                            <span
+                              className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${ev.status === "confirmed"
+                                ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                                : ev.status === "pending"
+                                  ? "bg-orange-100 text-orange-700 border-orange-200"
+                                  : "bg-slate-100 text-slate-700 border-slate-200"
+                                }`}
+                            >
+                              {ev.status === "confirmed"
+                                ? "已確認"
+                                : ev.status === "pending"
+                                  ? "待確認"
+                                  : ev.status}
                             </span>
                           </div>
-                        </div>
-                        <div className="mt-4 pt-3 border-t border-dashed border-primary/20 flex gap-2">
-                          <button className="flex-1 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-transparent hover:border-border-light dark:hover:border-border-dark transition-all shadow-sm">
-                            查看詳情
-                          </button>
+                          <h4 className="text-sm font-bold text-slate-800 dark:text-white mb-1">
+                            {ev.courseTitle || "課程"}
+                          </h4>
+                          <div className="flex items-center gap-2 mt-3">
+                            <div className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 flex items-center justify-center text-xs font-bold ring-2 ring-white dark:ring-surface-dark">
+                              {ev.name[0]}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                {ev.name}
+                              </span>
+                              <span className="text-[10px] text-text-sub">
+                                {ev.email}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="mt-4 pt-3 border-t border-dashed border-primary/20 flex gap-2">
+                            <button className="flex-1 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-transparent hover:border-border-light dark:hover:border-border-dark transition-all shadow-sm">
+                              查看詳情
+                            </button>
 
-                          {/* @ts-ignore */}
-                          {ev.hasPendingReschedule ? (
-                            <button
-                              onClick={() => {
-                                const booking = bookings.find((b) => b.id === ev.id);
-                                if (booking) {
-                                  // Find the pending request
-                                  const request = booking.rescheduleRequests?.find(r => r.status === 'pending');
-                                  if (request) {
-                                    // We need to pass the request ID to the dialog.
-                                    // But the dialog takes `booking` and assumes we want to edit it?
-                                    // No, ReviewRescheduleDialog takes `booking`, `requestId`, `newDate`...
-                                    // Wait, ReviewRescheduleDialog props are: { open, onOpenChange, booking, request, onSuccess }
-                                    // I need to check ReviewRescheduleDialog props.
-                                    // For now, I'll set the reviewingBooking and handle the rest in the dialog component area.
-                                    setReviewingBooking(booking);
+                            {/* @ts-ignore */}
+                            {ev.hasPendingReschedule ? (
+                              <button
+                                onClick={() => {
+                                  const booking = bookings.find((b) => b.id === ev.id);
+                                  if (booking) {
+                                    // Find the pending request
+                                    const request = booking.rescheduleRequests?.find(r => r.status === 'pending');
+                                    if (request) {
+                                      // We need to pass the request ID to the dialog.
+                                      // But the dialog takes `booking` and assumes we want to edit it?
+                                      // No, ReviewRescheduleDialog takes `booking`, `requestId`, `newDate`...
+                                      // Wait, ReviewRescheduleDialog props are: { open, onOpenChange, booking, request, onSuccess }
+                                      // I need to check ReviewRescheduleDialog props.
+                                      // For now, I'll set the reviewingBooking and handle the rest in the dialog component area.
+                                      setReviewingBooking(booking);
+                                    }
                                   }
-                                }
-                              }}
-                              className="flex-1 py-1.5 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-lg shadow-sm transition-all flex items-center justify-center gap-1"
-                            >
-                              <span className="material-symbols-outlined text-[14px]">update</span>
-                              審核改期
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => {
-                                // Find the original booking object
-                                const booking = bookings.find(
-                                  (b) => b.id === ev.id
-                                );
-                                if (booking) setEditingBooking(booking);
-                              }}
-                              className="flex-1 py-1.5 text-xs font-medium text-primary dark:text-primary hover:bg-primary hover:text-white rounded-lg bg-white/50 dark:bg-slate-800/50 border border-transparent hover:border-primary transition-all shadow-sm"
-                            >
-                              編輯預約
-                            </button>
-                          )}
-                        </div>
+                                }}
+                                className="flex-1 py-1.5 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-lg shadow-sm transition-all flex items-center justify-center gap-1"
+                              >
+                                <span className="material-symbols-outlined text-[14px]">update</span>
+                                審核改期
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  // Find the original booking object
+                                  const booking = bookings.find(
+                                    (b) => b.id === ev.id
+                                  );
+                                  if (booking) setEditingBooking(booking);
+                                }}
+                                className="flex-1 py-1.5 text-xs font-medium text-primary dark:text-primary hover:bg-primary hover:text-white rounded-lg bg-white/50 dark:bg-slate-800/50 border border-transparent hover:border-primary transition-all shadow-sm"
+                              >
+                                編輯預約
+                              </button>
+                            )}
+                          </div>
 
-                        {booking && draft && (
-                          <div className="mt-4 pt-4 border-t border-slate-200/70 dark:border-slate-700/60 space-y-3">
-                            <div className="flex items-center justify-between">
-                              <h5 className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                課後回饋
-                              </h5>
-                              <label className="flex items-center gap-2 text-[11px] text-slate-500">
-                                <input
-                                  type="checkbox"
-                                  checked={draft.visible}
+                          {booking && draft && (
+                            <div className="mt-4 pt-4 border-t border-slate-200/70 dark:border-slate-700/60 space-y-3">
+                              <div className="flex items-center justify-between">
+                                <h5 className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                                  課後回饋
+                                </h5>
+                                <label className="flex items-center gap-2 text-[11px] text-slate-500">
+                                  <input
+                                    type="checkbox"
+                                    checked={draft.visible}
+                                    onChange={(e) =>
+                                      setFeedbackDrafts((prev) => ({
+                                        ...prev,
+                                        [booking.id]: {
+                                          ...draft,
+                                          visible: e.target.checked,
+                                        },
+                                      }))
+                                    }
+                                    className="h-3.5 w-3.5 rounded border-slate-300 dark:border-slate-600"
+                                  />
+                                  對學生公開
+                                </label>
+                              </div>
+                              <div className="space-y-2">
+                                <textarea
+                                  value={draft.homework}
                                   onChange={(e) =>
                                     setFeedbackDrafts((prev) => ({
                                       ...prev,
                                       [booking.id]: {
                                         ...draft,
-                                        visible: e.target.checked,
+                                        homework: e.target.value,
                                       },
                                     }))
                                   }
-                                  className="h-3.5 w-3.5 rounded border-slate-300 dark:border-slate-600"
+                                  placeholder="回家作業（可留空）"
+                                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/40 px-3 py-2 text-xs text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                  rows={2}
                                 />
-                                對學生公開
-                              </label>
+                                <textarea
+                                  value={draft.feedback}
+                                  onChange={(e) =>
+                                    setFeedbackDrafts((prev) => ({
+                                      ...prev,
+                                      [booking.id]: {
+                                        ...draft,
+                                        feedback: e.target.value,
+                                      },
+                                    }))
+                                  }
+                                  placeholder="教師評語（可留空）"
+                                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/40 px-3 py-2 text-xs text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                  rows={3}
+                                />
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] text-slate-400">
+                                  允許修改歷史紀錄
+                                </span>
+                                <button
+                                  onClick={() => handleSaveFeedback(booking.id)}
+                                  disabled={draft.saving}
+                                  className="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold shadow-sm hover:bg-primary-dark disabled:opacity-60 disabled:cursor-not-allowed"
+                                >
+                                  {draft.saving ? "儲存中..." : "儲存回饋"}
+                                </button>
+                              </div>
                             </div>
-                            <div className="space-y-2">
-                              <textarea
-                                value={draft.homework}
-                                onChange={(e) =>
-                                  setFeedbackDrafts((prev) => ({
-                                    ...prev,
-                                    [booking.id]: {
-                                      ...draft,
-                                      homework: e.target.value,
-                                    },
-                                  }))
-                                }
-                                placeholder="回家作業（可留空）"
-                                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/40 px-3 py-2 text-xs text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                                rows={2}
-                              />
-                              <textarea
-                                value={draft.feedback}
-                                onChange={(e) =>
-                                  setFeedbackDrafts((prev) => ({
-                                    ...prev,
-                                    [booking.id]: {
-                                      ...draft,
-                                      feedback: e.target.value,
-                                    },
-                                  }))
-                                }
-                                placeholder="教師評語（可留空）"
-                                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/40 px-3 py-2 text-xs text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                                rows={3}
-                              />
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] text-slate-400">
-                                允許修改歷史紀錄
-                              </span>
-                              <button
-                                onClick={() => handleSaveFeedback(booking.id)}
-                                disabled={draft.saving}
-                                className="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold shadow-sm hover:bg-primary-dark disabled:opacity-60 disabled:cursor-not-allowed"
-                              >
-                                {draft.saving ? "儲存中..." : "儲存回饋"}
-                              </button>
-                            </div>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
-                    </div>
                     );
                   })
                 ) : (
