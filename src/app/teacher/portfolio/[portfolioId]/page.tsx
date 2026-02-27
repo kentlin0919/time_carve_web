@@ -51,7 +51,7 @@ export default async function PortfolioDetailPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
-      <div className="max-w-[1400px] mx-auto p-6 md:p-8">
+      <div className="max-w-[1400px] mx-auto p-4 md:p-8">
         <PortfolioEditForm
           initialData={portfolioData || undefined}
           teacherId={teacher.id}

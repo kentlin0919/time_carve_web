@@ -428,7 +428,7 @@ export default function StudentBookingCreatePage() {
   if (!course || error) return <div className="p-10">課程資訊錯誤</div>;
 
   return (
-    <div className="container mx-auto max-w-6xl p-6 md:p-10 pb-24">
+    <div className="container mx-auto max-w-6xl px-4 py-6 md:p-10 pb-24">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div>

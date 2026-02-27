@@ -25,7 +25,7 @@ export default async function PortfolioPage() {
   if (!teacher) {
     // Handle case where user is not a teacher or teacher profile not created
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         Teacher profile not found. Please complete your profile first.
       </div>
     );

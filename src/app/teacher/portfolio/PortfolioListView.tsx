@@ -13,7 +13,7 @@ export default function PortfolioListView({
   portfolios,
 }: PortfolioListViewProps) {
   return (
-    <div className="flex-1 overflow-y-auto p-6 md:p-8 scroll-smooth">
+    <div className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
       <div className="max-w-[1400px] mx-auto flex flex-col gap-6 pb-20">
         {/* Simplified Filters */}
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-border-light dark:border-border-dark shadow-sm">

@@ -100,7 +100,7 @@ export default function PaymentManagementPage() {
   return (
     <div className="flex-1 flex flex-col h-full bg-background-light dark:bg-background-dark overflow-hidden">
       {/* Header */}
-      <header className="w-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark px-8 py-4 flex justify-between items-center sticky top-0 z-10 transition-all">
+      <header className="w-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-10 transition-all">
         <div className="flex flex-col">
           <h2 className="text-slate-800 dark:text-white text-xl font-bold tracking-tight flex items-center gap-2">
             收款管理
@@ -134,7 +134,7 @@ export default function PaymentManagementPage() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto p-8 scroll-smooth">
+      <div className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
         <div className="max-w-[1400px] mx-auto flex flex-col gap-6 pb-10">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -171,8 +171,8 @@ export default function PaymentManagementPage() {
                   達成率{" "}
                   {summary.total_projected > 0
                     ? Math.round(
-                        (summary.total_received / summary.total_projected) * 100
-                      )
+                      (summary.total_received / summary.total_projected) * 100
+                    )
                     : 0}
                   %
                 </p>
@@ -250,41 +250,37 @@ export default function PaymentManagementPage() {
                 <div className="flex bg-white dark:bg-slate-800 rounded-lg p-1 border border-border-light dark:border-border-dark w-full sm:w-auto overflow-x-auto">
                   <button
                     onClick={() => setFilter("all")}
-                    className={`flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
-                      filter === "all"
+                    className={`flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${filter === "all"
                         ? "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm border border-slate-200 dark:border-slate-600"
                         : "text-text-sub hover:bg-slate-50 dark:hover:bg-slate-700"
-                    }`}
+                      }`}
                   >
                     全部
                   </button>
                   <button
                     onClick={() => setFilter("pending")}
-                    className={`flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
-                      filter === "pending"
+                    className={`flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${filter === "pending"
                         ? "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm border border-slate-200 dark:border-slate-600"
                         : "text-text-sub hover:bg-slate-50 dark:hover:bg-slate-700"
-                    }`}
+                      }`}
                   >
                     待收款
                   </button>
                   <button
                     onClick={() => setFilter("received")}
-                    className={`flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
-                      filter === "received"
+                    className={`flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${filter === "received"
                         ? "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm border border-slate-200 dark:border-slate-600"
                         : "text-text-sub hover:bg-slate-50 dark:hover:bg-slate-700"
-                    }`}
+                      }`}
                   >
                     已收款
                   </button>
                   <button
                     onClick={() => setFilter("overdue")}
-                    className={`flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
-                      filter === "overdue"
+                    className={`flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${filter === "overdue"
                         ? "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
                         : "text-text-sub hover:bg-slate-50 dark:hover:bg-slate-700 text-red-500"
-                    }`}
+                      }`}
                   >
                     逾期
                   </button>
@@ -383,11 +379,10 @@ export default function PaymentManagementPage() {
                               {record.course_title}
                             </span>
                             <div
-                              className={`flex items-center gap-1.5 mt-1 text-xs ${
-                                record.is_overdue
+                              className={`flex items-center gap-1.5 mt-1 text-xs ${record.is_overdue
                                   ? "text-red-500 font-medium"
                                   : "text-text-sub"
-                              }`}
+                                }`}
                             >
                               <span className="material-symbols-outlined text-[14px]">
                                 {record.is_overdue
@@ -403,20 +398,18 @@ export default function PaymentManagementPage() {
                         <td className="px-6 py-4">
                           <div className="flex flex-col">
                             <span
-                              className={`text-sm font-bold ${
-                                record.status === "completed"
+                              className={`text-sm font-bold ${record.status === "completed"
                                   ? "text-text-sub line-through"
                                   : "text-slate-800 dark:text-white"
-                              }`}
+                                }`}
                             >
                               {formatCurrency(record.price)}
                             </span>
                             <span
-                              className={`text-xs ${
-                                record.status === "completed"
+                              className={`text-xs ${record.status === "completed"
                                   ? "font-bold text-emerald-600 dark:text-emerald-400"
                                   : "text-text-sub"
-                              }`}
+                                }`}
                             >
                               實收:{" "}
                               <span

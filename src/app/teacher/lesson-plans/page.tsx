@@ -145,7 +145,7 @@ export default function LessonPlansPage() {
 
   return (
     <div className="flex flex-col h-full bg-background-light dark:bg-background-dark">
-      <header className="px-8 py-4 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-surface-light dark:bg-surface-dark sticky top-0 z-10">
+      <header className="px-4 md:px-8 py-4 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-surface-light dark:bg-surface-dark sticky top-0 z-10">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
           教案管理 (Lesson Plans)
         </h1>
@@ -158,9 +158,9 @@ export default function LessonPlansPage() {
         </button>
       </header>
 
-      <div className="flex-1 overflow-hidden flex flex-col md:flex-row p-6 gap-6 max-w-[1600px] mx-auto w-full">
+      <div className="flex-1 overflow-hidden flex flex-col md:flex-row p-4 md:p-6 gap-6 max-w-[1600px] mx-auto w-full">
         {/* List View */}
-        <div className="w-full md:w-1/3 min-w-[300px] flex flex-col bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark shadow-sm overflow-hidden">
+        <div className="w-full md:w-1/3 md:min-w-[300px] flex flex-col bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark shadow-sm overflow-hidden">
           <div className="p-4 border-b border-border-light dark:border-border-dark bg-slate-50 dark:bg-slate-800/50">
             <input
               type="text"
@@ -173,22 +173,20 @@ export default function LessonPlansPage() {
               <div
                 key={plan.id}
                 onClick={() => handleSelect(plan.id)}
-                className={`p-4 border-b border-border-light dark:border-border-dark cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50 ${
-                  selectedPlanId === plan.id
-                    ? "bg-primary/5 border-l-4 border-l-primary"
-                    : "border-l-4 border-l-transparent"
-                }`}
+                className={`p-4 border-b border-border-light dark:border-border-dark cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50 ${selectedPlanId === plan.id
+                  ? "bg-primary/5 border-l-4 border-l-primary"
+                  : "border-l-4 border-l-transparent"
+                  }`}
               >
                 <div className="flex justify-between items-start mb-1">
                   <h3 className="font-bold text-slate-800 dark:text-white line-clamp-1">
                     {plan.title}
                   </h3>
                   <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full ${
-                      plan.status === "active"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-slate-200 text-slate-600"
-                    }`}
+                    className={`text-[10px] px-2 py-0.5 rounded-full ${plan.status === "active"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-slate-200 text-slate-600"
+                      }`}
                   >
                     {plan.status === "active" ? "啟用" : "草稿"}
                   </span>

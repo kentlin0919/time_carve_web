@@ -17,7 +17,7 @@ export default async function StudentDashboard() {
   const activePlan = purchases.find(p => p.status === 'active');
 
   return (
-    <div className="container mx-auto max-w-[1280px] p-6 md:p-10 flex flex-col gap-8 pb-24">
+    <div className="container mx-auto max-w-[1280px] px-4 py-6 md:p-10 flex flex-col gap-8 pb-24">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h1 className="text-slate-900 dark:text-white text-3xl md:text-4xl font-black leading-tight tracking-tight mb-2">
@@ -31,7 +31,7 @@ export default async function StudentDashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Link 
+          <Link
             href="/student/booking/create"
             className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2"
           >
@@ -134,11 +134,10 @@ export default async function StudentDashboard() {
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${
-                          booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                          booking.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                          'bg-slate-100 text-slate-600'
-                        }`}>
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                            booking.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                              'bg-slate-100 text-slate-600'
+                          }`}>
                           {booking.status === 'confirmed' ? '已確認' : booking.status === 'pending' ? '待確認' : booking.status}
                         </span>
                         <Link href="/student/bookings" className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-400 transition-all">

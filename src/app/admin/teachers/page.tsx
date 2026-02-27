@@ -17,8 +17,8 @@ type TeacherEducation =
 
 type TeacherData = UserInfo & {
   teacher_info:
-    | (TeacherInfo & { teacher_education: TeacherEducation[] })
-    | null;
+  | (TeacherInfo & { teacher_education: TeacherEducation[] })
+  | null;
 };
 
 export default function TeacherManagement() {
@@ -168,30 +168,30 @@ export default function TeacherManagement() {
               is_active: formData.is_active,
               teacher_info: t.teacher_info
                 ? {
-                    ...t.teacher_info,
-                    title: formData.title,
-                    bio: formData.bio,
-                    base_price: formData.base_price,
-                    experience_years: formData.experience_years,
-                    is_public: formData.is_public,
-                    // Optimistic update of education
-                    teacher_education: [
-                      {
-                        ...(t.teacher_info?.teacher_education?.[0] || {}), // Keep ID if exists
-                        id:
-                          t.teacher_info?.teacher_education?.[0]?.id ||
-                          "temp-id",
-                        teacher_id: t.id,
-                        school_id: schoolId || "", // Might be null if not found (unexpected)
-                        status_id: statusId || 0,
-                        department: formData.department,
-                        schools: { name: formData.school },
-                        education_statuses: { status_key: formData.status },
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString(),
-                      } as any, // TS hack for simple optimistic update
-                    ],
-                  }
+                  ...t.teacher_info,
+                  title: formData.title,
+                  bio: formData.bio,
+                  base_price: formData.base_price,
+                  experience_years: formData.experience_years,
+                  is_public: formData.is_public,
+                  // Optimistic update of education
+                  teacher_education: [
+                    {
+                      ...(t.teacher_info?.teacher_education?.[0] || {}), // Keep ID if exists
+                      id:
+                        t.teacher_info?.teacher_education?.[0]?.id ||
+                        "temp-id",
+                      teacher_id: t.id,
+                      school_id: schoolId || "", // Might be null if not found (unexpected)
+                      status_id: statusId || 0,
+                      department: formData.department,
+                      schools: { name: formData.school },
+                      education_statuses: { status_key: formData.status },
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString(),
+                    } as any, // TS hack for simple optimistic update
+                  ],
+                }
                 : null,
             };
           }
@@ -394,11 +394,10 @@ export default function TeacherManagement() {
                 filteredTeachers.map((teacher) => (
                   <tr
                     key={teacher.id}
-                    className={`group transition-colors ${
-                      !teacher.is_active
+                    className={`group transition-colors ${!teacher.is_active
                         ? "bg-gray-50/50 dark:bg-gray-900/30"
                         : "hover:bg-blue-50/50 dark:hover:bg-blue-900/10"
-                    }`}
+                      }`}
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -407,8 +406,8 @@ export default function TeacherManagement() {
                           style={
                             teacher.avatar_url
                               ? {
-                                  backgroundImage: `url(${teacher.avatar_url})`,
-                                }
+                                backgroundImage: `url(${teacher.avatar_url})`,
+                              }
                               : {}
                           }
                         >
@@ -416,11 +415,10 @@ export default function TeacherManagement() {
                         </div>
                         <div className="flex flex-col">
                           <span
-                            className={`text-sm font-bold ${
-                              !teacher.is_active
+                            className={`text-sm font-bold ${!teacher.is_active
                                 ? "text-gray-500"
                                 : "text-gray-900 dark:text-white"
-                            }`}
+                              }`}
                           >
                             {teacher.name}
                           </span>
@@ -436,7 +434,7 @@ export default function TeacherManagement() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-sm text-gray-500 dark:text-gray-400 block max-w-[200px] truncate">
+                      <span className="text-sm text-gray-500 dark:text-gray-400 block max-w-full sm:max-w-[200px] truncate">
                         {(() => {
                           const edu =
                             teacher.teacher_info?.teacher_education?.[0];

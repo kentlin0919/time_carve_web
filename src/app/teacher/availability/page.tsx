@@ -259,7 +259,7 @@ export default function AvailabilityPage() {
   const DAYS = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
 
   return (
-    <div className="min-h-screen w-full bg-background-light dark:bg-background-dark p-6 md:p-10 pb-24 font-body text-text-main dark:text-slate-100">
+    <div className="min-h-screen w-full bg-background-light dark:bg-background-dark px-4 py-6 md:p-10 pb-24 font-body text-text-main dark:text-slate-100">
       {/* Header Area */}
       <div className="container mx-auto max-w-6xl mb-8 animate-fade-in">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">

@@ -156,7 +156,7 @@ export default function TeacherStudentManagementPage() {
   return (
     <div className="flex-1 flex flex-col h-full bg-background-light dark:bg-background-dark overflow-hidden">
       {/* Header */}
-      <header className="w-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark px-8 py-4 flex justify-between items-center sticky top-0 z-10 transition-all">
+      <header className="w-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-10 transition-all">
         <div className="flex flex-col">
           <h2 className="text-slate-800 dark:text-white text-xl font-bold tracking-tight flex items-center gap-2">
             學生資訊管理
@@ -184,7 +184,7 @@ export default function TeacherStudentManagementPage() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto p-8 scroll-smooth">
+      <div className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
         <div className="max-w-[1400px] mx-auto flex flex-col gap-6 pb-10">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -1,63 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import NavAuthButtons from "@/components/NavAuthButtons";
+import PublicHeader from "@/components/ui/PublicHeader";
 
 export default function HomePage() {
   return (
     <div className="relative flex min-h-screen w-full flex-col group/design-root bg-background-light dark:bg-background-dark text-[#111618] dark:text-[#f0f3f4] font-display overflow-x-hidden selection:bg-primary selection:text-white">
-      <header className="sticky top-0 z-50 w-full border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-[#101d22]/80 backdrop-blur-lg transition-all">
-        <div className="mx-auto flex h-20 max-w-[1024px] items-center justify-between px-6 sm:px-10">
-          <div className="flex items-center gap-3 group cursor-pointer">
-            <div className="relative w-10 h-10 transition-transform duration-300 group-hover:scale-110">
-              <Image
-                src="/logo.svg"
-                alt="TimeCarve Logo"
-                fill
-                className="object-contain"
-              />
-            </div>
-            <h2 className="text-xl font-bold leading-tight tracking-tight text-[#111618] dark:text-white">
-              TimeCarve 刻時
-            </h2>
-          </div>
-          <nav className="hidden md:flex items-center gap-10">
-            <a
-              className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors relative group"
-              href="#"
-            >
-              首頁
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
-            </a>
-            <a
-              className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors relative group"
-              href="#portfolio"
-            >
-              作品集
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
-            </a>
-            <a
-              className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors relative group"
-              href="#philosophy"
-            >
-              教學理念
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
-            </a>
-            <a
-              className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors relative group"
-              href="#courses"
-            >
-              課程資訊
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
-            </a>
-          </nav>
-          <div className="hidden md:flex items-center gap-4">
-            <NavAuthButtons />
-          </div>
-          <button className="md:hidden flex items-center justify-center text-[#111618] dark:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-            <span className="material-symbols-outlined">menu</span>
-          </button>
-        </div>
-      </header>
+      <PublicHeader />
       <main className="flex-1 w-full flex justify-center">
         <div className="flex flex-col max-w-[1024px] w-full px-6 sm:px-10">
           <section className="py-16 sm:py-24 relative">
