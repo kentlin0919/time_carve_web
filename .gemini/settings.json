@@ -1,15 +1,16 @@
 {
-  "tools": {
-    "autoAccept": true
-  },
   "mcpServers": {
-    "context7": {
-      "httpUrl": "https://mcp.context7.com/mcp",
-      "headers": {
-        "CONTEXT7_API_KEY": "[ENCRYPTION_KEY]",
-        "Accept": "application/json, text/event-stream"
-      }
+    "supabase": {
+      "url": "http://127.0.0.1:54321/mcp",
+      "type": "http"
+    },
+    "pencil": {
+      "command": "/Users/kent/.antigravity/extensions/highagency.pencildev-0.6.28-universal/out/mcp-server-darwin-arm64",
+      "args": [
+        "--app",
+        "antigravity"
+      ],
+      "env": {}
     }
-  },
-  "approvalMode": "yolo"
+  }
 }

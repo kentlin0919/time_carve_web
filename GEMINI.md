@@ -99,3 +99,19 @@ TimeCarve 是一個以「學習歷程連續性」為核心的家教管理系統�
 - **資料庫誠信**: 嚴禁私下繞過系統預約，違者追回 5 倍分潤罰金。
 - **Language**: 繁體中文 (Traditional Chinese)。
 - **Exit Strategy**: 支持 10 萬 TWD 買斷原始碼退場合約。
+
+---
+
+## 7. 設計稿參考指引 (Design Reference Guide)
+
+設計稿位於 `pencil/` 目錄，依身分別拆分為獨立 `.pen` 檔案。處理特定身分的頁面時，請參考對應的設計稿：
+
+| 身分別 | 設計稿檔案 | 適用路由 | 包含畫面 |
+|---|---|---|---|
+| **公開端** | `pencil/public.pen` | `/`, `/teachers`, `/teachers/[teacherCode]`, `/courses/[courseId]`, `/privacy`, `/terms`, `/404` | 首頁、教師個人頁、課程列表、作品集總覽、隱私政策、服務條款、系統提示、404 |
+| **學生端** | `pencil/student.pen` | `/student/*` | 學生儀表板、我的學習、預約建立、預約成功、通知中心、Onboarding |
+| **教師端** | `pencil/teacher.pen` | `/teacher/*` | 教師儀表板、課程管理、課程編輯、預約管理、個人設定、作品集編輯、排班、CRM、學生詳情 |
+| **管理員端** | `pencil/admin.pen` | `/admin/*` | 管理員儀表板、帳單管理、教師管理、學生管理、教師維護費方案 |
+| **身分驗證** | `pencil/auth.pen` | `/auth/*` | 登入/註冊、忘記密碼、重設密碼、獨立註冊頁面 |
+
+> **注意**: `pencil/time_carve_web.pen` 為完整原始設計稿（含所有身分畫面），上述 5 個檔案是從中拆分的子集。

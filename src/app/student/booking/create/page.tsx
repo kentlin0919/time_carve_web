@@ -340,7 +340,10 @@ export default function StudentBookingCreatePage() {
     try {
       if (isPurchaseOnly) {
         // Just buy the pack (hours) and init progress
-        await purchaseCourse(course.id, hours, totalPrice);
+        const purchaseResult = await purchaseCourse(course.id, hours, totalPrice);
+        if (!purchaseResult.success) {
+          throw new Error(purchaseResult.error || "方案購買失敗");
+        }
 
         showModal({
           title: "方案購買成功",
@@ -396,9 +399,13 @@ export default function StudentBookingCreatePage() {
           buyNewPack: isFirstCall ? buyNewPack : false // Only buy on first call
         });
 
+        if (!result.success) {
+          throw new Error(result.error || "預約建立失敗");
+        }
+
         // Capture newly created purchaseId for subsequent chunks
-        if (isFirstCall && buyNewPack && result.purchaseId) {
-          activePurchaseId = result.purchaseId;
+        if (isFirstCall && buyNewPack && result.data?.purchaseId) {
+          activePurchaseId = result.data.purchaseId;
         }
         isFirstCall = false;
       }

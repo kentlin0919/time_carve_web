@@ -75,38 +75,44 @@ export async function createBooking(
   },
   options: { buyNewPack?: boolean } = {}
 ) {
-  const supabase = await createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-  if (authError || !user) {
-    throw new Error("Unauthorized");
+    if (authError || !user) {
+      throw new Error("Unauthorized");
+    }
+
+    // Verify user is either the student OR the teacher
+    if (user.id !== bookingData.studentId && user.id !== bookingData.teacherId) {
+      throw new Error("Unauthorized booking attempt");
+    }
+
+    const bookingRepo = new SupabaseBookingRepository(supabase);
+    const availRepo = new SupabaseAvailabilityRepository(supabase);
+    const purchaseRepo = new SupabasePurchaseRepository(supabase);
+    const courseRepo = new SupabaseCourseRepository(supabase);
+    const progressRepo = new SupabaseProgressRepository(supabase);
+
+    // Use Admin Client for notifications to bypass RLS (Student notifying Teacher)
+    const adminSupabase = createAdminClient();
+    const notificationRepo = new SupabaseNotificationRepository(adminSupabase);
+
+    const useCase = new CreateBookingUseCase(
+      bookingRepo,
+      availRepo,
+      notificationRepo,
+      purchaseRepo,
+      courseRepo,
+      progressRepo
+    );
+
+    const result = await useCase.execute(bookingData, options);
+    return { success: true, data: result };
+  } catch (error: any) {
+    console.error("createBooking error:", error);
+    return { success: false, error: error.message || "Unknown error" };
   }
-
-  // Verify user is either the student OR the teacher
-  if (user.id !== bookingData.studentId && user.id !== bookingData.teacherId) {
-    throw new Error("Unauthorized booking attempt");
-  }
-
-  const bookingRepo = new SupabaseBookingRepository(supabase);
-  const availRepo = new SupabaseAvailabilityRepository(supabase);
-  const purchaseRepo = new SupabasePurchaseRepository(supabase);
-  const courseRepo = new SupabaseCourseRepository(supabase);
-  const progressRepo = new SupabaseProgressRepository(supabase);
-
-  // Use Admin Client for notifications to bypass RLS (Student notifying Teacher)
-  const adminSupabase = createAdminClient();
-  const notificationRepo = new SupabaseNotificationRepository(adminSupabase);
-
-  const useCase = new CreateBookingUseCase(
-    bookingRepo,
-    availRepo,
-    notificationRepo,
-    purchaseRepo,
-    courseRepo,
-    progressRepo
-  );
-
-  return await useCase.execute(bookingData, options);
 }
 
 export async function updateBookingStatus(bookingId: string, status: "pending" | "confirmed" | "cancelled" | "completed") {

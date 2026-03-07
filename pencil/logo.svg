@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+
+  <defs>
+    <!-- Swoosh gradient with sky blue -->
+    <linearGradient id="swooshGradient" x1="0.15" y1="0.75" x2="0.85" y2="0.25">
+      <stop offset="0%" stop-color="#7FDBFF"/>
+      <stop offset="45%" stop-color="#E6FAFF"/>
+      <stop offset="100%" stop-color="#FFFFFF"/>
+    </linearGradient>
+
+    <!-- Soft depth shadow (very subtle, not UI-like) -->
+    <filter id="softShadow" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#000" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+
+  <!-- Main carved swoosh (brand gesture) -->
+  <path d="M180 760
+       C 360 620, 520 560, 680 430
+       C 820 320, 900 250, 940 200
+       C 860 290, 760 380, 660 460
+       C 500 600, 320 700, 180 780
+       C 220 755, 235 745, 180 760 Z" fill="url(#swooshGradient)" filter="url(#softShadow)" />
+
+  <!-- Secondary chisel cut (handcraft detail) -->
+  <path d="M600 620
+       C 650 560, 720 510, 780 460
+       C 720 540, 680 600, 650 660
+       C 630 700, 590 720, 560 725
+       C 575 690, 585 650, 600 620 Z" fill="#FFFFFF" opacity="0.92" filter="url(#softShadow)" />
+
+</svg>

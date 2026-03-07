@@ -98,7 +98,7 @@ export function CreateBookingDialog({
 
     setLoading(true);
     try {
-      await createBooking({
+      const result = await createBooking({
         teacherId,
         studentId: selectedStudentId,
         courseId: selectedCourseId,
@@ -107,6 +107,10 @@ export function CreateBookingDialog({
         endTime,
         notes,
       });
+
+      if (!result.success) {
+        throw new Error(result.error || "預約建立失敗");
+      }
 
       showModal({
         type: "success",
