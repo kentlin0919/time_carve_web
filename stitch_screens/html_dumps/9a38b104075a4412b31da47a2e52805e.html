@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>教師維護費方案選擇</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13b6ec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#101d22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body>
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden font-display">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Header -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f3f4] dark:border-b-[#2a3c44] bg-white dark:bg-[#101d22] px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-4 text-[#111618] dark:text-white">
+<div class="size-8 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-[#111618] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">假牙雕刻家教系統</h2>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<div class="flex gap-2">
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#f0f3f4] dark:bg-[#2a3c44] text-[#111618] dark:text-white hover:bg-[#e1e5e6] dark:hover:bg-[#354852] transition-colors gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+<span class="material-symbols-outlined text-[#111618] dark:text-white" style="font-size: 20px;">notifications</span>
+</button>
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#f0f3f4] dark:bg-[#2a3c44] text-[#111618] dark:text-white hover:bg-[#e1e5e6] dark:hover:bg-[#354852] transition-colors gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+<span class="material-symbols-outlined text-[#111618] dark:text-white" style="font-size: 20px;">settings</span>
+</button>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border border-gray-200 dark:border-gray-700" data-alt="User profile picture placeholder" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBV2FLS1ouFtO3xDaynehTiIA8MJMPT4khQZVVtGJPOWkPKh_XtaWsBEyA7fXSjzRh3ddAG8c9TSmSyU2SxtVjocJxFDjn6hrm3TdnIOPDZ3swzUbi2TIP8npaD3N0EgLt7fgwj3AFh8-kzNH_Wc4jOW3MmEHz3_QIQiTmONCnZtxUxB1-r2R0Bx6mX6iAax6iqcl6EtNtkqdTvyT8qV3Xw-Hie94HMNQCEBgy3w2ZOqmTI1lTe-Ryrev50HDHw5cz174FWXkylZ9M");'></div>
+</div>
+</header>
+<div class="px-4 md:px-10 lg:px-40 flex flex-1 justify-center py-8">
+<div class="layout-content-container flex flex-col max-w-[960px] flex-1 gap-6">
+<!-- Page Heading -->
+<div class="flex flex-wrap justify-between gap-3 px-4">
+<div class="flex min-w-72 flex-col gap-2">
+<p class="text-[#111618] dark:text-white text-3xl font-black leading-tight tracking-[-0.033em]">教師維護費方案選擇</p>
+<p class="text-[#617f89] dark:text-[#93aab1] text-base font-normal leading-normal">請根據您的授課頻率選擇最適合的維護費方案，以優化您的教學成本。</p>
+</div>
+</div>
+<!-- Current Status Banner -->
+<div class="px-4">
+<div class="flex flex-col items-center gap-4 rounded-xl border border-[#dbe3e6] dark:border-[#2a3c44] bg-white dark:bg-[#101d22] p-6 shadow-sm md:flex-row md:justify-between">
+<div class="flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined" style="font-size: 24px;">verified</span>
+</div>
+<div class="flex flex-col">
+<p class="text-[#111618] dark:text-white text-lg font-bold leading-tight">當前方案：方案 A (超值固定制)</p>
+<p class="text-[#617f89] dark:text-[#93aab1] text-sm font-normal">您的方案將於 2023/12/31 到期，下個結算週期將自動續約。</p>
+</div>
+</div>
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#f0f3f4] dark:bg-[#2a3c44] text-[#111618] dark:text-white hover:bg-[#e1e5e6] dark:hover:bg-[#354852] transition-colors text-sm font-bold leading-normal tracking-[0.015em]">
+<span class="truncate">查看歷史帳單</span>
+</button>
+</div>
+</div>
+<!-- Pricing Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
+<!-- Plan A Card -->
+<div class="flex flex-col rounded-xl border-2 border-primary bg-white dark:bg-[#101d22] p-6 shadow-lg relative overflow-hidden transition-all hover:shadow-xl">
+<div class="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-bl-lg">當前使用</div>
+<div class="flex flex-col gap-4 mb-6">
+<div class="flex items-center gap-2">
+<h1 class="text-[#111618] dark:text-white text-xl font-bold leading-tight">方案 A：超值固定制</h1>
+</div>
+<div class="flex items-baseline gap-1 text-[#111618] dark:text-white">
+<span class="text-4xl font-black leading-tight tracking-[-0.033em]">$2,000</span>
+<span class="text-base font-medium text-[#617f89] dark:text-[#93aab1]">/ 月</span>
+</div>
+<p class="text-[#617f89] dark:text-[#93aab1] text-sm">適合高頻率授課的專職教師，每月費用固定，不受學生人數波動影響。</p>
+</div>
+<div class="flex flex-col gap-3 flex-1">
+<div class="flex gap-3 text-sm text-[#111618] dark:text-white items-start">
+<span class="material-symbols-outlined text-primary shrink-0" style="font-size: 20px;">check_circle</span>
+<span><span class="font-bold">計費方式：</span>每月固定金額結算</span>
+</div>
+<div class="flex gap-3 text-sm text-[#111618] dark:text-white items-start">
+<span class="material-symbols-outlined text-primary shrink-0" style="font-size: 20px;">check_circle</span>
+<span><span class="font-bold">費用標準：</span>無論學生數多少，費用均一</span>
+</div>
+<div class="flex gap-3 text-sm text-[#111618] dark:text-white items-start">
+<span class="material-symbols-outlined text-primary shrink-0" style="font-size: 20px;">check_circle</span>
+<span><span class="font-bold">最低保底：</span>無</span>
+</div>
+<div class="flex gap-3 text-sm text-[#111618] dark:text-white items-start">
+<span class="material-symbols-outlined text-primary shrink-0" style="font-size: 20px;">check_circle</span>
+<span><span class="font-bold">適合對象：</span>每月學生數 &gt; 40 人的教師</span>
+</div>
+<div class="mt-2 rounded-lg bg-primary/5 p-3">
+<div class="flex gap-3 text-sm text-primary dark:text-primary items-start font-medium">
+<span class="material-symbols-outlined shrink-0" style="font-size: 20px;">savings</span>
+<span>成本試算：若學生為 50 人，平均每人成本僅 $40</span>
+</div>
+</div>
+</div>
+<button class="mt-6 flex w-full cursor-not-allowed items-center justify-center rounded-lg h-12 bg-[#f0f3f4] dark:bg-[#2a3c44] text-[#617f89] dark:text-[#93aab1] text-sm font-bold opacity-70">
+                                保持當前方案
+                            </button>
+</div>
+<!-- Plan B Card -->
+<div class="flex flex-col rounded-xl border border-[#dbe3e6] dark:border-[#2a3c44] bg-white dark:bg-[#101d22] p-6 shadow-sm hover:border-primary/50 transition-all hover:shadow-md">
+<div class="flex flex-col gap-4 mb-6">
+<div class="flex items-center gap-2">
+<h1 class="text-[#111618] dark:text-white text-xl font-bold leading-tight">方案 B：彈性人頭制</h1>
+<span class="rounded-full bg-[#e3fcf7] text-[#0d7a68] px-2 py-0.5 text-xs font-bold">推薦新手</span>
+</div>
+<div class="flex items-baseline gap-1 text-[#111618] dark:text-white">
+<span class="text-4xl font-black leading-tight tracking-[-0.033em]">$50</span>
+<span class="text-base font-medium text-[#617f89] dark:text-[#93aab1]">/ 人</span>
+</div>
+<p class="text-[#617f89] dark:text-[#93aab1] text-sm">適合低頻率或兼職授課，按實際學生人數計費，負擔更輕。</p>
+</div>
+<div class="flex flex-col gap-3 flex-1">
+<div class="flex gap-3 text-sm text-[#111618] dark:text-white items-start">
+<span class="material-symbols-outlined text-gray-400 shrink-0" style="font-size: 20px;">check_circle</span>
+<span><span class="font-bold">計費方式：</span>按每月實際學生人數計費</span>
+</div>
+<div class="flex gap-3 text-sm text-[#111618] dark:text-white items-start">
+<span class="material-symbols-outlined text-gray-400 shrink-0" style="font-size: 20px;">check_circle</span>
+<span><span class="font-bold">費用標準：</span>每位學生收取固定人頭費</span>
+</div>
+<div class="flex gap-3 text-sm text-[#111618] dark:text-white items-start">
+<span class="material-symbols-outlined text-gray-400 shrink-0" style="font-size: 20px;">check_circle</span>
+<span><span class="font-bold">最低保底：</span>每月最低收取 $500</span>
+</div>
+<div class="flex gap-3 text-sm text-[#111618] dark:text-white items-start">
+<span class="material-symbols-outlined text-gray-400 shrink-0" style="font-size: 20px;">check_circle</span>
+<span><span class="font-bold">適合對象：</span>學生數不穩定或 &lt; 40 人</span>
+</div>
+<div class="mt-2 rounded-lg bg-gray-50 dark:bg-gray-800 p-3">
+<div class="flex gap-3 text-sm text-[#617f89] dark:text-[#93aab1] items-start font-medium">
+<span class="material-symbols-outlined shrink-0" style="font-size: 20px;">calculate</span>
+<span>成本試算：若學生為 10 人，僅需支付 $500</span>
+</div>
+</div>
+</div>
+<button class="mt-6 flex w-full cursor-pointer items-center justify-center rounded-lg h-12 bg-primary text-white hover:bg-sky-500 transition-colors text-sm font-bold shadow-md shadow-blue-200 dark:shadow-none">
+                                申請切換至方案 B
+                            </button>
+</div>
+</div>
+<!-- Action Panel / Warning -->
+<div class="px-4">
+<div class="flex flex-col gap-4 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900 p-5 md:flex-row md:items-start">
+<div class="text-amber-600 dark:text-amber-500 shrink-0">
+<span class="material-symbols-outlined" style="font-size: 28px;">warning</span>
+</div>
+<div class="flex flex-col gap-2 flex-1">
+<p class="text-[#111618] dark:text-white text-base font-bold leading-tight">切換方案重要注意事項</p>
+<p class="text-[#617f89] dark:text-[#93aab1] text-sm font-normal leading-relaxed">
+                                    為確保帳務結算正確，方案切換需於 <span class="font-bold text-[#111618] dark:text-white">30 天前</span> 提出申請。申請送出後，新方案將於下個結算週期（次月 1 日）正式生效，本週期將仍維持原方案計費標準。請您在切換前仔細評估您的學生人數預測。
+                                </p>
+<a class="mt-2 inline-flex items-center text-sm font-bold text-amber-700 dark:text-amber-500 hover:underline" href="#">
+                                    閱讀完整服務條款
+                                    <span class="material-symbols-outlined ml-1" style="font-size: 16px;">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Super Admin - 教師管理</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13b6ec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#101d22",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1a2c32",
+                        "text-main-light": "#111618",
+                        "text-main-dark": "#ffffff",
+                        "text-sec-light": "#617f89",
+                        "text-sec-dark": "#9aaeb5",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark font-display transition-colors duration-200">
+<div class="flex min-h-screen w-full overflow-hidden">
+<!-- Side Navigation -->
+<aside class="hidden lg:flex flex-col w-72 bg-surface-light dark:bg-surface-dark border-r border-gray-200 dark:border-gray-800 h-screen sticky top-0 shrink-0 z-20">
+<div class="flex flex-col h-full p-4 justify-between">
+<div class="flex flex-col gap-6">
+<!-- User Profile -->
+<div class="flex items-center gap-3 px-2">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12 shadow-sm relative" data-alt="Portrait of the system administrator" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDyycIGclFhToLYQNYLjMpDgi04Nf_zsuNAiUBjA2UToggrE45TUdPcf1iAWKAIt9rsLCcRsth3rc_nPnqEl-8EGHpyVj2EJY-oFdOkPw9XR3tFOSLkVLV3xZE39YZarqV_m4VRwguog0fsafW5GSmKCKVmJ39M4GE1hCS9yjq_nbMErtgtLYzhwjoYSsnfjXrdPZtQhZysLywEMIjSeaxLMGG0aExbdOrwfVxs1foU7yTKO0h72Nzwrui6Afzz3_IFH6BHTIT3MUM");'>
+<span class="absolute bottom-0 right-0 size-3 bg-green-500 border-2 border-white dark:border-surface-dark rounded-full"></span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-text-main-light dark:text-text-main-dark text-base font-bold leading-tight">Super Admin</h1>
+<p class="text-text-sec-light dark:text-text-sec-dark text-xs font-medium">牙牙學語 系統管理</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-text-sec-light dark:text-text-sec-dark hover:bg-background-light dark:hover:bg-gray-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-primary transition-colors">dashboard</span>
+<span class="text-sm font-medium">儀表板</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg bg-primary/10 text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px] fill-1">school</span>
+<span class="text-sm font-bold">教師管理</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-text-sec-light dark:text-text-sec-dark hover:bg-background-light dark:hover:bg-gray-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-primary transition-colors">book_2</span>
+<span class="text-sm font-medium">課程管理</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-text-sec-light dark:text-text-sec-dark hover:bg-background-light dark:hover:bg-gray-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-primary transition-colors">groups</span>
+<span class="text-sm font-medium">學生管理</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-text-sec-light dark:text-text-sec-dark hover:bg-background-light dark:hover:bg-gray-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-primary transition-colors">payments</span>
+<span class="text-sm font-medium">財務報表</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-text-sec-light dark:text-text-sec-dark hover:bg-background-light dark:hover:bg-gray-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-primary transition-colors">settings</span>
+<span class="text-sm font-medium">系統設定</span>
+</a>
+</nav>
+</div>
+<!-- Logout Button -->
+<button class="flex w-full items-center gap-3 px-3 py-3 rounded-lg text-text-sec-light dark:text-text-sec-dark hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400 transition-colors mt-auto">
+<span class="material-symbols-outlined text-[24px]">logout</span>
+<span class="text-sm font-medium">登出系統</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-screen overflow-y-auto relative scroll-smooth">
+<div class="flex-1 px-6 py-8 md:px-12 md:py-10 max-w-[1400px] mx-auto w-full">
+<!-- Page Header -->
+<header class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+<div class="flex flex-col gap-2">
+<h2 class="text-3xl md:text-4xl font-black text-text-main-light dark:text-text-main-dark tracking-tight">教師管理</h2>
+<p class="text-text-sec-light dark:text-text-sec-dark text-base">管理所有註冊教師的帳號權限、狀態與維護費方案</p>
+</div>
+<button class="flex shrink-0 items-center justify-center gap-2 rounded-xl h-12 px-6 bg-primary hover:bg-sky-400 text-white shadow-lg shadow-primary/20 transition-all active:scale-95">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span class="text-sm font-bold tracking-wide">新增教師</span>
+</button>
+</header>
+<!-- Filters & Search -->
+<div class="flex flex-col lg:flex-row gap-4 mb-6 bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
+<!-- Search Input -->
+<div class="flex-1 relative group">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-text-sec-light dark:text-text-sec-dark group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full h-12 pl-12 pr-4 rounded-lg bg-background-light dark:bg-background-dark border-transparent focus:border-primary focus:bg-surface-light dark:focus:bg-surface-dark focus:ring-0 text-text-main-light dark:text-text-main-dark placeholder:text-text-sec-light/70 transition-all outline-none" placeholder="搜尋姓名或電子郵件..." type="text"/>
+</div>
+<!-- Filters -->
+<div class="flex gap-4 overflow-x-auto pb-2 lg:pb-0">
+<div class="relative min-w-[160px]">
+<select class="w-full h-12 pl-4 pr-10 appearance-none rounded-lg bg-background-light dark:bg-background-dark border-transparent focus:border-primary focus:ring-0 text-text-main-light dark:text-text-main-dark cursor-pointer outline-none">
+<option value="">所有狀態</option>
+<option value="active">啟用中</option>
+<option value="disabled">已停用</option>
+</select>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-text-sec-light pointer-events-none text-sm">expand_more</span>
+</div>
+<div class="relative min-w-[160px]">
+<select class="w-full h-12 pl-4 pr-10 appearance-none rounded-lg bg-background-light dark:bg-background-dark border-transparent focus:border-primary focus:ring-0 text-text-main-light dark:text-text-main-dark cursor-pointer outline-none">
+<option value="">所有方案</option>
+<option value="basic">基礎版</option>
+<option value="pro">專業版</option>
+<option value="enterprise">企業版</option>
+</select>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-text-sec-light pointer-events-none text-sm">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Stats Summary (Quick View) -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-3">
+<div class="size-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined">group</span>
+</div>
+<div>
+<p class="text-xs text-text-sec-light dark:text-text-sec-dark font-medium">總教師數</p>
+<p class="text-lg font-bold text-text-main-light dark:text-text-main-dark">128</p>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-3">
+<div class="size-10 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-600 dark:text-green-400">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+<div>
+<p class="text-xs text-text-sec-light dark:text-text-sec-dark font-medium">啟用中</p>
+<p class="text-lg font-bold text-text-main-light dark:text-text-main-dark">112</p>
+</div>
+</div>
+<!-- Add more stats if needed -->
+</div>
+<!-- Data Table Container -->
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+<th class="px-6 py-4 text-xs font-bold text-text-sec-light dark:text-text-sec-dark uppercase tracking-wider w-[280px]">教師姓名</th>
+<th class="px-6 py-4 text-xs font-bold text-text-sec-light dark:text-text-sec-dark uppercase tracking-wider w-[240px]">電子郵件</th>
+<th class="px-6 py-4 text-xs font-bold text-text-sec-light dark:text-text-sec-dark uppercase tracking-wider">維護費方案</th>
+<th class="px-6 py-4 text-xs font-bold text-text-sec-light dark:text-text-sec-dark uppercase tracking-wider">狀態</th>
+<th class="px-6 py-4 text-xs font-bold text-text-sec-light dark:text-text-sec-dark uppercase tracking-wider text-right">操作</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+<!-- Row 1 -->
+<tr class="group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-cover bg-center shrink-0 border border-gray-200 dark:border-gray-700" data-alt="Portrait of Lin Xiao-Mei" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuANZ-oaySP0kVjk34VAVu06wIbevYcQtfoKHy3c2oIOdl-CjEvMvXqoT718BNUAqmY0SvOn0347G4ERc61t_KBny4v1Zkv5deYDkhG3btp-_fIUf8f-MG7mN-G9FweYlLhNG4Rk6IniFtjUm_rxkpYV3dtmo1EwOTROOHqiVa5hIshqjrMy93PjXVE6ZvHsq72btyGH4Pe3yhXZXCEB_YjOWbLJw7LhjWPcMdOn2IdUduJkLhVc_LWgZ6x7ifX5fZ82RJ0qehTu-2k");'>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-text-main-light dark:text-text-main-dark">林小美</span>
+<span class="text-xs text-text-sec-light dark:text-text-sec-dark md:hidden">lin.xm@example.com</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm text-text-sec-light dark:text-text-sec-dark font-medium">lin.xm@example.com</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800">
+                                            專業版
+                                        </span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span>
+<span class="text-sm font-medium text-text-main-light dark:text-text-main-dark">啟用中</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+<button class="size-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-text-sec-light dark:text-text-sec-dark transition-colors" title="編輯">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition-colors" title="刪除">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-cover bg-center shrink-0 border border-gray-200 dark:border-gray-700" data-alt="Portrait of Wang Da-Ming" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBLGWWfrL0jWRTHUvl_HgY2k7yIHdosiB1hBysJpPYK0JEzBCnIRVu8pWrp_4NffzBUDqqA4mMj7JJW771UTL4YMWe2o9VDC9fFOeUFqgbGOoQSGf3DtzxoNP7GhqtTYoUK-L8g9IAct6gbKdQqPss8lzn54BbcukP62nTIcsWXtjAwxjaW0rHTrgWZbVhXEkn4iADhIEBfUoLNzy8BMMvl8HxeOWF-3onUADPhR5mbdgfnRmkwVMwHeSH1xoE53Mcr-C4UAJWLqiQ");'>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-text-main-light dark:text-text-main-dark">王大明</span>
+<span class="text-xs text-text-sec-light dark:text-text-sec-dark md:hidden">wang.dm@test.com</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm text-text-sec-light dark:text-text-sec-dark font-medium">wang.dm@test.com</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                                            基礎版
+                                        </span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-gray-400"></span>
+<span class="text-sm font-medium text-text-sec-light dark:text-text-sec-dark">已停用</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+<button class="size-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-text-sec-light dark:text-text-sec-dark transition-colors" title="編輯">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition-colors" title="刪除">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-cover bg-center shrink-0 border border-gray-200 dark:border-gray-700" data-alt="Portrait of Chen Si-Yu" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAw_2AOzTgC3IQP9-8B7S6AynOYyZFpbxjxJ0be-Xk8Ihuhq-tnsWl5TSWDn3pYQRAPf7gcgQ6jCGJoTlQvHbwhlIfz6wlPrhMtWvyfTicTVTKU11b5jRn8EeKoxyjfQEABjbOAWTP5vEB5JcPFYApyj-1U6H3NXEh0u6iw9RcMtxPte_qciIbwYJ3y5iX1Vda5iu0eNLGHKUh-9d5yGoyewWPGjbV7qz330Sn9EtA-hz1nHsMpcXToEC1bN29DJ6SPv2rmzi38Ygw");'>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-text-main-light dark:text-text-main-dark">陳思妤</span>
+<span class="text-xs text-text-sec-light dark:text-text-sec-dark md:hidden">chen.sy@demo.tw</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm text-text-sec-light dark:text-text-sec-dark font-medium">chen.sy@demo.tw</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800">
+                                            進階版
+                                        </span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span>
+<span class="text-sm font-medium text-text-main-light dark:text-text-main-dark">啟用中</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+<button class="size-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-text-sec-light dark:text-text-sec-dark transition-colors" title="編輯">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition-colors" title="刪除">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-cover bg-center shrink-0 border border-gray-200 dark:border-gray-700" data-alt="Portrait of Chang Zhi-Hao" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAb6wUFT0fR0pMYyRY72cvTCnrwXEiT1mo1LomYebfnKY4Lq-uQRgrCWUCqR7zQ0gnxbsgDibYuH2RckCNhpWFADJowTrNI4uIjPaQsq3B_4gGlgZcdTkwpnYZdFuNQ5ywwcmAmLvD5z5eTAPXeCKox-5yprAnwonkN7-hxyDjrpZS-UcS6vQ2AjQMdt1mATsg7AGYH_ip_SaVYbN3M2yO3VvvHqIy_XckIErZIWMLB7pXAvfeKGIT3DHkjGbIlXwQGZQYqYznA3ag");'>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-text-main-light dark:text-text-main-dark">張志豪</span>
+<span class="text-xs text-text-sec-light dark:text-text-sec-dark md:hidden">chang.jh@mail.com</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm text-text-sec-light dark:text-text-sec-dark font-medium">chang.jh@mail.com</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800">
+                                            專業版
+                                        </span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span>
+<span class="text-sm font-medium text-text-main-light dark:text-text-main-dark">啟用中</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+<button class="size-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-text-sec-light dark:text-text-sec-dark transition-colors" title="編輯">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition-colors" title="刪除">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="group hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-cover bg-center shrink-0 border border-gray-200 dark:border-gray-700" data-alt="Portrait of Lee Shu-Fen" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDjCLMCgpNGALVrkIIQ2dqNCOL2JHr1a-VIcezvxwmRpY_5RvCqzT8nsvi8h3ZGuAEVUp297kEH3DJ_2aEHWc088M6viWEpy2I_4goUNvh9TvYgtfXlq4A-g9UZAUIwTmgrfo-lUqqZF89wPrD4_cqqoFSI4BAysmnBb_UA1LQLF_nXObWV5d2B-R8OSBoucaJux5o46L-ODsUe41cuUI3r5tTF1jQvhsqnS0kMug7q25wHchTsmKeSbYdvISe3Z-JXpqL01tNQa2s");'>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-text-main-light dark:text-text-main-dark">李淑芬</span>
+<span class="text-xs text-text-sec-light dark:text-text-sec-dark md:hidden">lee.sf@web.com</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm text-text-sec-light dark:text-text-sec-dark font-medium">lee.sf@web.com</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-primary/10 text-primary border border-primary/20">
+                                            企業版
+                                        </span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-gray-400"></span>
+<span class="text-sm font-medium text-text-sec-light dark:text-text-sec-dark">已停用</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+<button class="size-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-text-sec-light dark:text-text-sec-dark transition-colors" title="編輯">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition-colors" title="刪除">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-800 bg-surface-light dark:bg-surface-dark">
+<div class="flex items-center gap-2">
+<span class="text-sm text-text-sec-light dark:text-text-sec-dark">顯示 1 到 5 筆，共 128 筆</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="size-8 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-text-sec-light dark:text-text-sec-dark hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded-lg bg-primary text-white text-sm font-bold">1</button>
+<button class="size-8 flex items-center justify-center rounded-lg border border-transparent hover:bg-gray-50 dark:hover:bg-gray-800 text-text-sec-light dark:text-text-sec-dark text-sm font-medium">2</button>
+<button class="size-8 flex items-center justify-center rounded-lg border border-transparent hover:bg-gray-50 dark:hover:bg-gray-800 text-text-sec-light dark:text-text-sec-dark text-sm font-medium">3</button>
+<span class="text-text-sec-light dark:text-text-sec-dark text-sm px-1">...</span>
+<button class="size-8 flex items-center justify-center rounded-lg border border-transparent hover:bg-gray-50 dark:hover:bg-gray-800 text-text-sec-light dark:text-text-sec-dark text-sm font-medium">10</button>
+<button class="size-8 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-text-sec-light dark:text-text-sec-dark hover:bg-gray-50 dark:hover:bg-gray-800">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-TW"><head>
+<meta charset="utf-8"/>
+<title>預約成功 - 牙體雕刻家教系統</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;family=Noto+Sans+TC:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#13b6ec",
+            "primary-dark": "#0e8db9",
+            "background-light": "#f6f8f8",
+            "background-dark": "#101d22",
+            "surface-light": "#ffffff",
+            "surface-dark": "#1a2c32",
+            "text-main-light": "#111618",
+            "text-main-dark": "#e0e6e8",
+            "text-secondary-light": "#617f89",
+            "text-secondary-dark": "#a0b3b9",
+          },
+          fontFamily: {
+            "display": ["Lexend", "Noto Sans TC", "sans-serif"],
+            "body": ["Noto Sans TC", "sans-serif"],
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Lexend', 'Noto Sans TC', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark transition-colors duration-300 min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 w-full bg-surface-light dark:bg-surface-dark border-b border-[#f0f3f4] dark:border-[#2a3c42]">
+<div class="px-4 sm:px-10 py-3 flex items-center justify-between mx-auto max-w-[1440px]">
+<div class="flex items-center gap-4">
+<div class="size-8 text-primary">
+<svg class="w-full h-full" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M39.5563 34.1455V13.8546C39.5563 15.708 36.8773 17.3437 32.7927 18.3189C30.2914 18.916 27.263 19.2655 24 19.2655C20.737 19.2655 17.7086 18.916 15.2073 18.3189C11.1227 17.3437 8.44365 15.708 8.44365 13.8546V34.1455C8.44365 35.9988 11.1227 37.6346 15.2073 38.6098C17.7086 39.2069 20.737 39.5564 24 39.5564C27.263 39.5564 30.2914 39.2069 32.7927 38.6098C36.8773 37.6346 39.5563 35.9988 39.5563 34.1455Z" fill="currentColor"></path>
+<path clip-rule="evenodd" d="M10.4485 13.8519C10.4749 13.9271 10.6203 14.246 11.379 14.7361C12.298 15.3298 13.7492 15.9145 15.6717 16.3735C18.0007 16.9296 20.8712 17.2655 24 17.2655C27.1288 17.2655 29.9993 16.9296 32.3283 16.3735C34.2508 15.9145 35.702 15.3298 36.621 14.7361C37.3796 14.246 37.5251 13.9271 37.5515 13.8519C37.5287 13.7876 37.4333 13.5973 37.0635 13.2931C36.5266 12.8516 35.6288 12.3647 34.343 11.9175C31.79 11.0295 28.1333 10.4437 24 10.4437C19.8667 10.4437 16.2099 11.0295 13.657 11.9175C12.3712 12.3647 11.4734 12.8516 10.9365 13.2931C10.5667 13.5973 10.4713 13.7876 10.4485 13.8519ZM37.5563 18.7877C36.3176 19.3925 34.8502 19.8839 33.2571 20.2642C30.5836 20.9025 27.3973 21.2655 24 21.2655C20.6027 21.2655 17.4164 20.9025 14.7429 20.2642C13.1498 19.8839 11.6824 19.3925 10.4436 18.7877V34.1275C10.4515 34.1545 10.5427 34.4867 11.379 35.027C12.298 35.6207 13.7492 36.2054 15.6717 36.6644C18.0007 37.2205 20.8712 37.5564 24 37.5564C27.1288 37.5564 29.9993 37.2205 32.3283 36.6644C34.2508 36.2054 35.702 35.6207 36.621 35.027C37.4573 34.4867 37.5485 34.1546 37.5563 34.1275V18.7877ZM41.5563 13.8546V34.1455C41.5563 36.1078 40.158 37.5042 38.7915 38.3869C37.3498 39.3182 35.4192 40.0389 33.2571 40.5551C30.5836 41.1934 27.3973 41.5564 24 41.5564C20.6027 41.5564 17.4164 41.1934 14.7429 40.5551C12.5808 40.0389 10.6502 39.3182 9.20848 38.3869C7.84205 37.5042 6.44365 36.1078 6.44365 34.1455L6.44365 13.8546C6.44365 12.2684 7.37223 11.0454 8.39581 10.2036C9.43325 9.3505 10.8137 8.67141 12.343 8.13948C15.4203 7.06909 19.5418 6.44366 24 6.44366C28.4582 6.44366 32.5797 7.06909 35.657 8.13948C37.1863 8.67141 38.5667 9.3505 39.6042 10.2036C40.6278 11.0454 41.5563 12.2684 41.5563 13.8546Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-text-main-light dark:text-text-main-dark text-lg font-bold leading-tight tracking-tight">牙體雕刻家教系統</h2>
+</div>
+<div class="hidden md:flex flex-1 justify-end gap-8">
+<nav class="flex items-center gap-6 lg:gap-9">
+<a class="text-text-main-light dark:text-text-main-dark text-sm font-medium hover:text-primary transition-colors" href="#">課程列表</a>
+<a class="text-text-main-light dark:text-text-main-dark text-sm font-medium hover:text-primary transition-colors" href="#">我的預約</a>
+<a class="text-text-main-light dark:text-text-main-dark text-sm font-medium hover:text-primary transition-colors" href="#">個人檔案</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="flex items-center justify-center rounded-full size-10 bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="User profile avatar of a smiling young woman" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA_ru846x8gv14bP6J-OTj4hGB-1As3P0MOwqCzo6dTi04WiyQnppP59PAQtFVZBoNTc_bTCdF8RFDsI-YStQiKFPxQ8N7DtqEe1OnxgWsoOLuEmP7SLqK3hviJDJfTZkuTY4yxgBMPhZ6Yh2Pb2i3lN4vl4UFHDJt8xWllex9eXnMh88TX2152gq4y3SOqic_tmYTRHu0cf4U-WRjwA2EuvyBTTGf5QIBrWXU_2YdqhBohZD_u2k_Y1gTXcJ-k7HN0ugUhp486prA");'>
+</div>
+</div>
+</div>
+<!-- Mobile Menu Button -->
+<button class="md:hidden text-text-main-light dark:text-text-main-dark">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow flex items-center justify-center p-4 sm:p-8 bg-background-light dark:bg-background-dark">
+<div class="w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm border border-[#e5e7eb] dark:border-[#2a3c42] overflow-hidden">
+<!-- Success Header Section -->
+<div class="flex flex-col items-center pt-10 pb-6 px-6 text-center">
+<div class="size-20 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center mb-6 animate-pulse">
+<span class="material-symbols-outlined text-green-500 text-[48px]">check_circle</span>
+</div>
+<h1 class="text-2xl sm:text-3xl font-bold text-text-main-light dark:text-text-main-dark mb-2">預約成功！</h1>
+<p class="text-text-secondary-light dark:text-text-secondary-dark text-base max-w-md">
+          您的課程已確認。我們已將詳細資訊發送至您的電子郵件，請記得準時出席。
+        </p>
+</div>
+<!-- Course Details Card (Embedded) -->
+<div class="px-6 sm:px-12 py-4">
+<div class="bg-[#f8fafc] dark:bg-[#152329] rounded-xl border border-[#e2e8f0] dark:border-[#2a3c42] p-6">
+<div class="flex flex-col sm:flex-row gap-6">
+<!-- Course Image -->
+<div class="w-full sm:w-1/3 aspect-video sm:aspect-square rounded-lg bg-cover bg-center shrink-0" data-alt="Close up of a dental model being carved with precision tools" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBMpXtETP2XNt5ysfx-YEWd7awAgC8Slrob8eh81PycM_4CP6nziymIljN8adAu1oXuvnkDDkXVoS753BamnLdBz7rjUQYe6_gQBR0hpQ4EmmtdOIkF16UCojMAQidWX7-fF8e7Y0y5hpLh8aGbx7Cj4U7px7yHKmUiYYNu8asaZIs0O8Ie5hFcmcxRjZQRvvQPfLpbldiXZSh-rGJg5xpDqjXs4NiqbjZ78FmbzQZmKnkrGhEKhiTMgV7OQt3txKEhnW3UxWzLV6o");'>
+</div>
+<!-- Details List -->
+<div class="flex-1 flex flex-col justify-center gap-4">
+<div>
+<span class="text-xs font-semibold uppercase tracking-wider text-primary mb-1 block">課程名稱</span>
+<h3 class="text-lg font-bold text-text-main-light dark:text-text-main-dark">進階前牙雕刻實作</h3>
+</div>
+<div class="grid grid-cols-1 gap-3">
+<div class="flex items-center gap-3 text-sm">
+<span class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark text-[20px]">calendar_today</span>
+<span class="text-text-main-light dark:text-text-main-dark font-medium">2023年11月15日 (週三)</span>
+</div>
+<div class="flex items-center gap-3 text-sm">
+<span class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark text-[20px]">schedule</span>
+<span class="text-text-main-light dark:text-text-main-dark font-medium">14:00 - 16:00 (2小時)</span>
+</div>
+<div class="flex items-center gap-3 text-sm pt-1">
+<div class="size-6 rounded-full bg-cover bg-center" data-alt="Portrait of the instructor Lin looking professional" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBAIf928uSvWt7Y_d1mrPYxLCT8G-HvDlCSBaqDpwsASempM9gmchE1i8-r8sDOBk1CbOwQEUlVeGzZz_kq1tePTqyQQQPpMMoKXNJZckZSj_JqlRy0wilj8_ZjjmpqqBHrkzZorFWPvPn5kz4jJME1zR9iDEJb6yZU5FnhTkMABfm2Bvg7h9MKME6tsorGc8wRRCxgAVlxk70nGZls0U0zQELoae1TVPZoHf9YxwTvexTNIwK8VLwHVDPP33s4tZlpI4EwYUzKMLY");'>
+</div>
+<div class="flex flex-col">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">授課講師</span>
+<span class="text-text-main-light dark:text-text-main-dark font-medium">林靜宜 老師</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Add to Calendar Link -->
+<div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-center sm:justify-start">
+<button class="text-primary hover:text-primary-dark text-sm font-medium flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[18px]">event</span>
+               加入行事曆
+             </button>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="px-6 sm:px-12 pt-4 pb-10 flex flex-col items-center gap-4">
+<!-- Primary Action -->
+<button class="w-full sm:w-auto min-w-[200px] h-12 bg-primary hover:bg-primary-dark text-white rounded-lg font-bold text-base shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
+<span>回到學生儀表板</span>
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+</button>
+<!-- Secondary Actions Group -->
+<div class="flex w-full sm:w-auto gap-3 sm:gap-4 justify-center">
+<button class="flex-1 sm:flex-none py-2.5 px-5 bg-gray-100 dark:bg-gray-800 text-text-main-light dark:text-text-main-dark hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors border border-transparent hover:border-gray-300 dark:hover:border-gray-600">
+            查看預約詳情
+          </button>
+<button class="flex-1 sm:flex-none py-2.5 px-5 bg-gray-100 dark:bg-gray-800 text-text-main-light dark:text-text-main-dark hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors border border-transparent hover:border-gray-300 dark:hover:border-gray-600">
+            預約更多課程
+          </button>
+</div>
+</div>
+<!-- Footer Help Link -->
+<div class="bg-gray-50 dark:bg-[#131f24] p-4 text-center border-t border-gray-100 dark:border-gray-800">
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+          需要協助嗎？ <a class="text-primary hover:underline" href="#">聯繫客服</a> 或 <a class="text-primary hover:underline" href="#">查看常見問題</a>
+</p>
+</div>
+</div>
+</main>
+</body></html>

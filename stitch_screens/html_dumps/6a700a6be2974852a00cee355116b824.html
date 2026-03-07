@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-TW"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TimeCarve 刻時 - 教師作品集總覽</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13b6ec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#101d22",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "Noto Sans TC", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .portfolio-card:hover .hover-overlay {
+            opacity: 1;
+        }
+        .portfolio-card:hover img {
+            transform: scale(1.05);
+        }
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen text-[#111618] dark:text-white transition-colors duration-300">
+<!-- TopNavBar -->
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-solid border-[#f0f3f4] dark:border-gray-800">
+<div class="max-w-[1200px] mx-auto px-4 sm:px-10 h-16 flex items-center justify-between">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 flex items-center justify-center bg-primary rounded-lg text-white">
+<span class="material-symbols-outlined text-[20px]">brush</span>
+</div>
+<h1 class="text-[#111618] dark:text-white text-xl font-bold leading-tight tracking-tight">TimeCarve 刻時</h1>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-[#111618] dark:text-gray-300 text-sm font-medium hover:text-primary transition-colors" href="#">首頁</a>
+<a class="text-primary text-sm font-semibold" href="#">所有教師</a>
+<a class="text-[#111618] dark:text-gray-300 text-sm font-medium hover:text-primary transition-colors" href="#">工作坊</a>
+<a class="text-[#111618] dark:text-gray-300 text-sm font-medium hover:text-primary transition-colors" href="#">關於我們</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden sm:flex relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[20px]">search</span>
+<input class="w-48 lg:w-64 pl-10 pr-4 py-2 bg-[#f0f3f4] dark:bg-gray-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary/50 transition-all outline-none" placeholder="搜尋作品或教師..." type="text"/>
+</div>
+<button class="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+<span class="material-symbols-outlined">shopping_cart</span>
+</button>
+<button class="bg-primary text-white px-5 py-2 rounded-lg text-sm font-bold hover:brightness-110 transition-all">
+                    登入
+                </button>
+</div>
+</div>
+</header>
+<main class="max-w-[960px] mx-auto px-4 py-10">
+<!-- ProfileHeader -->
+<div class="flex flex-col items-center mb-12">
+<div class="relative group">
+<div class="size-32 rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-xl mb-4 transition-transform duration-500 group-hover:scale-105">
+<img alt="Teacher profile" class="w-full h-full object-cover" data-alt="Professional female artist portrait with warm smile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJHgOkbo8pHZxalGoo7mSuJokSs60Fk6eHzC6xo87vye0pK6HATXdMPHiVO9IH2_yWUDbQqysOjGt8jbfGcohLBMxfnGDHlzh004NVspTQek5yoYLW4vHwdG9qUXvfbZpdBtb-4wyP-AzC0jutOILlCI6regMVAjm2dYJi5-OQaQtUr8FkupB394Aq1WsZFALfoY0R0zyH7AjaAjWd5dg2aPv2MWSURHtn2bc9BNyYVUBk2na7PwfJ9FVWAb6-WkllaU69_f3NLfw"/>
+</div>
+<div class="absolute bottom-4 right-1 bg-primary text-white size-8 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-800">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+</div>
+</div>
+<div class="text-center space-y-2">
+<h2 class="text-3xl font-bold tracking-tight text-[#111618] dark:text-white">陳語喬 Sarah Chen</h2>
+<p class="text-primary font-medium">在指尖刻劃時間，將美學融入日常手作</p>
+<p class="text-gray-500 dark:text-gray-400 text-sm max-w-lg mx-auto leading-relaxed">
+                    專業陶藝與油畫導師 | 15年教學經驗 | 專注於將自然元素轉化為居家生活藝術。曾於倫敦藝術學院進修，致力於推廣現代女性手作生活美學。
+                </p>
+</div>
+<div class="flex gap-3 mt-6">
+<button class="flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
+<span class="material-symbols-outlined">calendar_month</span>
+                    預約課程
+                </button>
+<button class="flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-white border border-gray-200 dark:border-gray-700 px-6 py-3 rounded-xl font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
+<span class="material-symbols-outlined">mail</span>
+                    諮詢導師
+                </button>
+</div>
+</div>
+<!-- SectionHeader & Chips -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+<h3 class="text-xl font-bold text-[#111618] dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">gallery_thumbnail</span>
+                作品展示集
+            </h3>
+<div class="flex gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
+<button class="flex-none px-4 py-1.5 rounded-full bg-primary text-white text-sm font-medium transition-colors">全部作品</button>
+<button class="flex-none px-4 py-1.5 rounded-full bg-[#f0f3f4] dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">陶藝製作</button>
+<button class="flex-none px-4 py-1.5 rounded-full bg-[#f0f3f4] dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">油畫創作</button>
+<button class="flex-none px-4 py-1.5 rounded-full bg-[#f0f3f4] dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">刺繡藝術</button>
+<button class="flex-none px-4 py-1.5 rounded-full bg-[#f0f3f4] dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">金工飾品</button>
+</div>
+</div>
+<!-- ImageGrid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Card 1 -->
+<div class="portfolio-card group cursor-pointer">
+<div class="relative overflow-hidden rounded-xl aspect-[4/5] mb-3 shadow-sm bg-gray-100">
+<img alt="Ceramic Vase" class="w-full h-full object-cover transition-transform duration-700" data-alt="Modern blue ceramic vase with textured surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3i3_0eL4sQjrfOM4E5L1IK800NYZhvjSYaMf8ccRdW2ynoxogpOETo1Vzbzj_DxV_As8ttSBPdLQYRVgM_B2AeIWZ9g9F-TYtHgEzGT6wfb4_x782kfSp3hnqOvd4YzfvhdR1lWOMho12D1Gj6hWmt2dXRUWd0tjsPlEw_9_Wk-d1fhqWXxTFU7-Qrj9SVryHdntFR43khEER7GGk2PUiPbvvHIBaUxyx-TxNtTzWUE3Xo86C_SbIS7c5zMoS7VT8zON6ZrN4GgY"/>
+<div class="hover-overlay absolute inset-0 bg-black/30 opacity-0 transition-opacity flex items-center justify-center">
+<span class="bg-white/90 text-[#111618] px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">查看詳情</span>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-start">
+<h4 class="text-[#111618] dark:text-white font-bold group-hover:text-primary transition-colors">蔚藍流光花瓶系列</h4>
+<span class="text-xs font-medium text-primary px-2 py-0.5 bg-primary/10 rounded">陶藝</span>
+</div>
+<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">運用天空藍釉料展現如水波般的流動感，每一件皆為手工拉胚而成。</p>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="portfolio-card group cursor-pointer">
+<div class="relative overflow-hidden rounded-xl aspect-[4/5] mb-3 shadow-sm bg-gray-100">
+<img alt="Oil Painting" class="w-full h-full object-cover transition-transform duration-700" data-alt="Impressionist oil painting of sunrise with golden colors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXKu8EGy_qxEFj8dzJgxLAaiei-QHZBAR2j1upqjSG6CVfl1LQGApYk4qy8npsbkkHHPAqxTi8cuaV39tE05WDKZQkvbOmLDlhAB17E7F6gNt78JcpKWsG16IFQubafqQCZMxhw-r8JDj5Qyam8hMZzOxAirhlAfmLBi2MYUwzZ_QQvGG2A5I64UTVNhdLKBhQ1geviVwtb5tKTSt5atIcShTintp9gyIExrj7i2o4ByY813OmHQNebLk5OWm-XOPtCwOB5at_7cA"/>
+<div class="hover-overlay absolute inset-0 bg-black/30 opacity-0 transition-opacity flex items-center justify-center">
+<span class="bg-white/90 text-[#111618] px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">查看詳情</span>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-start">
+<h4 class="text-[#111618] dark:text-white font-bold group-hover:text-primary transition-colors">金黃晨曦油畫</h4>
+<span class="text-xs font-medium text-orange-500 px-2 py-0.5 bg-orange-500/10 rounded">繪畫</span>
+</div>
+<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">捕捉清晨第一道曙光照進工作室的瞬間，富有溫度的厚塗技法。</p>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="portfolio-card group cursor-pointer">
+<div class="relative overflow-hidden rounded-xl aspect-[4/5] mb-3 shadow-sm bg-gray-100">
+<img alt="Embroidery Art" class="w-full h-full object-cover transition-transform duration-700" data-alt="Detailed botanical embroidery in a wooden hoop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAy3B3OEePSPyaa_VAe-WxeZciGsn21BwVwAh6or-DIAytkfYei9XFfZ6ILMB5ywWH1rTbKxu776kapXWKyKkyFY70Er4OLpMgcv9gl27Y_oC6dQO789Y-C4KscGMzz6c3ApTB92IOdv1ASsyYa6zgkxb9nrLOCSLhKFSVA1k0V8akI_Y-hJq8x-kdmvAZ-zolmCbEmFtt5i_0PYknK8SLSuPwZkuSXkenm5a8mnesh4dWuvLKnultq2-oUBlFb4E0GTib7wJrQg34"/>
+<div class="hover-overlay absolute inset-0 bg-black/30 opacity-0 transition-opacity flex items-center justify-center">
+<span class="bg-white/90 text-[#111618] px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">查看詳情</span>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-start">
+<h4 class="text-[#111618] dark:text-white font-bold group-hover:text-primary transition-colors">森林系手工刺繡</h4>
+<span class="text-xs font-medium text-emerald-500 px-2 py-0.5 bg-emerald-500/10 rounded">刺繡</span>
+</div>
+<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">細膩針法勾勒大自然生機，選用天然麻布呈現樸拙質感。</p>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="portfolio-card group cursor-pointer">
+<div class="relative overflow-hidden rounded-xl aspect-[4/5] mb-3 shadow-sm bg-gray-100">
+<img alt="Jewelry" class="w-full h-full object-cover transition-transform duration-700" data-alt="Handcrafted minimalist gold necklace on white background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsopEKsAymMR8_fUi1wlYsZcj3DX-o1VQqOnHhVN48P_W_HzitnZBpE34Wl4rzGKkScMGepGJBlE0k_smd_WG41mXeQ6hgCq6x1qhcc-SXkMYJzMA2tZcHa7ze5ExAZZ1iZ8zu4hkgjWciHNMT0JJR7zz34lOoJPweVvSBosMiN1RyW3kI2v-gR06VluKuGf1ibECMIQiL9Ih99_PIZ_75ZQYXhdRWCG7O2wodLM0Cj-mXsqKxCcocjmAz-wHQeAh0Uf8i2mOuEAY"/>
+<div class="hover-overlay absolute inset-0 bg-black/30 opacity-0 transition-opacity flex items-center justify-center">
+<span class="bg-white/90 text-[#111618] px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">查看詳情</span>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-start">
+<h4 class="text-[#111618] dark:text-white font-bold group-hover:text-primary transition-colors">復古金工項鍊</h4>
+<span class="text-xs font-medium text-purple-500 px-2 py-0.5 bg-purple-500/10 rounded">金工</span>
+</div>
+<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">手工敲製的獨一無二質感，保留了銀飾與黃銅最原始的光澤。</p>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="portfolio-card group cursor-pointer">
+<div class="relative overflow-hidden rounded-xl aspect-[4/5] mb-3 shadow-sm bg-gray-100">
+<img alt="Fluid Art" class="w-full h-full object-cover transition-transform duration-700" data-alt="Abstract fluid acrylic painting with blue and gold" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBe4VRwXhB0MmyDipqT3Z23hzkLuM9FaWlKnpHioVCdi0hIVlQNW380He1m_2kn6m5Carr5jhCAbfCDSaLZNvzZd2GC1akx9JA7LP26dWni9Ei9aUWPFjp39GVt3ehFb61UjoMgqv9w6DjhtQIrEvWC2q7BnSmqNXH3UWxZknOVpGzZ8gwxXYpvVCgR6cNcmropqm8j2j2o_BtfeQFnIRpmAD1VyQyMsRWyBPGJn_E4pMHv5AjNiPI8ZQdtbgCGkjFBk7N6jYVkINI"/>
+<div class="hover-overlay absolute inset-0 bg-black/30 opacity-0 transition-opacity flex items-center justify-center">
+<span class="bg-white/90 text-[#111618] px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">查看詳情</span>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-start">
+<h4 class="text-[#111618] dark:text-white font-bold group-hover:text-primary transition-colors">流體藝術：深海</h4>
+<span class="text-xs font-medium text-primary px-2 py-0.5 bg-primary/10 rounded">創作</span>
+</div>
+<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">色彩碰撞出的視覺饗宴，探索無法預測的隨機美感。</p>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="portfolio-card group cursor-pointer">
+<div class="relative overflow-hidden rounded-xl aspect-[4/5] mb-3 shadow-sm bg-gray-100">
+<img alt="Ceramic Plate" class="w-full h-full object-cover transition-transform duration-700" data-alt="Minimalist geometric ceramic plate with white glaze" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUJTRY2K3a93gNTpSOMH5vF7hLXh0lqXs3QliRpgpspSQWmNjXXdWDVa16lKU94Ixp0YqV5G0GjYuTIo5PWE5gG-oA-OwFMyq5oCpoWcnRHR0TQ1zOmbhM_73DhLnF4Arx1auPt35jTMyClZr8DpPTzbnbGPgceAdIi7x6Nw77iRxuku__TfChSjX9YRtemLAMFY9lJ_m3qvwgLlbBuYIUbwyAwbNdV2-d4P8LVMOCKfUuJLurSJypuQZqD_GwdlzCruNhJ0fgLy4"/>
+<div class="hover-overlay absolute inset-0 bg-black/30 opacity-0 transition-opacity flex items-center justify-center">
+<span class="bg-white/90 text-[#111618] px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">查看詳情</span>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-start">
+<h4 class="text-[#111618] dark:text-white font-bold group-hover:text-primary transition-colors">極簡幾何陶盤</h4>
+<span class="text-xs font-medium text-primary px-2 py-0.5 bg-primary/10 rounded">陶藝</span>
+</div>
+<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">純粹線條與溫潤土質的對話，適合盛裝生活的每一份美好。</p>
+</div>
+</div>
+</div>
+<!-- SectionHeader: Testimonials -->
+<div class="mt-20 border-t border-gray-100 dark:border-gray-800 pt-10">
+<h2 class="text-xl font-bold text-[#111618] dark:text-white px-4 mb-6">學員好評</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 px-4">
+<div class="p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+<div class="flex items-center gap-1 text-yellow-400 mb-3">
+<span class="material-symbols-outlined fill-1">star</span>
+<span class="material-symbols-outlined fill-1">star</span>
+<span class="material-symbols-outlined fill-1">star</span>
+<span class="material-symbols-outlined fill-1">star</span>
+<span class="material-symbols-outlined fill-1">star</span>
+</div>
+<p class="text-gray-600 dark:text-gray-300 italic mb-4">"老師教學非常細心，在陶藝課上學到了很多關於控制釉料的技巧，成品比想像中還要美！"</p>
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-gray-200" data-alt="Student avatar placeholder"></div>
+<div>
+<p class="text-sm font-bold">林小雅</p>
+<p class="text-xs text-gray-400">進階陶藝課程學員</p>
+</div>
+</div>
+</div>
+<div class="p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+<div class="flex items-center gap-1 text-yellow-400 mb-3">
+<span class="material-symbols-outlined fill-1">star</span>
+<span class="material-symbols-outlined fill-1">star</span>
+<span class="material-symbols-outlined fill-1">star</span>
+<span class="material-symbols-outlined fill-1">star</span>
+<span class="material-symbols-outlined fill-1">star</span>
+</div>
+<p class="text-gray-600 dark:text-gray-300 italic mb-4">"陳老師的油畫課氛圍非常放鬆，完全不像傳統課堂那樣嚴肅。非常推薦給想培養興趣的朋友。"</p>
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-gray-200" data-alt="Student avatar placeholder"></div>
+<div>
+<p class="text-sm font-bold">Sophie Wang</p>
+<p class="text-xs text-gray-400">零基礎油畫班學員</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Sticky Booking Button -->
+<div class="fixed bottom-8 right-8 z-40 hidden lg:block">
+<button class="flex items-center gap-3 bg-primary text-white pl-4 pr-6 py-4 rounded-full shadow-2xl shadow-primary/40 hover:scale-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[24px]">event_available</span>
+<span class="font-bold">立即預約 Sarah 的課程</span>
+</button>
+</div>
+<!-- Footer -->
+<footer class="bg-white dark:bg-background-dark border-t border-gray-100 dark:border-gray-800 py-12 px-4 mt-20">
+<div class="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+<div class="col-span-1 md:col-span-2">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary text-[24px]">brush</span>
+<h4 class="text-xl font-bold">TimeCarve 刻時</h4>
+</div>
+<p class="text-gray-500 text-sm max-w-sm">專為女性藝術創作者打造的教學管理平台，讓每一刻創作時光都值得被珍藏。</p>
+</div>
+<div>
+<h5 class="font-bold mb-4">探索</h5>
+<ul class="space-y-2 text-sm text-gray-500">
+<li><a class="hover:text-primary transition-colors" href="#">熱門課程</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">精選教師</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">合作夥伴</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">常見問題</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-bold mb-4">聯繫我們</h5>
+<ul class="space-y-2 text-sm text-gray-500">
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">mail</span> service@timecarve.art</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">location_on</span> 台北市信義區創意大道 88 號</li>
+</ul>
+</div>
+</div>
+<div class="max-w-[1200px] mx-auto pt-10 border-t border-gray-50 dark:border-gray-800 mt-10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-400">
+<p>© 2024 TimeCarve 刻時. All Rights Reserved.</p>
+<div class="flex gap-6">
+<a class="hover:text-primary" href="#">隱私政策</a>
+<a class="hover:text-primary" href="#">服務條款</a>
+</div>
+</div>
+</footer>
+</body></html>

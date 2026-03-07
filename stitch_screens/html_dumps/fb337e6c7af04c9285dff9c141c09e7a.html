@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Super Admin - 管理員儀表板</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0ea5e9", // Sky blue/Cyan matching the screenshot accent
+                        secondary: "#10b981", // Green for financial elements
+                        "background-light": "#f3f4f6",
+                        "background-dark": "#0f172a",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1e293b",
+                        "text-light": "#1f2937",
+                        "text-dark": "#f3f4f6",
+                        "subtext-light": "#6b7280",
+                        "subtext-dark": "#94a3b8",
+                    },
+                    fontFamily: {
+                        display: ["Noto Sans TC", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.75rem", // 12px for softer UI
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark antialiased min-h-screen flex transition-colors duration-300">
+<aside class="w-64 bg-card-light dark:bg-card-dark border-r border-gray-200 dark:border-gray-700 flex flex-col fixed h-full z-20 hidden lg:flex transition-colors duration-300">
+<div class="p-6 flex items-center space-x-3 border-b border-gray-100 dark:border-gray-800">
+<div class="relative">
+<img alt="Super Admin Profile" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary ring-offset-2 dark:ring-offset-gray-900" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAt6W3eIXk2fHV7ExtV5kB8M6gkgNH91LHPohYHNEV1GR6Ot_YkeOJzTvmE-1EVYqbI66jY480BTxj0G_uPFRLhIIaT-Ved3efBy1SOMqYXPWFlp3guuL8uwqw6KIwgIx825PFTnA65hOhzb0NlEsA5IrD3evHcAGrODr9IcrhcTOkPzQ_BQjfhC98fgy_rXLJFcrx2hbzXDC0V0zEp-TM1pR9xacPJ2rvzyzLn68TK8-qB_ZiFcmPH_iNeakodt5pVW8tC86Uro24"/>
+<div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
+</div>
+<div>
+<h2 class="text-sm font-bold text-gray-900 dark:text-white">Super Admin</h2>
+<p class="text-xs text-subtext-light dark:text-subtext-dark">牙牙學語 系統管理</p>
+</div>
+</div>
+<nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+<a class="flex items-center space-x-3 px-3 py-2.5 bg-blue-50 dark:bg-primary/20 text-primary rounded-lg group" href="#">
+<span class="material-icons-outlined text-xl">dashboard</span>
+<span class="font-medium text-sm">儀表板</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 text-subtext-light dark:text-subtext-dark hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg group transition-colors" href="#">
+<span class="material-icons-outlined text-xl group-hover:text-primary transition-colors">school</span>
+<span class="font-medium text-sm">教師管理</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 text-subtext-light dark:text-subtext-dark hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg group transition-colors" href="#">
+<span class="material-icons-outlined text-xl group-hover:text-primary transition-colors">menu_book</span>
+<span class="font-medium text-sm">課程管理</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 text-subtext-light dark:text-subtext-dark hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg group transition-colors" href="#">
+<span class="material-icons-outlined text-xl group-hover:text-primary transition-colors">people</span>
+<span class="font-medium text-sm">學生管理</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 text-subtext-light dark:text-subtext-dark hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg group transition-colors" href="#">
+<span class="material-icons-outlined text-xl group-hover:text-primary transition-colors">payments</span>
+<span class="font-medium text-sm">財務報表</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 text-subtext-light dark:text-subtext-dark hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg group transition-colors" href="#">
+<span class="material-icons-outlined text-xl group-hover:text-primary transition-colors">settings</span>
+<span class="font-medium text-sm">系統設定</span>
+</a>
+</nav>
+<div class="p-4 border-t border-gray-200 dark:border-gray-800">
+<a class="flex items-center space-x-3 px-3 py-2 text-subtext-light dark:text-subtext-dark hover:text-red-500 dark:hover:text-red-400 transition-colors" href="#">
+<span class="material-icons-outlined text-xl">logout</span>
+<span class="font-medium text-sm">登出系統</span>
+</a>
+</div>
+</aside>
+<header class="lg:hidden fixed w-full z-30 top-0 bg-card-light dark:bg-card-dark border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center">
+<h1 class="text-lg font-bold">Admin</h1>
+<button class="text-gray-500 dark:text-gray-400">
+<span class="material-icons-outlined">menu</span>
+</button>
+</header>
+<main class="flex-1 lg:ml-64 p-6 lg:p-10 pt-20 lg:pt-10 overflow-x-hidden">
+<div class="mb-8">
+<h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">管理員儀表板</h1>
+<p class="text-subtext-light dark:text-subtext-dark">管理所有註冊教師的帳板、狀態與總覽方案</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center space-x-4 transition-transform hover:-translate-y-1 duration-300">
+<div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-primary">
+<span class="material-icons-outlined text-2xl">supervisor_account</span>
+</div>
+<div>
+<p class="text-xs text-subtext-light dark:text-subtext-dark font-medium mb-1">總教師數</p>
+<h3 class="text-2xl font-bold text-gray-900 dark:text-white">128</h3>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center space-x-4 transition-transform hover:-translate-y-1 duration-300">
+<div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-primary">
+<span class="material-icons-outlined text-2xl">person_outline</span>
+</div>
+<div>
+<p class="text-xs text-subtext-light dark:text-subtext-dark font-medium mb-1">活躍學生數</p>
+<h3 class="text-2xl font-bold text-gray-900 dark:text-white">1,540</h3>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center space-x-4 transition-transform hover:-translate-y-1 duration-300">
+<div class="p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg text-indigo-500">
+<span class="material-icons-outlined text-2xl">event_available</span>
+</div>
+<div>
+<p class="text-xs text-subtext-light dark:text-subtext-dark font-medium mb-1">總預約數</p>
+<h3 class="text-2xl font-bold text-gray-900 dark:text-white">2,345</h3>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center space-x-4 transition-transform hover:-translate-y-1 duration-300">
+<div class="p-3 bg-green-50 dark:bg-green-900/30 rounded-lg text-secondary">
+<span class="material-icons-outlined text-2xl">attach_money</span>
+</div>
+<div>
+<p class="text-xs text-subtext-light dark:text-subtext-dark font-medium mb-1">總營收概覽</p>
+<h3 class="text-2xl font-bold text-gray-900 dark:text-white">NT$ 850,000</h3>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-6">
+<div class="col-span-12 lg:col-span-9 space-y-6">
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white">每月營收趨勢</h3>
+<div class="flex items-center space-x-2">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="text-xs text-subtext-light dark:text-subtext-dark">2023 年度</span>
+</div>
+</div>
+<div class="relative h-64 w-full">
+<div class="absolute inset-0 flex flex-col justify-between text-xs text-subtext-light dark:text-subtext-dark pointer-events-none">
+<div class="border-b border-dashed border-gray-200 dark:border-gray-700 w-full pb-1">NT$15,000</div>
+<div class="border-b border-dashed border-gray-200 dark:border-gray-700 w-full pb-1">NT$12,000</div>
+<div class="border-b border-dashed border-gray-200 dark:border-gray-700 w-full pb-1">NT$9,000</div>
+<div class="border-b border-dashed border-gray-200 dark:border-gray-700 w-full pb-1">NT$6,000</div>
+<div class="border-b border-dashed border-gray-200 dark:border-gray-700 w-full pb-1">NT$3,000</div>
+<div class="border-b border-gray-300 dark:border-gray-600 w-full pb-1">NT$0</div>
+</div>
+<svg class="absolute inset-0 w-full h-full pt-6 pb-6" preserveAspectRatio="none" viewBox="0 0 100 100">
+<defs>
+<linearGradient id="gradientPrimary" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:0.2"></stop>
+<stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:0"></stop>
+</linearGradient>
+</defs>
+<path class="text-primary" d="M0,80 Q10,75 20,60 T40,50 T60,40 T80,30 L100,10 L100,100 L0,100 Z" fill="url(#gradientPrimary)"></path>
+<path class="text-primary" d="M0,80 Q10,75 20,60 T40,50 T60,40 T80,30 L100,10" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+</svg>
+<div class="absolute bottom-0 w-full flex justify-between text-xs text-subtext-light dark:text-subtext-dark px-2 pt-2">
+<span>1月</span><span>2月</span><span>3月</span><span>4月</span><span>5月</span><span>6月</span><span>7月</span><span>8月</span><span>9月</span><span>10月</span><span>11月</span><span>12月</span>
+</div>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white">新註冊用戶數</h3>
+<select class="text-xs bg-transparent border-gray-200 dark:border-gray-600 rounded text-subtext-light dark:text-subtext-dark">
+<option>最近 6 個月</option>
+<option>最近 12 個月</option>
+</select>
+</div>
+<div class="h-56 flex items-end justify-between space-x-2 lg:space-x-4 px-2">
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full bg-primary/20 dark:bg-primary/10 rounded-t-md relative h-32 group-hover:bg-primary/40 transition-all duration-300">
+<div class="absolute bottom-0 w-full bg-primary rounded-t-md h-24"></div>
+</div>
+<span class="text-xs text-subtext-light dark:text-subtext-dark mt-2">1月</span>
+</div>
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full bg-primary/20 dark:bg-primary/10 rounded-t-md relative h-24 group-hover:bg-primary/40 transition-all duration-300">
+<div class="absolute bottom-0 w-full bg-primary rounded-t-md h-16"></div>
+</div>
+<span class="text-xs text-subtext-light dark:text-subtext-dark mt-2">2月</span>
+</div>
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full bg-primary/20 dark:bg-primary/10 rounded-t-md relative h-40 group-hover:bg-primary/40 transition-all duration-300">
+<div class="absolute bottom-0 w-full bg-primary rounded-t-md h-32"></div>
+</div>
+<span class="text-xs text-subtext-light dark:text-subtext-dark mt-2">3月</span>
+</div>
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full bg-primary/20 dark:bg-primary/10 rounded-t-md relative h-48 group-hover:bg-primary/40 transition-all duration-300">
+<div class="absolute bottom-0 w-full bg-primary rounded-t-md h-40"></div>
+</div>
+<span class="text-xs text-subtext-light dark:text-subtext-dark mt-2">4月</span>
+</div>
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full bg-primary/20 dark:bg-primary/10 rounded-t-md relative h-28 group-hover:bg-primary/40 transition-all duration-300">
+<div class="absolute bottom-0 w-full bg-primary rounded-t-md h-20"></div>
+</div>
+<span class="text-xs text-subtext-light dark:text-subtext-dark mt-2">5月</span>
+</div>
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full bg-primary/20 dark:bg-primary/10 rounded-t-md relative h-36 group-hover:bg-primary/40 transition-all duration-300">
+<div class="absolute bottom-0 w-full bg-primary rounded-t-md h-28"></div>
+</div>
+<span class="text-xs text-subtext-light dark:text-subtext-dark mt-2">6月</span>
+</div>
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full bg-primary/20 dark:bg-primary/10 rounded-t-md relative h-32 group-hover:bg-primary/40 transition-all duration-300">
+<div class="absolute bottom-0 w-full bg-primary rounded-t-md h-24"></div>
+</div>
+<span class="text-xs text-subtext-light dark:text-subtext-dark mt-2">7月</span>
+</div>
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full bg-primary/20 dark:bg-primary/10 rounded-t-md relative h-44 group-hover:bg-primary/40 transition-all duration-300">
+<div class="absolute bottom-0 w-full bg-primary rounded-t-md h-36"></div>
+</div>
+<span class="text-xs text-subtext-light dark:text-subtext-dark mt-2">8月</span>
+</div>
+</div>
+</div>
+</div>
+<div class="col-span-12 lg:col-span-3">
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 h-full">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+<span class="material-icons-outlined text-primary">bolt</span>
+                        快速連結
+                    </h3>
+<div class="flex flex-col gap-4">
+<a class="group block p-4 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-white dark:hover:bg-gray-700 border border-transparent hover:border-primary/30 shadow-sm hover:shadow-md transition-all duration-300" href="#">
+<div class="flex items-center space-x-4">
+<div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-icons-outlined">school</span>
+</div>
+<div>
+<h4 class="font-bold text-gray-800 dark:text-white">教師管理</h4>
+<p class="text-xs text-subtext-light dark:text-subtext-dark mt-0.5">審核與管理師資</p>
+</div>
+<span class="material-icons-outlined text-gray-400 group-hover:text-primary ml-auto">chevron_right</span>
+</div>
+</a>
+<a class="group block p-4 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-white dark:hover:bg-gray-700 border border-transparent hover:border-primary/30 shadow-sm hover:shadow-md transition-all duration-300" href="#">
+<div class="flex items-center space-x-4">
+<div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-icons-outlined">people</span>
+</div>
+<div>
+<h4 class="font-bold text-gray-800 dark:text-white">學生管理</h4>
+<p class="text-xs text-subtext-light dark:text-subtext-dark mt-0.5">查看學生學習進度</p>
+</div>
+<span class="material-icons-outlined text-gray-400 group-hover:text-primary ml-auto">chevron_right</span>
+</div>
+</a>
+<a class="group block p-4 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-white dark:hover:bg-gray-700 border border-transparent hover:border-primary/30 shadow-sm hover:shadow-md transition-all duration-300" href="#">
+<div class="flex items-center space-x-4">
+<div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-icons-outlined">attach_money</span>
+</div>
+<div>
+<h4 class="font-bold text-gray-800 dark:text-white">維護費總覽</h4>
+<p class="text-xs text-subtext-light dark:text-subtext-dark mt-0.5">平台費用與報表</p>
+</div>
+<span class="material-icons-outlined text-gray-400 group-hover:text-primary ml-auto">chevron_right</span>
+</div>
+</a>
+<a class="group block p-4 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-white dark:hover:bg-gray-700 border border-transparent hover:border-primary/30 shadow-sm hover:shadow-md transition-all duration-300" href="#">
+<div class="flex items-center space-x-4">
+<div class="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-300 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-icons-outlined">announcement</span>
+</div>
+<div>
+<h4 class="font-bold text-gray-800 dark:text-white">發布公告</h4>
+<p class="text-xs text-subtext-light dark:text-subtext-dark mt-0.5">全站消息推播</p>
+</div>
+<span class="material-icons-outlined text-gray-400 group-hover:text-primary ml-auto">chevron_right</span>
+</div>
+</a>
+<a class="group block p-4 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-white dark:hover:bg-gray-700 border border-transparent hover:border-primary/30 shadow-sm hover:shadow-md transition-all duration-300" href="#">
+<div class="flex items-center space-x-4">
+<div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-icons-outlined">featured_video</span>
+</div>
+<div>
+<h4 class="font-bold text-gray-800 dark:text-white">首頁及登入頁面廣告</h4>
+<p class="text-xs text-subtext-light dark:text-subtext-dark mt-0.5">修改首頁與登入頁內容</p>
+</div>
+<span class="material-icons-outlined text-gray-400 group-hover:text-primary ml-auto">chevron_right</span>
+</div>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-12 text-center text-xs text-subtext-light dark:text-subtext-dark">
+            © 2023 牙牙學語 Denture Carving Tutoring System. All rights reserved.
+        </div>
+</main>
+<button class="fixed bottom-6 right-6 bg-gray-900 dark:bg-white text-white dark:text-gray-900 p-3 rounded-full shadow-lg z-50 hover:scale-110 transition-transform" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-icons-outlined block dark:hidden">dark_mode</span>
+<span class="material-icons-outlined hidden dark:block">light_mode</span>
+</button>
+
+</body></html>

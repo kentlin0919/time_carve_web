@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TimeCarve 刻時 - 404 頁面未找到</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;family=Noto+Sans+TC:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13b6ec",
+                        "primary-dark": "#0ea5d9",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#101d22",
+                        "text-main": "#111618",
+                        "text-light": "#637588",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "Noto Sans TC", "sans-serif"],
+                        "body": ["Lexend", "Noto Sans TC", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom floating animation for the 404 graphic */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased transition-colors duration-200">
+<div class="relative flex min-h-screen w-full flex-col overflow-hidden">
+<!-- Header -->
+<header class="flex items-center justify-between px-6 py-5 lg:px-12 w-full max-w-[1280px] mx-auto z-10">
+<div class="flex items-center gap-3">
+<div class="size-10 flex items-center justify-center rounded-xl bg-primary/10 text-primary">
+<!-- Streamlined Sky Blue Icon -->
+<span class="material-symbols-outlined text-3xl">water_drop</span>
+</div>
+<h1 class="text-text-main dark:text-white text-xl font-bold tracking-tight">TimeCarve 刻時</h1>
+</div>
+<!-- Optional Top Right Action for consistency -->
+<a class="hidden md:flex text-sm font-medium text-text-light hover:text-primary dark:text-slate-400 dark:hover:text-primary transition-colors" href="#">
+                需要協助？
+            </a>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex items-center justify-center px-4 py-8 relative">
+<!-- Decorative Background Blobs -->
+<div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-0 pointer-events-none"></div>
+<div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl -z-0 pointer-events-none"></div>
+<div class="layout-content-container flex flex-col items-center max-w-[640px] w-full z-10">
+<!-- Illustration Area -->
+<div class="relative w-full max-w-[400px] aspect-[4/3] mb-8 animate-float">
+<div class="w-full h-full bg-center bg-contain bg-no-repeat" data-alt="Abstract artistic painting supplies and soft blue fluid shapes representing creativity" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDj056gMXnmCUGEHxBDUqpGLhtcpA68GMUoc9hYBDWRtX3-y5OxaDwhOwQBrP6AIEuxxmRyxvVOc-8mTEjjm6LKXS1XjtUC9YaoqCRQTL-BIub2bF4FU6BD5QjMZWeskL-S0YfipOhMGzzchjpEOTsUNNJxhIFs4got-6x7mJYMoV1CQ_rStUXKnhKIYVJcC-OuJbtRRmh3slcMpPujRX-FvLyyuswOIL48KGvVUOoJonWKA50BfR7HVTBJw9Ekqb6PAGX_-J9xcog'); border-radius: 24px;">
+</div>
+<!-- Overlay gradient to blend image if needed, or add depth -->
+<div class="absolute inset-0 bg-gradient-to-t from-background-light dark:from-background-dark to-transparent opacity-20"></div>
+</div>
+<!-- Text Content -->
+<div class="flex flex-col items-center text-center gap-4 mb-10 px-4">
+<h2 class="text-8xl md:text-9xl font-bold text-primary/20 dark:text-primary/10 leading-none select-none">404</h2>
+<h3 class="text-text-main dark:text-white text-2xl md:text-3xl font-bold leading-tight">
+                        頁面未找到
+                    </h3>
+<p class="text-text-light dark:text-slate-400 text-base md:text-lg font-normal leading-relaxed max-w-[480px]">
+                        就像一件未完成的藝術品，這個頁面似乎還在打磨中。<br class="hidden md:block"/>
+                        您似乎走失了，別擔心，我們可以幫您找回來！
+                    </p>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col sm:flex-row items-center gap-4 w-full max-w-[480px] justify-center">
+<!-- Primary Button -->
+<button class="w-full sm:w-auto min-w-[140px] h-12 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-sm tracking-wide transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 group">
+<span class="material-symbols-outlined text-[20px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                        返回首頁
+                    </button>
+<!-- Secondary Button -->
+<button class="w-full sm:w-auto min-w-[140px] h-12 px-6 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary dark:hover:border-primary text-text-main dark:text-white font-bold text-sm tracking-wide transition-all flex items-center justify-center gap-2 group">
+<span class="material-symbols-outlined text-[20px] text-primary group-hover:scale-110 transition-transform">grid_view</span>
+                        查看所有課程
+                    </button>
+</div>
+<!-- Tertiary Link -->
+<div class="mt-8">
+<button class="text-text-light hover:text-primary dark:text-slate-400 dark:hover:text-primary text-sm font-medium flex items-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-[18px]">mail</span>
+                        聯絡我們
+                    </button>
+</div>
+</div>
+</main>
+<!-- Minimal Footer for context -->
+<footer class="w-full py-6 text-center text-xs text-slate-400 dark:text-slate-600">
+<p>© 2024 TimeCarve 刻時. All rights reserved.</p>
+</footer>
+</div>
+</body></html>

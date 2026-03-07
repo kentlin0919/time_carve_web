@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>儲存成功 - 牙體雕刻課程管理系統</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;family=Noto+Sans+TC:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13b6ec",
+                        "primary-dark": "#0e9ac9",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#0f172a",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1e293b",
+                        "text-main": "#334155",
+                        "text-sub": "#64748b",
+                        "border-light": "#e2e8f0",
+                        "border-dark": "#334155",
+                        "success": "#10b981",
+                        "danger": "#ef4444"
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "Noto Sans TC", "sans-serif"],
+                        "sans": ["Lexend", "Noto Sans TC", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.375rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                    boxShadow: {
+                        'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+                        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main dark:text-gray-200 font-display overflow-hidden antialiased">
+<div class="flex h-screen w-full">
+<aside class="w-72 flex-shrink-0 flex flex-col bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark h-full transition-all duration-300 z-20 shadow-sm relative">
+<div class="p-6 flex flex-col h-full justify-between">
+<div class="flex flex-col gap-8">
+<div class="flex flex-col gap-6">
+<div class="flex items-center gap-2 px-1">
+<span class="material-symbols-outlined text-primary text-3xl">draw_collage</span>
+<h2 class="text-xl font-bold tracking-tight text-slate-800 dark:text-white">雕刻時光</h2>
+</div>
+<div class="flex items-center gap-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-border-light dark:border-border-dark">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-12 shadow-sm ring-2 ring-white dark:ring-slate-700" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDO6reZcrIx4TpNaoa2cHckBMT5jGOVcSOgCiWFeFHvwR5BhOlm6EzZoO1nDA5jhhdVnLiS3xPcbfPeCVuaPW7x9yyQ1OpilXHhQqZf7s1ilC_fOFoonIf98HRVehAYuVriM8l3I0MrYHIn39RVWEj_4jU-wlh_BemOK4VeRUNedhA-sln2p5816fNCRlBCziM3mk1IHmY1EIx1yw45MJkIcGFi9fz7JcPrVe1C0mU8MYnl7CYlnU1BMQEyHUmuypSHuwydpWLgPOU");'>
+</div>
+<div class="flex flex-col min-w-0">
+<h1 class="text-slate-900 dark:text-white text-base font-bold truncate">林曉梅</h1>
+<p class="text-text-sub dark:text-gray-400 text-xs truncate">專業牙體雕刻導師</p>
+</div>
+</div>
+</div>
+<nav class="flex flex-col gap-1.5">
+<p class="px-3 text-xs font-semibold text-text-sub uppercase tracking-wider mb-2">管理中心</p>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">dashboard</span>
+<span>儀表板總覽</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">calendar_month</span>
+<span>預約管理</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">school</span>
+<span>課程方案</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">photo_library</span>
+<span>作品集管理</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">group</span>
+<span>學生資訊</span>
+</a>
+<p class="px-3 text-xs font-semibold text-text-sub uppercase tracking-wider mt-6 mb-2">財務與分析</p>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary-dark dark:text-primary border-l-4 border-primary transition-all font-medium" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span>營收報表</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">edit_note</span>
+<span>新增記帳</span>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-3 mt-4">
+<div class="h-px bg-border-light dark:bg-border-dark w-full"></div>
+<button class="flex w-full items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">系統設定</span>
+</button>
+<button class="flex w-full items-center gap-3 px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-sm font-medium">登出系統</span>
+</button>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col h-full overflow-hidden relative bg-background-light dark:bg-background-dark">
+<header class="w-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark px-8 py-4 flex justify-between items-center sticky top-0 z-10 transition-all">
+<div class="flex flex-col">
+<h2 class="text-slate-800 dark:text-white text-xl font-bold tracking-tight flex items-center gap-2">
+                    操作完成
+                </h2>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center justify-center gap-2 rounded-lg h-9 px-4 text-text-sub hover:text-text-main transition-colors text-sm font-medium">
+<span class="material-symbols-outlined text-[20px]">help</span>
+<span>使用說明</span>
+</button>
+</div>
+</header>
+<div class="flex-1 flex items-center justify-center p-4 md:p-8 scroll-smooth">
+<div class="max-w-xl w-full mx-auto">
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card overflow-hidden text-center p-12">
+<div class="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-6 ring-8 ring-emerald-50 dark:ring-emerald-900/10">
+<span class="material-symbols-outlined text-5xl text-emerald-500 dark:text-emerald-400">check_circle</span>
+</div>
+<h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">記錄狀態已成功更新！</h2>
+<p class="text-text-sub dark:text-gray-400 mb-8 max-w-sm mx-auto">
+                        #REC-20231025-01 的付款狀態與備註已同步儲存。系統已自動發送通知信給學生。
+                    </p>
+<div class="flex flex-col gap-3 sm:flex-row justify-center w-full">
+<button class="px-6 py-3 rounded-xl border border-border-light dark:border-border-dark text-slate-700 dark:text-gray-300 font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors w-full sm:w-auto" type="button">
+                            返回儀表板
+                        </button>
+<button class="px-6 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors w-full sm:w-auto flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">receipt_long</span>
+                            查看記錄詳情
+                        </button>
+<button class="px-6 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold shadow-lg shadow-primary/30 transition-all active:scale-95 w-full sm:w-auto flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">calendar_month</span>
+                            返回預約管理
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-TW"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>申請改期 - 牙體雕刻課程</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;family=Noto+Sans+TC:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2dd4bf","primary-dark": "#14b8a6",
+                        "secondary": "#f472b6","background-light": "#f8fafc","background-dark": "#0f172a","surface-light": "#ffffff",
+                        "surface-dark": "#1e293b","text-main": "#334155","text-light": "#64748b",},
+                    fontFamily: {
+                        "display": ["Lexend", "Noto Sans TC", "sans-serif"],
+                        "body": ["Noto Sans TC", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem", 
+                        "lg": "1rem", 
+                        "xl": "1.25rem", 
+                        "2xl": "1.5rem", 
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(45, 212, 191, 0.3)',
+                        'floating': '0 10px 40px -10px rgba(0,0,0,0.1)'
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Lexend', 'Noto Sans TC', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        .trans-all { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .calendar-day { cursor: pointer; }
+        .calendar-day:not(.disabled):hover { background-color: rgba(45, 212, 191, 0.1); color: #14b8a6; transform: translateY(-2px); }
+        .calendar-day.selected { background-color: #2dd4bf; color: white; box-shadow: 0 4px 12px rgba(45, 212, 191, 0.4); transform: scale(1.05); }
+        .time-slot { cursor: pointer; position: relative; overflow: hidden; }
+        .time-slot:not(:disabled):hover { border-color: #2dd4bf; color: #14b8a6; background-color: rgba(45, 212, 191, 0.05); }
+        .time-slot.selected { border-color: #2dd4bf; background-color: #2dd4bf; color: white; box-shadow: 0 4px 12px rgba(45, 212, 191, 0.3); }
+        .step-line::before {
+            content: ''; position: absolute; top: 0; bottom: 0; left: 19px; width: 2px; background: #e2e8f0; z-index: 0;
+        }
+        .dark .step-line::before { background: #334155; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main dark:text-slate-100 transition-colors duration-200 antialiased selection:bg-primary/20 selection:text-primary-dark">
+<div class="flex h-screen w-full overflow-hidden">
+<aside class="w-72 flex-shrink-0 flex flex-col bg-surface-light dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 transition-colors duration-200 hidden md:flex z-30 shadow-sm">
+<div class="p-6 flex flex-col h-full">
+<div class="flex items-center gap-3 mb-10 text-primary-dark dark:text-primary">
+<div class="p-2.5 bg-gradient-to-br from-primary/20 to-primary/5 rounded-xl border border-primary/10">
+<span class="material-symbols-outlined text-[28px]">dentistry</span>
+</div>
+<span class="font-display font-bold text-xl tracking-tight text-slate-800 dark:text-white">牙雕家教</span>
+</div>
+<nav class="flex flex-col gap-2 flex-1">
+<div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-4">主選單</div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-light dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 trans-all group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:scale-110 trans-all">dashboard</span>
+<span class="text-sm font-medium">儀表板</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-light dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 trans-all group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:scale-110 trans-all">menu_book</span>
+<span class="text-sm font-medium">課程方案</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-light dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 trans-all group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:scale-110 trans-all">calendar_add_on</span>
+<span class="text-sm font-medium">預約課程</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 text-primary-dark dark:text-primary transition-colors group relative overflow-hidden shadow-sm ring-1 ring-primary/20" href="#">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"></div>
+<span class="material-symbols-outlined text-[22px]">calendar_month</span>
+<span class="text-sm font-bold">預約記錄</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-light dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 trans-all group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:scale-110 trans-all">trending_up</span>
+<span class="text-sm font-medium">學習進度</span>
+</a>
+<div class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-6 mb-2 px-4">帳戶管理</div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-light dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 trans-all group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:scale-110 trans-all">settings</span>
+<span class="text-sm font-medium">個人設定</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer trans-all">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 shadow-sm relative ring-2 ring-white dark:ring-slate-700" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBHpcmx5FN0ieyK-KUTHlzpCr7Aj8wyk3XwCcfO9sBG40Fan-DY44DtRxhLT6rnswES6q6B0xREgxnk1ImkFwzDG1AjLCEp0il-_ttTxQZAjLL4AmXamRYBu2Zh6v2QyEZ0GyVpujs4Zkwv3aEJLnYJezfNy4L9DxmcDC3Z5QoMc3eQbRTwtSxoYieRI_nfI5E5ysjpEjZueHWnjExK4sfPdXovbW73WmDh1wuhV8s2zmYq5qKDODTOCJw_efYco-8WOO4DyDdedxA");'>
+<div class="absolute bottom-0 right-0 size-2.5 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
+</div>
+<div class="flex flex-col overflow-hidden">
+<h1 class="text-slate-800 dark:text-white text-sm font-bold truncate">陳小美</h1>
+<p class="text-slate-500 dark:text-slate-400 text-xs truncate">進階學員</p>
+</div>
+<span class="material-symbols-outlined text-slate-400 ml-auto">logout</span>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 overflow-y-auto relative h-full bg-background-light dark:bg-background-dark scroll-smooth">
+<div class="md:hidden flex items-center justify-between p-4 bg-surface-light/90 dark:bg-surface-dark/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40">
+<div class="flex items-center gap-3">
+<div class="bg-primary/10 p-1.5 rounded-lg text-primary-dark">
+<span class="material-symbols-outlined text-[20px]">dentistry</span>
+</div>
+<span class="font-bold text-slate-800 dark:text-white">牙雕家教</span>
+</div>
+<button class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+<div class="container mx-auto max-w-6xl p-6 md:p-10 pb-24">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 animate-fade-in">
+<div>
+<div class="flex items-center gap-2 mb-3 text-slate-500 dark:text-slate-400 text-sm font-medium">
+<a class="hover:text-primary transition-colors" href="#">預約記錄</a>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-slate-800 dark:text-white">申請改期</span>
+</div>
+<h1 class="text-slate-900 dark:text-white text-3xl font-display font-black leading-tight tracking-tight">
+                        申請課程改期
+                    </h1>
+<p class="text-slate-500 dark:text-slate-400 mt-2 max-w-2xl">
+                        請選擇新的上課時間。請注意，距離原定上課時間 24 小時內的改期可能需要經由教師審核。
+                    </p>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 relative">
+<div class="lg:col-span-8 flex flex-col gap-6">
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 border-l-4 border-l-amber-500 border border-slate-200 dark:border-slate-800 shadow-soft flex flex-col sm:flex-row gap-5 items-start relative">
+<div class="flex-1">
+<h3 class="font-bold text-xs text-amber-600 dark:text-amber-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">edit_calendar</span>
+                                目前欲改期的課程
+                            </h3>
+<h2 class="font-bold text-xl text-slate-800 dark:text-white mb-4">全口假牙專修班</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-8">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined text-[18px]">event</span>
+</div>
+<div>
+<p class="text-xs text-slate-500">原預約日期</p>
+<p class="text-sm font-bold text-slate-700 dark:text-slate-300">2023年 11月 02日 (四)</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+</div>
+<div>
+<p class="text-xs text-slate-500">原預約時間</p>
+<p class="text-sm font-bold text-slate-700 dark:text-slate-300">10:00 - 11:30</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined text-[18px]">person</span>
+</div>
+<div>
+<p class="text-xs text-slate-500">授課教師</p>
+<p class="text-sm font-bold text-slate-700 dark:text-slate-300">林醫師</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+</div>
+<div>
+<p class="text-xs text-slate-500">上課地點</p>
+<p class="text-sm font-bold text-slate-700 dark:text-slate-300">教室 A03</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-slate-800 shadow-soft overflow-hidden step-line relative pb-4">
+<div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between relative z-10 bg-surface-light dark:bg-surface-dark">
+<h2 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
+<span class="flex items-center justify-center size-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-lg font-bold shadow-md">1</span>
+                                選擇新日期
+                            </h2>
+<div class="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+<button class="p-1.5 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-slate-500 shadow-sm transition-all">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<span class="font-bold text-slate-800 dark:text-white px-4 text-sm">2023年 11月</span>
+<button class="p-1.5 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-slate-500 shadow-sm transition-all">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="p-6 relative z-10 bg-surface-light dark:bg-surface-dark">
+<div class="grid grid-cols-7 gap-1 text-center mb-4">
+<span class="text-xs font-bold text-slate-400 py-2">日</span>
+<span class="text-xs font-bold text-slate-400 py-2">一</span>
+<span class="text-xs font-bold text-slate-400 py-2">二</span>
+<span class="text-xs font-bold text-slate-400 py-2">三</span>
+<span class="text-xs font-bold text-slate-400 py-2">四</span>
+<span class="text-xs font-bold text-slate-400 py-2">五</span>
+<span class="text-xs font-bold text-slate-400 py-2">六</span>
+</div>
+<div class="grid grid-cols-7 gap-2 sm:gap-4 text-center">
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-300 pointer-events-none opacity-50">29</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-300 pointer-events-none opacity-50">30</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-300 pointer-events-none opacity-50">31</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-600 dark:text-slate-400 calendar-day trans-all group">
+<span class="text-sm font-medium">1</span>
+</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-400 dark:text-slate-600 bg-amber-50 dark:bg-amber-900/10 cursor-not-allowed border-2 border-amber-100 dark:border-amber-800/30">
+<span class="text-sm font-medium">2</span>
+<span class="text-[9px] text-amber-500 font-bold mt-[-2px]">原訂</span>
+</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-600 dark:text-slate-400 calendar-day trans-all group">
+<span class="text-sm font-medium">3</span>
+</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-300 dark:text-slate-600 bg-slate-50 dark:bg-slate-800/50 cursor-not-allowed">
+<span class="text-sm font-medium">4</span>
+</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-300 dark:text-slate-600 bg-slate-50 dark:bg-slate-800/50 cursor-not-allowed">
+<span class="text-sm font-medium">5</span>
+</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-600 dark:text-slate-400 calendar-day trans-all group">
+<span class="text-sm font-medium">6</span>
+</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-600 dark:text-slate-400 calendar-day trans-all group">
+<span class="text-sm font-medium">7</span>
+</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-600 dark:text-slate-400 calendar-day trans-all relative group bg-green-50/50 dark:bg-green-900/10">
+<span class="text-sm font-medium">8</span>
+<span class="absolute bottom-2 w-1.5 h-1.5 rounded-full bg-primary ring-2 ring-white dark:ring-surface-dark"></span>
+</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center calendar-day selected trans-all font-bold ring-4 ring-primary/20 relative z-20">
+<span class="text-lg">9</span>
+</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-600 dark:text-slate-400 calendar-day trans-all group">
+<span class="text-sm font-medium">10</span>
+</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-600 dark:text-slate-400 calendar-day trans-all group">
+<span class="text-sm font-medium">11</span>
+</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-600 dark:text-slate-400 calendar-day trans-all group">
+<span class="text-sm font-medium">12</span>
+</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-600 dark:text-slate-400 calendar-day trans-all group">
+<span class="text-sm font-medium">13</span>
+</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-600 dark:text-slate-400 calendar-day trans-all group">
+<span class="text-sm font-medium">14</span>
+</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-600 dark:text-slate-400 calendar-day trans-all relative group bg-green-50/50 dark:bg-green-900/10">
+<span class="text-sm font-medium">15</span>
+<span class="absolute bottom-2 w-1.5 h-1.5 rounded-full bg-primary ring-2 ring-white dark:ring-surface-dark"></span>
+</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-600 dark:text-slate-400 calendar-day trans-all group">
+<span class="text-sm font-medium">16</span>
+</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-600 dark:text-slate-400 calendar-day trans-all group">
+<span class="text-sm font-medium">17</span>
+</button>
+<button class="aspect-square rounded-xl flex flex-col items-center justify-center text-slate-600 dark:text-slate-400 calendar-day trans-all group">
+<span class="text-sm font-medium">18</span>
+</button>
+</div>
+<div class="mt-6 flex items-center justify-center gap-6 text-xs text-slate-500">
+<div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-primary"></span> 可選擇</div>
+<div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> 原定日期</div>
+<div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-white border-2 border-primary box-border"></span> 新選取</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-slate-800 shadow-soft overflow-hidden relative">
+<div class="p-6 border-b border-slate-100 dark:border-slate-800 relative z-10 bg-surface-light dark:bg-surface-dark">
+<h2 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-3">
+<span class="flex items-center justify-center size-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-lg font-bold shadow-md">2</span>
+                                選擇新時段
+                                <span class="text-sm font-normal text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full ml-2">11月9日 (四)</span>
+</h2>
+</div>
+<div class="p-6 relative z-10 bg-surface-light dark:bg-surface-dark">
+<div class="mb-6">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-amber-500 text-[20px]">wb_sunny</span>
+<span class="text-xs font-bold text-slate-400 uppercase tracking-wider">上午時段</span>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+<button class="time-slot border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-medium text-slate-600 dark:text-slate-300 trans-all hover:shadow-md">09:00</button>
+<button class="time-slot border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-medium text-slate-600 dark:text-slate-300 trans-all hover:shadow-md">10:00</button>
+<button class="time-slot border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 text-sm font-medium text-slate-400 dark:text-slate-500 cursor-not-allowed flex items-center justify-center gap-1" disabled="">
+                                        11:00 <span class="text-[10px] block">(已滿)</span>
+</button>
+</div>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-orange-500 text-[20px]">sunny</span>
+<span class="text-xs font-bold text-slate-400 uppercase tracking-wider">下午時段</span>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+<button class="time-slot border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-medium text-slate-600 dark:text-slate-300 trans-all hover:shadow-md">13:00</button>
+<button class="time-slot selected border border-primary dark:border-primary bg-primary/5 text-primary-dark dark:text-primary rounded-xl p-3 text-sm font-bold trans-all shadow-glow ring-1 ring-primary relative overflow-hidden group">
+<span class="relative z-10">14:00</span>
+<span class="absolute right-0 top-0 p-0.5 text-primary opacity-20 group-hover:opacity-100 trans-all">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+</span>
+</button>
+<button class="time-slot border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-medium text-slate-600 dark:text-slate-300 trans-all hover:shadow-md">15:00</button>
+<button class="time-slot border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-medium text-slate-600 dark:text-slate-300 trans-all hover:shadow-md">16:00</button>
+<button class="time-slot border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-medium text-slate-600 dark:text-slate-300 trans-all hover:shadow-md">17:00</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-4">
+<div class="sticky top-24 z-20">
+<div class="bg-surface-light dark:bg-surface-dark rounded-3xl border border-slate-200 dark:border-slate-800 shadow-floating overflow-hidden">
+<div class="h-2 bg-gradient-to-r from-amber-500 to-orange-400 w-full"></div>
+<div class="p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
+<div class="flex justify-between items-start mb-2">
+<h2 class="text-lg font-bold text-slate-800 dark:text-white">改期預覽</h2>
+<span class="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-200 uppercase tracking-wide">Review</span>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400">請確認您的新預約資訊。</p>
+</div>
+<div class="p-6 flex flex-col gap-6">
+<div class="space-y-5 relative">
+<div class="absolute left-[19px] top-4 bottom-4 w-0.5 border-l-2 border-dashed border-slate-200 dark:border-slate-700"></div>
+<div class="flex gap-4 items-start relative">
+<div class="w-10 h-10 rounded-full bg-white dark:bg-surface-dark border-2 border-primary/20 text-primary flex items-center justify-center shrink-0 shadow-sm z-10">
+<span class="material-symbols-outlined text-[20px]">calendar_today</span>
+</div>
+<div class="pt-1 w-full">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">預約日期 Date</p>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-slate-400 line-through decoration-slate-400 decoration-1">原: 11月 02日 (四)</span>
+<span class="text-primary-dark dark:text-primary font-bold text-base bg-primary/5 px-2 py-0.5 rounded -ml-2 w-fit">新: 11月 09日 (四)</span>
+</div>
+</div>
+</div>
+<div class="flex gap-4 items-start relative">
+<div class="w-10 h-10 rounded-full bg-white dark:bg-surface-dark border-2 border-primary/20 text-primary flex items-center justify-center shrink-0 shadow-sm z-10">
+<span class="material-symbols-outlined text-[20px]">schedule</span>
+</div>
+<div class="pt-1 w-full">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">預約時間 Time</p>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-slate-400 line-through decoration-slate-400 decoration-1">原: 10:00</span>
+<span class="text-primary-dark dark:text-primary font-bold text-base bg-primary/5 px-2 py-0.5 rounded -ml-2 w-fit">新: 14:00</span>
+</div>
+</div>
+</div>
+<div class="flex gap-4 items-start relative">
+<div class="w-10 h-10 rounded-full bg-white dark:bg-surface-dark border-2 border-slate-200 text-slate-400 flex items-center justify-center shrink-0 shadow-sm z-10">
+<span class="material-symbols-outlined text-[20px]">person</span>
+</div>
+<div class="pt-1">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">指導教師 Teacher</p>
+<div class="flex items-center gap-2 opacity-80">
+<img alt="Teacher" class="w-5 h-5 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdiNjc29PDosXkaAwEIXt7Hpglj6N5VsojTMtp-MNAMCIBGHEXt4hZKQ-Jti3YnlckxTrhV4EqeypOawGiW7uoSPfqHO_-3ZUQVkP1Tjub-8-HKj3y57ZkiEfCH_42MHl84Pu2BF3Ro6S1NyMIznk_IXvIOCgI2UYpQS-lfFkLIgOaOlys_8oLoz6o3HjopxrN0-jS3lXslFk3gYeIqFv1S3LOZ1rV3uspDpfgHQKMZ7jFe3sMvOn9ZzSvryRni00phs9DUvfVbXc"/>
+<p class="text-slate-800 dark:text-white font-bold text-sm">林醫師</p>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-5 border-t border-slate-100 dark:border-slate-800">
+<label class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 block flex items-center gap-1" for="reason">
+<span class="material-symbols-outlined text-[16px]">edit_note</span>
+                                        改期原因 (選填)
+                                    </label>
+<div class="relative">
+<textarea class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 text-sm focus:ring-primary focus:border-primary resize-none p-3 placeholder:text-slate-400 transition-shadow focus:shadow-md" id="reason" placeholder="請簡述改期原因..." rows="2"></textarea>
+</div>
+</div>
+<div class="bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800 rounded-xl p-3 flex gap-3">
+<span class="material-symbols-outlined text-amber-500 text-[20px] shrink-0 mt-0.5">info</span>
+<div class="text-xs text-amber-800 dark:text-amber-200/80 leading-relaxed">
+<span class="font-bold block mb-0.5">改期政策提示</span>
+                                        距離原定課程開始時間 24 小時內申請改期，將收取 $100 手續費。新時段經確認後，系統將發送通知信件。
+                                    </div>
+</div>
+<div class="pt-2 flex flex-col gap-3">
+<button class="w-full bg-slate-900 hover:bg-slate-800 dark:bg-primary dark:hover:bg-primary-dark text-white dark:text-slate-900 font-bold py-3.5 rounded-xl shadow-lg shadow-slate-300/50 dark:shadow-glow transition-all flex items-center justify-center gap-2 group transform active:scale-[0.98]">
+<span>確認改期</span>
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<button class="w-full bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold py-3 rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all">
+                                        取消
+                                    </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

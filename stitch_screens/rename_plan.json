@@ -1,0 +1,762 @@
+[
+  {
+    "id": "0d924c3739a14f7ea23c9e3614d8d931",
+    "originalTitle": "Super Admin - 維護費總覽",
+    "suggestedTitle": "Admin (管理員) - 維護費方案總覽"
+  },
+  {
+    "id": "d54d428d8a1d4fdcad9cfb49d419acbc",
+    "originalTitle": "Super Admin - 維護費總覽",
+    "suggestedTitle": "Admin (管理員) - 維護費方案總覽 (2)"
+  },
+  {
+    "id": "ea64bad98f39480bbe33d704a74bad43",
+    "originalTitle": "TimeCarve 刻時",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 404"
+  },
+  {
+    "id": "e775042575794b758bcc30cef9f1017c",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - TimeCarve 刻時"
+  },
+  {
+    "id": "ed14b8ec214f45cc9486f76050c9d2b0",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - TimeCarve 刻時 (10)"
+  },
+  {
+    "id": "48ccbef016f74389b4c71da7d2957f72",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - TimeCarve 刻時 (2)"
+  },
+  {
+    "id": "78cab93050c84d3d820cf3278a5814cb",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - TimeCarve 刻時 (3)"
+  },
+  {
+    "id": "8cce72cd0e154bad8dda9d73155c12b7",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - TimeCarve 刻時 (4)"
+  },
+  {
+    "id": "06a2e212bf57429ab0a6e1042ef760c5",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - TimeCarve 刻時 (5)"
+  },
+  {
+    "id": "e50e787b720445409e69e19b0ff972d8",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - TimeCarve 刻時 (6)"
+  },
+  {
+    "id": "f89f9f228aa24dccab413c8963ec9e96",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - TimeCarve 刻時 (7)"
+  },
+  {
+    "id": "671c5c725c594e3cb96ca1be41ebb869",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - TimeCarve 刻時 (8)"
+  },
+  {
+    "id": "6b39d7cd13d74c2f827d992e29e5e9ca",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - TimeCarve 刻時 (9)"
+  },
+  {
+    "id": "c36c64a557c54ee5a05f6fbc5e5eb1ef",
+    "originalTitle": "TimeCarve 刻時",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 使用者條款"
+  },
+  {
+    "id": "cf73753c11084258bfcd5a17746f80ed",
+    "originalTitle": "TimeCarve 刻時",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 使用者條款 (2)"
+  },
+  {
+    "id": "4af81bdb1fdb4f5d88dfdad39ae2ed11",
+    "originalTitle": "TimeCarve 刻時",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 使用者條款 (3)"
+  },
+  {
+    "id": "2779ee9edd6b4cb692d64d001af52c00",
+    "originalTitle": "TimeCarve 刻時",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 使用者條款 (4)"
+  },
+  {
+    "id": "2dee1cada0164654b9a203e72765ec00",
+    "originalTitle": "TimeCarve 刻時",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 使用者條款 (5)"
+  },
+  {
+    "id": "0c62726a0ecb479c9adbd6ad64e30b6d",
+    "originalTitle": "獨立註冊頁面",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 建立您的帳戶"
+  },
+  {
+    "id": "2ca20faa6b0f454c97f1670d257fb660",
+    "originalTitle": "獨立註冊頁面",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 建立您的帳戶 (2)"
+  },
+  {
+    "id": "2780c01e8c3749b7a587bfd3bf3fcc09",
+    "originalTitle": "獨立註冊頁面",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 建立您的帳戶 (3)"
+  },
+  {
+    "id": "d86258bcbe9f4b34b3c9ef5902a26945",
+    "originalTitle": "獨立註冊頁面",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 建立您的帳戶 (4)"
+  },
+  {
+    "id": "739b258d919e4b8c8ee10ce0ec7d4296",
+    "originalTitle": "獨立註冊頁面",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 建立您的帳戶 (5)"
+  },
+  {
+    "id": "10925fed778d4f09b51e0ccbbcd2db88",
+    "originalTitle": "獨立註冊頁面",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 建立您的帳戶 (6)"
+  },
+  {
+    "id": "6f30e9f41e5c4671acd5197fa95b1fa1",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 手作藝術課程方案"
+  },
+  {
+    "id": "36be278c68054786b6968ef11ae0c32c",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 打造妳的 專屬雕刻 旅程"
+  },
+  {
+    "id": "21168dd3ac47471e8bdd5aaa1d1c2b03",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 打造妳的 專屬雕刻 旅程 (2)"
+  },
+  {
+    "id": "a5d9e498feed4ee3b620052e98d993a9",
+    "originalTitle": "首頁與作品集",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 林雅婷 Ya-Ting Lin"
+  },
+  {
+    "id": "ef8fb8d765a64e899f6942e49ab487ce",
+    "originalTitle": "首頁與作品集",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 林雅婷 Ya-Ting Lin (2)"
+  },
+  {
+    "id": "04ea2ef1f86541f88c948e6e916a14f3",
+    "originalTitle": "首頁與作品集",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 林雅婷 Ya-Ting Lin (3)"
+  },
+  {
+    "id": "616d3d381f0342339399f8359e61abd5",
+    "originalTitle": "首頁與作品集",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 林雅婷 Ya-Ting Lin (4)"
+  },
+  {
+    "id": "a7efd8b86d7d4ecdb582866851318a00",
+    "originalTitle": "首頁與作品集",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 林雅婷 Ya-Ting Lin (5)"
+  },
+  {
+    "id": "2b1176860f6d43648c9df66e41592f58",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 牙體雕刻家教中心"
+  },
+  {
+    "id": "a66e8a2a48b3455aa4463d6dab873a16",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 牙體雕刻家教中心 (2)"
+  },
+  {
+    "id": "c428e7f3d76d4e82aaac7507d7061171",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 牙體雕刻家教中心 (3)"
+  },
+  {
+    "id": "f0e75550ae6b4d3594c9b610403ff12c",
+    "originalTitle": "課程方案公開詳細頁",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 精修假牙雕刻 職人全能班"
+  },
+  {
+    "id": "cc7be10c04f5465989a3beea4b1b846e",
+    "originalTitle": "課程方案公開詳細頁",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 精修假牙雕刻 職人全能班 (2)"
+  },
+  {
+    "id": "9f51104ca2b440b3a9855b0716007a68",
+    "originalTitle": "課程方案公開詳細頁",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 精修假牙雕刻 職人全能班 (3)"
+  },
+  {
+    "id": "ce7b7d70cdbb4027a24fc15e817df466",
+    "originalTitle": "課程方案公開詳細頁",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 精修假牙雕刻全能班"
+  },
+  {
+    "id": "ca15a686cbe44496a1b4d2ab63dc0d48",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 課程方案列表"
+  },
+  {
+    "id": "62514cb239074679bece530fb719c29c",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 課程方案列表 (2)"
+  },
+  {
+    "id": "d934cc6ab2d34400ba1ab7c7db628b35",
+    "originalTitle": "TimeCarve 刻時",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 通知中心"
+  },
+  {
+    "id": "a7f6fc16199448f8b71756b58edef45b",
+    "originalTitle": "TimeCarve 刻時",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 通知中心 (2)"
+  },
+  {
+    "id": "b65c589113a9480fac5d1baac26d84fd",
+    "originalTitle": "TimeCarve 刻時",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 通知中心 (3)"
+  },
+  {
+    "id": "7979503949304576aaff84ca4def9f32",
+    "originalTitle": "TimeCarve 刻時",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 通知中心 (4)"
+  },
+  {
+    "id": "f1bbaf39662e45af86ec12807f9766b6",
+    "originalTitle": "TimeCarve 刻時",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 通知中心 (5)"
+  },
+  {
+    "id": "00359fb1c5cf494d8d7845b8852e17f4",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 重設密碼"
+  },
+  {
+    "id": "b2957a524af349afa6d2bca370bcba7d",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 重設密碼 (2)"
+  },
+  {
+    "id": "2d6acc44fe684ab9858e4dce25aa06d8",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 重設密碼 (3)"
+  },
+  {
+    "id": "96f8150699044f9cb95e96f608832d48",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 重設密碼 (4)"
+  },
+  {
+    "id": "42776839caf54c1ab9f7c20bb67b629e",
+    "originalTitle": "課程方案列表",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 重設密碼 (5)"
+  },
+  {
+    "id": "1df9253cb1ff47c98e2965f8b4b01f19",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 陳小美"
+  },
+  {
+    "id": "2afa7ac54f264914a9666f9389f14be9",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 陳小美 (2)"
+  },
+  {
+    "id": "580f896c59a64d63955073a8c93fcbcf",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 陳小美 (3)"
+  },
+  {
+    "id": "707d4f8666ac47bab9f4ebfed1fac51a",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 陳小美 (4)"
+  },
+  {
+    "id": "6479e0c39a52426dbb0decf21bf86c06",
+    "originalTitle": "TimeCarve 刻時 - 教師作品集總覽",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 陳語喬 Sarah Chen"
+  },
+  {
+    "id": "6a700a6be2974852a00cee355116b824",
+    "originalTitle": "TimeCarve 刻時 - 教師作品集總覽",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 陳語喬 Sarah Chen (2)"
+  },
+  {
+    "id": "842d6b2be5e14a528bd38e15a1f0a39e",
+    "originalTitle": "TimeCarve 刻時 - 教師作品集總覽",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 陳語喬 Sarah Chen (3)"
+  },
+  {
+    "id": "92bb8b97b13a429c967b9e9bb2ab26c1",
+    "originalTitle": "TimeCarve 刻時 - 教師作品集總覽",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 陳語喬 Sarah Chen (4)"
+  },
+  {
+    "id": "afb32c025b5849d8831c801e431a73c8",
+    "originalTitle": "TimeCarve 刻時 - 教師作品集總覽",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 陳語喬 Sarah Chen (5)"
+  },
+  {
+    "id": "d9fdff4e662e4694aed93a59c29218e2",
+    "originalTitle": "TimeCarve 刻時 - 教師作品集總覽",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 陳語喬 Sarah Chen (6)"
+  },
+  {
+    "id": "a7a8d9c4ef70484faf2a5f47a937ea98",
+    "originalTitle": "TimeCarve 刻時 - 教師作品集總覽",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 陳語喬 Sarah Chen (7)"
+  },
+  {
+    "id": "bb1003845be24170814802582d27c49a",
+    "originalTitle": "首頁與作品集",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 雕刻完美微笑的藝術起點"
+  },
+  {
+    "id": "2e78ce81d7114c44aa308e7ee2e57218",
+    "originalTitle": "首頁與作品集",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 雕刻時光凝視的美學起點"
+  },
+  {
+    "id": "e31aae0b20854f2183d24c6f6de76494",
+    "originalTitle": "首頁與作品集",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 雕刻時光凝結藝術瞬間"
+  },
+  {
+    "id": "159098f55fc14cedb936874f0cbc8f68",
+    "originalTitle": "預約課程介面",
+    "suggestedTitle": "Public / Auth (訪客/驗證) - 預約失敗"
+  },
+  {
+    "id": "be9fa857f93b49f1a6be211de9793ac7",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "Student (學生) - 陳小美"
+  },
+  {
+    "id": "85628b986acd480e996508227fa35550",
+    "originalTitle": "預約成功頁面",
+    "suggestedTitle": "Student (學生) - 預約成功！"
+  },
+  {
+    "id": "fb337e6c7af04c9285dff9c141c09e7a",
+    "originalTitle": "Super Admin - 管理員儀表板 (新佈局)",
+    "suggestedTitle": "Teacher (教師) - Admin"
+  },
+  {
+    "id": "eaade47df6984514b5636970369c94ff",
+    "originalTitle": "Super Admin - 管理員儀表板 (新佈局)",
+    "suggestedTitle": "Teacher (教師) - Admin (2)"
+  },
+  {
+    "id": "a4c7cc148d644a12b1a9b48bcb6d13a1",
+    "originalTitle": "Super Admin - 管理員儀表板 (新佈局)",
+    "suggestedTitle": "Teacher (教師) - Admin (3)"
+  },
+  {
+    "id": "6ac4507b2b7b489793a3b05f6e33d251",
+    "originalTitle": "Super Admin - 管理員儀表板 (新佈局)",
+    "suggestedTitle": "Teacher (教師) - Admin (4)"
+  },
+  {
+    "id": "884746f0940046debb38bd9470509dfe",
+    "originalTitle": "Super Admin - 教師管理",
+    "suggestedTitle": "Teacher (教師) - Super Admin"
+  },
+  {
+    "id": "1912ce2aee6a4096ba5b54790e9a7910",
+    "originalTitle": "Super Admin - 教師管理",
+    "suggestedTitle": "Teacher (教師) - Super Admin (2)"
+  },
+  {
+    "id": "818b5aa99b58488f9bc13ed998277235",
+    "originalTitle": "Super Admin - 教師管理",
+    "suggestedTitle": "Teacher (教師) - Super Admin (3)"
+  },
+  {
+    "id": "0531953b9cc641c29c6b23ca7093f8c3",
+    "originalTitle": "Super Admin - 教師管理",
+    "suggestedTitle": "Teacher (教師) - Super Admin (4)"
+  },
+  {
+    "id": "d4234b6683474777bdeb02ee735640bb",
+    "originalTitle": "Super Admin - 教師管理",
+    "suggestedTitle": "Teacher (教師) - Super Admin (5)"
+  },
+  {
+    "id": "c1f0ac7b2248405dad7c7ae8957bf8d3",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 時間的褶皺：金繼美學系列"
+  },
+  {
+    "id": "d8bb6764153c420bb9128a9e47937946",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 時間的褶皺：金繼美學系列 (2)"
+  },
+  {
+    "id": "e14d9d7b064446ffa4060db5b5e049c8",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 時間的褶皺：金繼美學系列 (3)"
+  },
+  {
+    "id": "e538e51bf91142cd8ff54257d94527fb",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅"
+  },
+  {
+    "id": "5b3ae52ec7e440e2a63300ae55c9ba23",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (10)"
+  },
+  {
+    "id": "b1d6dde433314014962aad97e417a0b8",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (11)"
+  },
+  {
+    "id": "92924260f28e45a0b8fdf372c63a06d4",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (12)"
+  },
+  {
+    "id": "a9ae5a983c3d4e3699b54edf4df512ce",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (13)"
+  },
+  {
+    "id": "ae6a0a9a0c004b58adfa35cbf5473eaf",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (14)"
+  },
+  {
+    "id": "333d75c087ee4fbd9dd0dd46084a76c8",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (15)"
+  },
+  {
+    "id": "57f4b582d28b452b9c3c23cda1c93919",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (16)"
+  },
+  {
+    "id": "4cea5c41eed54bea9f70b8c6139845eb",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (17)"
+  },
+  {
+    "id": "fb17a4e038554de49fef68576f353ce1",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (18)"
+  },
+  {
+    "id": "f492bbdc804b4a839795f4f283727550",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (19)"
+  },
+  {
+    "id": "762f5595f2e343b9b2c3a7b7222dc2e2",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (2)"
+  },
+  {
+    "id": "44ea70da29fe43bf875c32c539b50d15",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (20)"
+  },
+  {
+    "id": "24888abe3e1149169538aee920f75d24",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (21)"
+  },
+  {
+    "id": "206a24cea81544bf88aa710d06cf6009",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (22)"
+  },
+  {
+    "id": "4dea6177b2bf4617a5fca6cdd4a86b40",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (23)"
+  },
+  {
+    "id": "609a45ffbf894116a11a3d1727d25766",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (24)"
+  },
+  {
+    "id": "9e4abbdd17dc4ff1a42ce93569e257dc",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (25)"
+  },
+  {
+    "id": "adcb572e10ea49619a0a7c5b9f8fa968",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (26)"
+  },
+  {
+    "id": "45293fd0a1a9440990cddc36669446f6",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (27)"
+  },
+  {
+    "id": "f5f05e77e7c14d84a5eb74a89c612128",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (28)"
+  },
+  {
+    "id": "d74f608ef8c34cd78f77571d4dc83bfe",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (29)"
+  },
+  {
+    "id": "c1865e878eaa4b5ea4601c6c72428190",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (3)"
+  },
+  {
+    "id": "f60092e08f0d4a54849801fb2a93a3fe",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (30)"
+  },
+  {
+    "id": "5aaa534edff44dd3bd3b398c2e4f2b8e",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (31)"
+  },
+  {
+    "id": "809935681a834b7683998f261a6e4bbe",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (32)"
+  },
+  {
+    "id": "e9e5ba2fdb8846d6abd9bba10d97f3bc",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (4)"
+  },
+  {
+    "id": "71990cef77f74bd7af3a77619bea34ed",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (5)"
+  },
+  {
+    "id": "1270644b8ed841b2b006d4f39453a500",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (6)"
+  },
+  {
+    "id": "c8dede1027f6406ba559990fbfd316bc",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (7)"
+  },
+  {
+    "id": "1f229aad42cc47d0a8d96b69778091af",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (8)"
+  },
+  {
+    "id": "3ef544dd2e5148098fde2d5c8907af91",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 林曉梅 (9)"
+  },
+  {
+    "id": "dbd92b6355b14d86a77c47c032135607",
+    "originalTitle": "Super Admin - 學生管理",
+    "suggestedTitle": "Teacher (教師) - 牙雕家教"
+  },
+  {
+    "id": "5d708dd272374ed49c1187799624cfde",
+    "originalTitle": "Super Admin - 學生管理",
+    "suggestedTitle": "Teacher (教師) - 牙雕家教 (2)"
+  },
+  {
+    "id": "35789f8c31af4e8ab4126214be70e80d",
+    "originalTitle": "Super Admin - 學生管理",
+    "suggestedTitle": "Teacher (教師) - 牙雕家教 (3)"
+  },
+  {
+    "id": "a52d7b074dc04354be0ede3a914bedd8",
+    "originalTitle": "編輯個人檔案",
+    "suggestedTitle": "Teacher (教師) - 牙雕家教中心"
+  },
+  {
+    "id": "4ff3509615664c86addf043aa8fdf832",
+    "originalTitle": "編輯個人檔案",
+    "suggestedTitle": "Teacher (教師) - 牙雕家教管理系統"
+  },
+  {
+    "id": "b107af4b7ed0408b84d5e09f956adfb2",
+    "originalTitle": "家教中心",
+    "suggestedTitle": "Teacher (教師) - 編輯耗材品項"
+  },
+  {
+    "id": "e48b283cd514422c83c1d7b2a8ac0cf1",
+    "originalTitle": "TimeCarve 刻時",
+    "suggestedTitle": "Teacher (教師) - 設定 / 隱私政策"
+  },
+  {
+    "id": "d6619e9ccbdb491e98e53f5cdb2797a3",
+    "originalTitle": "TimeCarve 刻時",
+    "suggestedTitle": "Teacher (教師) - 設定 / 隱私政策 (2)"
+  },
+  {
+    "id": "e8fbdbc9514848b9a538af36250f1f7d",
+    "originalTitle": "Super Admin - 管理員儀表板 (新佈局)",
+    "suggestedTitle": "Teacher (教師) - 財務報表"
+  },
+  {
+    "id": "c2cdf1d4e6d049f79301a898686299a3",
+    "originalTitle": "Super Admin - 管理員儀表板 (新佈局)",
+    "suggestedTitle": "Teacher (教師) - 財務報表 (2)"
+  },
+  {
+    "id": "0c729f3321c245aa86d21d595cc92f48",
+    "originalTitle": "Super Admin - 管理員儀表板 (新佈局)",
+    "suggestedTitle": "Teacher (教師) - 財務報表 (3)"
+  },
+  {
+    "id": "29a4ca244dd14176b499289514c50cf5",
+    "originalTitle": "教師管理後台",
+    "suggestedTitle": "Teacher (教師) - 陳小美"
+  },
+  {
+    "id": "c89639e203f34825a9c1692cff0708ee",
+    "originalTitle": "TimeCarve 刻時",
+    "suggestedTitle": "Teacher (教師) - 隱私政策"
+  },
+  {
+    "id": "13050f16fc85454eab349414c18fbfe0",
+    "originalTitle": "TimeCarve 刻時",
+    "suggestedTitle": "Teacher (教師) - 隱私政策 (2)"
+  },
+  {
+    "id": "10b9644a85814494895e5341c5008422",
+    "originalTitle": "TimeCarve 刻時",
+    "suggestedTitle": "未知 - My Learning"
+  },
+  {
+    "id": "6fa618b72cce45768b8193d044400651",
+    "originalTitle": "TimeCarve 刻時",
+    "suggestedTitle": "未知 - Welcome back, Sarah"
+  },
+  {
+    "id": "21c1f75196dd4af1996634b5cfe983a6",
+    "originalTitle": "家教中心",
+    "suggestedTitle": "未知 - 家教中心"
+  },
+  {
+    "id": "d602691f504d4e438e8b501010fa2f61",
+    "originalTitle": "家教中心",
+    "suggestedTitle": "未知 - 家教中心 (2)"
+  },
+  {
+    "id": "5f6b46972a024d71a412b0acff65a2ab",
+    "originalTitle": "家教中心",
+    "suggestedTitle": "未知 - 家教中心 (3)"
+  },
+  {
+    "id": "9a38b104075a4412b31da47a2e52805e",
+    "originalTitle": "教師維護費方案選擇",
+    "suggestedTitle": "未知 - 方案 A：超值固定制"
+  },
+  {
+    "id": "ece7bc912adb4ae8a1a405066b152624",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美"
+  },
+  {
+    "id": "fd57948910a14af2bdf496e1b25a3d89",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (10)"
+  },
+  {
+    "id": "3d3a51402e704574ba9f154dd519e547",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (11)"
+  },
+  {
+    "id": "067609f6e2984d5f860329c4474ab094",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (12)"
+  },
+  {
+    "id": "c7b063f25ddd4a84b42f04aff9be41a6",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (13)"
+  },
+  {
+    "id": "7ae9489d845d48f1aa8425e8922395b5",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (14)"
+  },
+  {
+    "id": "c7d04e56d5c442839de1c7ed8ea4630f",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (15)"
+  },
+  {
+    "id": "51c2db42da5b43958e05e55148f878a5",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (16)"
+  },
+  {
+    "id": "83408ac893284e6d89e23f0b5e2f10f4",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (17)"
+  },
+  {
+    "id": "aa40ce32c1a74cf1a9162e7c9427aa75",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (18)"
+  },
+  {
+    "id": "c89e486d3e4142d385bbd62243db3d4f",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (19)"
+  },
+  {
+    "id": "995c14c1aeee46528ceebcfa5eeb1c5d",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (2)"
+  },
+  {
+    "id": "6a63f7745a41478b866e72bf13bac3f9",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (20)"
+  },
+  {
+    "id": "8a9fb9c34cb04c1a9f95e8df1ecbae5f",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (3)"
+  },
+  {
+    "id": "aab6e81a59b0416ea0bcfeab8a9b33fc",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (4)"
+  },
+  {
+    "id": "517ffd9dc59a4bf98e9c2f9e8f2fab87",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (5)"
+  },
+  {
+    "id": "b6491395a2574a88a26b04fe5af15b17",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (6)"
+  },
+  {
+    "id": "15e9fac0679442ac942001fc86c61bfb",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (7)"
+  },
+  {
+    "id": "ac6b4bf23e3743ec8e3bbf4c61f436b1",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (8)"
+  },
+  {
+    "id": "0ff745b7b5e344faa7f03e7ee54f4aa4",
+    "originalTitle": "學生儀表板",
+    "suggestedTitle": "未知 - 陳小美 (9)"
+  }
+]

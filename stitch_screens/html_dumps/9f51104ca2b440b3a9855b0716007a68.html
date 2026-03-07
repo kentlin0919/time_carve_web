@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html class="light scroll-smooth" lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TimeCarve 刻時 - 精修假牙雕刻全能班</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;family=Noto+Sans+TC:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2DD4BF", // Teal-400 for a modern, fluid feel
+                        "primary-dark": "#14B8A6",
+                        "secondary": "#F472B6", 
+                        "background-light": "#FAFAFA",
+                        "background-dark": "#0F172A",
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#1E293B",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "Noto Sans TC", "sans-serif"],
+                        "sans": ["Lexend", "Noto Sans TC", "sans-serif"],
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+                        'glow': '0 0 20px rgba(45, 212, 191, 0.3)',
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out',
+                        'bounce-slow': 'bounce 3s infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background-color: #475569;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-sans text-slate-800 dark:text-slate-100 overflow-x-hidden antialiased">
+<header class="sticky top-0 z-50 bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 transition-colors duration-300">
+<div class="px-4 md:px-8 py-4 flex items-center justify-between max-w-7xl mx-auto">
+<div class="flex items-center gap-3 group cursor-pointer">
+<div class="size-10 bg-gradient-to-tr from-primary to-emerald-200 rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform duration-300">
+<span class="material-symbols-outlined text-2xl">diamond</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors">
+                TimeCarve <span class="text-primary">刻時</span>
+</h1>
+</div>
+<div class="hidden md:flex flex-1 justify-end gap-8 items-center">
+<nav class="flex items-center gap-8">
+<a class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors" href="#outcomes">課程特色</a>
+<a class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors" href="#syllabus">課程大綱</a>
+<a class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors" href="#reviews">學員評價</a>
+</nav>
+<a class="flex items-center justify-center rounded-full h-10 px-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white transition-all shadow-md" href="#pricing">
+                立即預約
+            </a>
+</div>
+<button class="md:hidden text-slate-700 dark:text-white hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-3xl">menu</span>
+</button>
+</div>
+</header>
+<section class="relative pt-12 pb-20 md:pt-24 md:pb-32 overflow-hidden">
+<div class="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-[400px] h-[400px] bg-blue-400/10 rounded-full blur-[80px] pointer-events-none"></div>
+<div class="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+<div class="flex flex-col-reverse lg:flex-row gap-12 lg:gap-20 items-center">
+<div class="flex flex-col gap-6 lg:w-1/2 items-start text-left animate-fade-in-up">
+<div class="inline-flex items-center gap-2 rounded-full bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 px-4 py-1.5 shadow-sm">
+<span class="flex h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+<span class="text-xs font-bold tracking-wide text-slate-600 dark:text-slate-300 uppercase">2024 春季班招生中</span>
+</div>
+<h2 class="text-4xl md:text-5xl lg:text-6xl font-black leading-[1.1] text-slate-900 dark:text-white tracking-tight">
+                    精修假牙雕刻<br/>
+<span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">職人全能班</span>
+</h2>
+<p class="text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-lg">
+                    專為追求細節的妳打造。從基礎型態學到高階蠟型堆築，由資深技師一對一指導，20 小時掌握核心技術，雕刻出自信職涯。
+                </p>
+<div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-4">
+<a class="flex items-center justify-center rounded-xl h-14 px-8 bg-primary hover:bg-primary-dark text-white text-base font-bold shadow-lg shadow-primary/30 transition-all hover:scale-[1.02]" href="#pricing">
+                        預約免費諮詢
+                    </a>
+<button class="flex items-center justify-center rounded-xl h-14 px-8 bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-base font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+<span class="material-symbols-outlined mr-2 text-xl">play_circle</span>
+                        觀看課程介紹
+                    </button>
+</div>
+<div class="flex items-center gap-6 mt-6 pt-6 border-t border-slate-200 dark:border-slate-700 w-full">
+<div class="flex -space-x-3">
+<img alt="Student" class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-900" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXf-CF2a5Kzj8wcCO-YDu0v2Sj9vB5kCAqrlkQnVJrz7veJndKk0KErVu7vdsevW8S_vGFXjkNcZHP-Z17352bnkOnaJk7U7XWONy9DQR1D8QDv8rpCvcl9w5COhItV-uDakEI25Uf5ww-HzmLWkzkCDiy26YWqfoWd1PSKUWAMGtmJ3ZIMdunmkhu6VVOPFBmIhZQ5QBf0zNw3YJMXgTnjxcIFU1ZlPSPD_EowLrWieaXbsAIs8i3KfqnKnP4PmlZRs6xRHKQBHQ"/>
+<img alt="Student" class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-900" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2FJyDxaRV6DNr_tkEMcgaUHFJLilqJXaMbrmtZN2I9vpHKAO5az5aLZh7Mnbb125yWzBGrNbEGGN1SKVr0cy4tx6TR6MGgtXMJaaOhMnnsgEnmkZQDZ9kQ232SszgYgT1bjcj4LCUyiqvtGIuihiGZxcNdly6Nzv_Yxpnva1TdeReCiR__TDRqtViXlnhacWYpG3yXQnSwBRPkdNY6zfQdpd_g8I84ggCIthFfquK2YGTYGDqTXG5ShLDk0SFundP2b0VruHTNjk"/>
+<img alt="Student" class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-900" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATAIrYWn83vwQmAz4AJpnnzjKACPK8CUcke2HL5H6luQvVUCg1I2djBBgTMDPluzJQA4YGVfcDvjBt_wE_Za9tnOQdUOUtQ7m6J36rienPC3ss5GYxHoC9X_0a9lNmnOZRMOcQpXVip13I4I8a1-VBW8hhs0qMS7EkdMCkC7CxDZ_jvM0QidvOZicb2901-igbY9bzDecKavucJOvVqv-tsbD3VDIaGl_OA-fOqUnJgmcCEELVP_Ei14SmlA91plSxTozHNBjY9zg"/>
+<div class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-400">+300</div>
+</div>
+<div class="flex flex-col">
+<div class="flex text-yellow-400 text-sm">
+<span class="material-symbols-outlined filled text-lg">star</span>
+<span class="material-symbols-outlined filled text-lg">star</span>
+<span class="material-symbols-outlined filled text-lg">star</span>
+<span class="material-symbols-outlined filled text-lg">star</span>
+<span class="material-symbols-outlined filled text-lg">star</span>
+</div>
+<p class="text-sm font-medium text-slate-600 dark:text-slate-400">學員滿意度 5.0</p>
+</div>
+</div>
+</div>
+<div class="w-full lg:w-1/2 relative group perspective-1000">
+<div class="absolute -inset-4 bg-gradient-to-tr from-primary/30 to-purple-400/30 rounded-[2rem] blur-2xl opacity-60 group-hover:opacity-80 transition duration-700"></div>
+<div class="relative w-full aspect-[4/3] rounded-[2rem] overflow-hidden shadow-2xl ring-1 ring-white/50 dark:ring-white/10 transform transition-transform duration-500 hover:rotate-y-2 hover:scale-[1.01]">
+<div aria-label="Professional dental carving" class="w-full h-full bg-cover bg-center" role="img" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAVLigtq8OksAH_lvaIyxmWjMX-PtRs66OfvaoXfJeThWF93yn6gV2oteqPz2qFQhqa4p5KfiyKNsV0oQPU1YCjtA6ZfRaLiPh_BlXSqmdyPh0FCciTxO2ZLAk01erYhDJWcnZaXrus7OUwzHSWZVnRaHm7dtkSXkVBU3-ZNuPI4gvPjcl22MkM4AFxXAMGtW5d3DR95wdEbjWu-UTKKUBrotVxXtXuD-ag1-fh3ndz2I6Yq1naW2udeor8TfCYZ4WVmlTooZVJwPg');"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+</div>
+<div class="absolute -bottom-6 -left-6 bg-white/90 dark:bg-surface-dark/90 backdrop-blur-sm p-5 rounded-2xl shadow-xl border border-white/20 dark:border-white/10 flex gap-4 items-center animate-bounce-slow max-w-xs">
+<div class="bg-green-100 dark:bg-green-900/30 p-3 rounded-full text-green-600 dark:text-green-400">
+<span class="material-symbols-outlined">verified_user</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">證照通過率</p>
+<p class="text-xl font-bold text-slate-900 dark:text-white">98% 國考通過</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-20 bg-white dark:bg-surface-dark relative" id="outcomes">
+<div class="max-w-7xl mx-auto px-4 md:px-8">
+<div class="text-center max-w-3xl mx-auto mb-16">
+<span class="text-primary font-bold text-sm tracking-[0.2em] uppercase mb-3 block">Outcomes</span>
+<h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-6">為什麼選擇這堂課？</h2>
+<p class="text-slate-600 dark:text-slate-300 text-lg leading-relaxed">
+                透過系統化的拆解教學，將複雜的牙體型態轉化為易於理解的幾何結構。不只是模仿，而是真正理解後的精準重現。
+            </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+<div class="group p-8 rounded-3xl bg-background-light dark:bg-background-dark border border-slate-100 dark:border-slate-800 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+<div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined text-3xl">menu_book</span>
+</div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">牙體型態學</h3>
+<p class="text-slate-500 dark:text-slate-400 leading-relaxed">
+                    深入理解解剖構造與特徵，建立正確的立體空間觀念，一眼看出型態關鍵。
+                </p>
+</div>
+<div class="group p-8 rounded-3xl bg-background-light dark:bg-background-dark border border-slate-100 dark:border-slate-800 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+<div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined text-3xl">brush</span>
+</div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">精準雕刻刀法</h3>
+<p class="text-slate-500 dark:text-slate-400 leading-relaxed">
+                    矯正握刀姿勢與施力點，掌握各種刀具特性，雕出流暢自然、不生硬的線條。
+                </p>
+</div>
+<div class="group p-8 rounded-3xl bg-background-light dark:bg-background-dark border border-slate-100 dark:border-slate-800 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+<div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined text-3xl">view_in_ar</span>
+</div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">實作訓練</h3>
+<p class="text-slate-500 dark:text-slate-400 leading-relaxed">
+                    從幾何圖形到1:1精細牙齒型態，透過大量實作練習，累積手感與肌肉記憶。
+                </p>
+</div>
+<div class="group p-8 rounded-3xl bg-background-light dark:bg-background-dark border border-slate-100 dark:border-slate-800 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+<div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined text-3xl">water_drop</span>
+</div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">蠟型堆築</h3>
+<p class="text-slate-500 dark:text-slate-400 leading-relaxed">
+                    掌握熱蠟特性與堆築成型關鍵，模擬臨床製作流程，為將來職場接軌。
+                </p>
+</div>
+</div>
+</div>
+</section>
+<section class="py-20 md:py-28 bg-background-light dark:bg-background-dark" id="syllabus">
+<div class="max-w-4xl mx-auto px-4 md:px-8">
+<div class="flex flex-col md:flex-row items-end justify-between mb-12 gap-6">
+<div>
+<h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">課程大綱</h2>
+<p class="text-slate-600 dark:text-slate-400">循序漸進的四階段教學，確保每一步都紮實穩固。</p>
+</div>
+<div class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-surface-dark rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-primary">schedule</span>
+<span class="text-sm font-bold text-slate-700 dark:text-slate-200">總時長 20 小時</span>
+</div>
+</div>
+<div class="space-y-4">
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-1 shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-md transition-all">
+<details class="group">
+<summary class="flex items-center justify-between p-5 cursor-pointer list-none">
+<div class="flex items-center gap-6">
+<div class="flex flex-col items-center justify-center w-14 h-14 bg-slate-50 dark:bg-background-dark rounded-xl border border-slate-100 dark:border-slate-700">
+<span class="text-xs text-slate-400 font-bold uppercase">CH</span>
+<span class="text-xl font-black text-slate-900 dark:text-white">01</span>
+</div>
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">基礎概論與工具介紹</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-1">認識工具、保養與基本觀念建立</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</summary>
+<div class="px-5 pb-6 pl-[5.5rem] text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800 pt-4">
+<ul class="space-y-2 list-disc list-inside marker:text-primary">
+<li>牙體解剖學名詞定義與方位認識</li>
+<li>雕刻刀具種類介紹、握持法與磨銳保養</li>
+<li>石膏棒特性與前置處理作業</li>
+<li>立體空間概念與幾何圖形雕刻練習</li>
+</ul>
+</div>
+</details>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-1 shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-md transition-all">
+<details class="group">
+<summary class="flex items-center justify-between p-5 cursor-pointer list-none">
+<div class="flex items-center gap-6">
+<div class="flex flex-col items-center justify-center w-14 h-14 bg-slate-50 dark:bg-background-dark rounded-xl border border-slate-100 dark:border-slate-700">
+<span class="text-xs text-slate-400 font-bold uppercase">CH</span>
+<span class="text-xl font-black text-slate-900 dark:text-white">02</span>
+</div>
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">前牙區型態雕刻</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-1">門齒與犬齒特徵解析與實作</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</summary>
+<div class="px-5 pb-6 pl-[5.5rem] text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800 pt-4">
+<ul class="space-y-2 list-disc list-inside marker:text-primary">
+<li>上顎正中門齒 1:1 石膏雕刻</li>
+<li>側門齒與犬齒之型態差異比較</li>
+<li>舌側面隆脊與窩的表現技巧</li>
+<li>切端角度與鄰接面接觸點定位</li>
+</ul>
+</div>
+</details>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-1 shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-md transition-all">
+<details class="group">
+<summary class="flex items-center justify-between p-5 cursor-pointer list-none">
+<div class="flex items-center gap-6">
+<div class="flex flex-col items-center justify-center w-14 h-14 bg-slate-50 dark:bg-background-dark rounded-xl border border-slate-100 dark:border-slate-700">
+<span class="text-xs text-slate-400 font-bold uppercase">CH</span>
+<span class="text-xl font-black text-slate-900 dark:text-white">03</span>
+</div>
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">後牙區型態雕刻</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-1">小臼齒與大臼齒咬合面解析</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</summary>
+<div class="px-5 pb-6 pl-[5.5rem] text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800 pt-4">
+<ul class="space-y-2 list-disc list-inside marker:text-primary">
+<li>上下顎小臼齒型態比較與雕刻</li>
+<li>第一大臼齒主要咬頭與發育溝雕刻</li>
+<li>咬合面隆線(Ridge)走向與斜度控制</li>
+<li>功能性咬頭與非功能性咬頭區別</li>
+</ul>
+</div>
+</details>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-1 shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-md transition-all">
+<details class="group">
+<summary class="flex items-center justify-between p-5 cursor-pointer list-none">
+<div class="flex items-center gap-6">
+<div class="flex flex-col items-center justify-center w-14 h-14 bg-slate-50 dark:bg-background-dark rounded-xl border border-slate-100 dark:border-slate-700">
+<span class="text-xs text-slate-400 font-bold uppercase">CH</span>
+<span class="text-xl font-black text-slate-900 dark:text-white">04</span>
+</div>
+<div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">全口蠟型堆築應用</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-1">滴蠟技巧與成品修整</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</summary>
+<div class="px-5 pb-6 pl-[5.5rem] text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800 pt-4">
+<ul class="space-y-2 list-disc list-inside marker:text-primary">
+<li>PKT 滴蠟技術練習與溫度控制</li>
+<li>功能性咬合蠟型(Wax-up)製作流程</li>
+<li>鄰接面接觸區與外型高點建立</li>
+<li>最終型態修整與表面拋光技巧</li>
+</ul>
+</div>
+</details>
+</div>
+</div>
+<div class="mt-10 text-center">
+<a class="inline-flex items-center gap-2 text-primary font-bold hover:text-primary-dark transition-colors border-b border-dashed border-primary pb-0.5" href="#">
+                下載完整課程 PDF 簡章 <span class="material-symbols-outlined text-sm">download</span>
+</a>
+</div>
+</div>
+</section>
+<section class="py-20 bg-white dark:bg-surface-dark border-y border-slate-100 dark:border-slate-800">
+<div class="max-w-7xl mx-auto px-4 md:px-8">
+<div class="bg-background-light dark:bg-background-dark rounded-3xl p-8 md:p-12 lg:p-16 flex flex-col md:flex-row items-center gap-12 md:gap-20">
+<div class="w-full md:w-5/12 shrink-0 relative">
+<div class="absolute inset-0 bg-primary/20 rounded-[2rem] translate-x-4 translate-y-4"></div>
+<div class="aspect-[3/4] rounded-[2rem] overflow-hidden bg-slate-200 relative shadow-2xl">
+<div aria-label="Instructor Portrait" class="w-full h-full bg-cover bg-center transition-transform hover:scale-110 duration-700" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDB7Y4p_MkkUuFwujp5JDocMQBsZzATrvgazSfeGs0Q4NlT8AW62GfGZdaqPll2UqKtxZ4m6sq78rVicXPsrnA5OuJ2hNWv-43ErH-rei3vCAFf-cmy7Hu4TlUPta65kmWi42SDoHrXNWq2KAWU1T-MuQQqTAh44OQT6B5cFtW8s6TbSTVA176jgLq0QrjTSUI_C-WywJo0N792K7v2Bs1-vxZRfYUDTD8W2CukCt2Ukk62WOT8NVgxNjSgrhnx4Ca_Jfy8BNX26Ro');"></div>
+</div>
+</div>
+<div class="w-full md:w-7/12">
+<h4 class="text-primary font-bold tracking-widest uppercase mb-2 text-sm">Instructor</h4>
+<h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-6">遇見妳的導師：林雅婷</h2>
+<div class="bg-white dark:bg-surface-dark p-6 rounded-2xl border-l-4 border-primary shadow-sm mb-8 italic text-slate-600 dark:text-slate-300">
+                    "雕刻不只是技術，更是一種專注的藝術。我希望帶領妳跨越手拙的恐懼，看見自己雙手創造的美。"
+                </div>
+<div class="space-y-4 text-slate-600 dark:text-slate-300 leading-relaxed mb-8 text-lg">
+<p>
+                        嗨，我是雅婷！擁有超過 10 年的臨床牙體技術經驗，曾在大型教學醫院擔任主治技師。我深知許多初學者在面對複雜的牙齒型態時感到的挫折與迷惘。
+                    </p>
+<p>
+                        在這堂課中，我會將生硬的解剖學理論，轉化為直觀的線條與面塊，帶著妳一刀一刀刻畫出完美的牙體。無論妳是為了國考準備，還是精進職場技能，我都將毫無保留地分享我的經驗。
+                    </p>
+</div>
+<div class="flex flex-wrap gap-3">
+<span class="px-4 py-2 rounded-lg bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-base">verified</span>
+                        國家牙體技術師證照
+                    </span>
+<span class="px-4 py-2 rounded-lg bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-base">school</span>
+                        牙體技術學系 碩士
+                    </span>
+<span class="px-4 py-2 rounded-lg bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-base">work_history</span>
+                        10+ 年臨床經驗
+                    </span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-20 md:py-28 bg-background-light dark:bg-background-dark" id="reviews">
+<div class="max-w-7xl mx-auto px-4 md:px-8">
+<h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-16">學員真實好評</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="bg-white dark:bg-surface-dark p-8 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col h-full">
+<div class="flex gap-1 text-yellow-400 mb-6">
+<span class="material-symbols-outlined filled">star</span>
+<span class="material-symbols-outlined filled">star</span>
+<span class="material-symbols-outlined filled">star</span>
+<span class="material-symbols-outlined filled">star</span>
+<span class="material-symbols-outlined filled">star</span>
+</div>
+<p class="text-slate-600 dark:text-slate-300 text-lg italic mb-8 flex-grow">
+                    "原本對雕刻很沒自信，總覺得手很笨。但老師的教法非常有邏輯，把牙齒型態拆解成簡單的步驟，讓我真的刻出了漂亮的門牙！超有成就感！"
+                </p>
+<div class="flex items-center gap-4 pt-6 border-t border-slate-100 dark:border-slate-800">
+<img alt="Chen" class="w-12 h-12 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXf-CF2a5Kzj8wcCO-YDu0v2Sj9vB5kCAqrlkQnVJrz7veJndKk0KErVu7vdsevW8S_vGFXjkNcZHP-Z17352bnkOnaJk7U7XWONy9DQR1D8QDv8rpCvcl9w5COhItV-uDakEI25Uf5ww-HzmLWkzkCDiy26YWqfoWd1PSKUWAMGtmJ3ZIMdunmkhu6VVOPFBmIhZQ5QBf0zNw3YJMXgTnjxcIFU1ZlPSPD_EowLrWieaXbsAIs8i3KfqnKnP4PmlZRs6xRHKQBHQ"/>
+<div>
+<p class="font-bold text-slate-900 dark:text-white">陳小美</p>
+<p class="text-sm text-slate-400">國考考生</p>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-surface-dark p-8 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col h-full">
+<div class="flex gap-1 text-yellow-400 mb-6">
+<span class="material-symbols-outlined filled">star</span>
+<span class="material-symbols-outlined filled">star</span>
+<span class="material-symbols-outlined filled">star</span>
+<span class="material-symbols-outlined filled">star</span>
+<span class="material-symbols-outlined filled">star</span>
+</div>
+<p class="text-slate-600 dark:text-slate-300 text-lg italic mb-8 flex-grow">
+                    "一對一的指導真的很值得，老師會直接點出我下刀角度的問題，這是在大班課學不到的細節。上完課後我的術科成績進步非常多。"
+                </p>
+<div class="flex items-center gap-4 pt-6 border-t border-slate-100 dark:border-slate-800">
+<img alt="Wang" class="w-12 h-12 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2FJyDxaRV6DNr_tkEMcgaUHFJLilqJXaMbrmtZN2I9vpHKAO5az5aLZh7Mnbb125yWzBGrNbEGGN1SKVr0cy4tx6TR6MGgtXMJaaOhMnnsgEnmkZQDZ9kQ232SszgYgT1bjcj4LCUyiqvtGIuihiGZxcNdly6Nzv_Yxpnva1TdeReCiR__TDRqtViXlnhacWYpG3yXQnSwBRPkdNY6zfQdpd_g8I84ggCIthFfquK2YGTYGDqTXG5ShLDk0SFundP2b0VruHTNjk"/>
+<div>
+<p class="font-bold text-slate-900 dark:text-white">王雅筑</p>
+<p class="text-sm text-slate-400">大三學生</p>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-surface-dark p-8 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col h-full">
+<div class="flex gap-1 text-yellow-400 mb-6">
+<span class="material-symbols-outlined filled">star</span>
+<span class="material-symbols-outlined filled">star</span>
+<span class="material-symbols-outlined filled">star</span>
+<span class="material-symbols-outlined filled">star</span>
+<span class="material-symbols-outlined filled">star</span>
+</div>
+<p class="text-slate-600 dark:text-slate-300 text-lg italic mb-8 flex-grow">
+                    "環境很舒適，工具也很齊全。最重要的是老師人很溫柔，問問題都不會有壓力，非常推薦給想要打好基礎的學妹們！"
+                </p>
+<div class="flex items-center gap-4 pt-6 border-t border-slate-100 dark:border-slate-800">
+<img alt="Lee" class="w-12 h-12 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATAIrYWn83vwQmAz4AJpnnzjKACPK8CUcke2HL5H6luQvVUCg1I2djBBgTMDPluzJQA4YGVfcDvjBt_wE_Za9tnOQdUOUtQ7m6J36rienPC3ss5GYxHoC9X_0a9lNmnOZRMOcQpXVip13I4I8a1-VBW8hhs0qMS7EkdMCkC7CxDZ_jvM0QidvOZicb2901-igbY9bzDecKavucJOvVqv-tsbD3VDIaGl_OA-fOqUnJgmcCEELVP_Ei14SmlA91plSxTozHNBjY9zg"/>
+<div>
+<p class="font-bold text-slate-900 dark:text-white">李怡君</p>
+<p class="text-sm text-slate-400">在職進修</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-20 bg-slate-900 text-white relative overflow-hidden" id="pricing">
+<div class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/20 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+<div>
+<h2 class="text-3xl md:text-5xl font-bold mb-6">投資妳的專業未來<br/>成就無可取代的價值</h2>
+<p class="text-slate-300 text-lg mb-8 leading-relaxed">
+                    這不只是一堂雕刻課，更是一把開啟專業職涯的鑰匙。我們提供業界最高規格的教學品質與環境，讓妳的每一分投入都物超所值。
+                </p>
+<ul class="space-y-5 mb-10">
+<li class="flex items-center gap-4">
+<div class="flex items-center justify-center size-8 rounded-full bg-primary/20 text-primary">
+<span class="material-symbols-outlined text-lg">check</span>
+</div>
+<span class="text-lg">包含所有專業雕刻刀具組（價值 $3,000）</span>
+</li>
+<li class="flex items-center gap-4">
+<div class="flex items-center justify-center size-8 rounded-full bg-primary/20 text-primary">
+<span class="material-symbols-outlined text-lg">check</span>
+</div>
+<span class="text-lg">無限量供應石膏棒與練習用蠟</span>
+</li>
+<li class="flex items-center gap-4">
+<div class="flex items-center justify-center size-8 rounded-full bg-primary/20 text-primary">
+<span class="material-symbols-outlined text-lg">check</span>
+</div>
+<span class="text-lg">課後專屬 LINE 群組解惑</span>
+</li>
+<li class="flex items-center gap-4">
+<div class="flex items-center justify-center size-8 rounded-full bg-primary/20 text-primary">
+<span class="material-symbols-outlined text-lg">check</span>
+</div>
+<span class="text-lg">協助作品集拍攝與編排指導</span>
+</li>
+</ul>
+<div class="flex gap-4">
+<button class="px-8 py-3 rounded-xl border border-white/20 hover:bg-white/10 transition-colors font-bold text-white">
+                        聯繫客服諮詢
+                    </button>
+</div>
+</div>
+<div class="bg-white text-slate-900 rounded-[2rem] p-8 md:p-10 shadow-2xl relative transform lg:translate-x-10">
+<div class="absolute -top-4 -right-4 bg-red-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg animate-pulse">
+                    限時早鳥優惠
+                </div>
+<div class="text-center mb-8 pb-8 border-b border-slate-100">
+<p class="text-slate-400 text-sm line-through mb-2">原價 NT$ 28,000</p>
+<div class="flex items-baseline justify-center gap-2">
+<span class="text-2xl font-bold">NT$</span>
+<span class="text-6xl font-black text-slate-900 tracking-tight">22,500</span>
+</div>
+<p class="text-primary font-bold mt-3 bg-primary/10 inline-block px-3 py-1 rounded-full text-sm">可分 3 期零利率</p>
+</div>
+<button class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-5 rounded-xl text-xl shadow-xl shadow-primary/30 transition-all hover:-translate-y-1 mb-6">
+                    立即報名課程
+                </button>
+<p class="text-center text-xs text-slate-400">
+                    名額有限，額滿即止。享有 7 天滿意保證。<br/>
+                    目前剩餘名額：<span class="text-red-500 font-bold">3</span> 位
+                </p>
+</div>
+</div>
+</div>
+</section>
+<footer class="bg-white dark:bg-background-dark pt-20 pb-10 border-t border-slate-200 dark:border-slate-800">
+<div class="max-w-7xl mx-auto px-4 md:px-8">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+<div class="col-span-1 md:col-span-1">
+<div class="flex items-center gap-2 mb-6">
+<div class="size-8 bg-gradient-to-tr from-primary to-emerald-200 rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-lg">diamond</span>
+</div>
+<span class="text-xl font-bold text-slate-900 dark:text-white">TimeCarve 刻時</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-6">
+                    專注於牙體技術傳承，協助每一位未來的技師雕刻出精彩的職涯。我們相信，好的技術值得最好的傳承。
+                </p>
+<div class="flex gap-4">
+<a class="size-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-primary hover:text-white dark:hover:bg-primary transition-colors" href="#">
+<span class="text-sm font-bold">FB</span>
+</a>
+<a class="size-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-primary hover:text-white dark:hover:bg-primary transition-colors" href="#">
+<span class="text-sm font-bold">IG</span>
+</a>
+<a class="size-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-primary hover:text-white dark:hover:bg-primary transition-colors" href="#">
+<span class="text-sm font-bold">YT</span>
+</a>
+</div>
+</div>
+<div class="col-span-1">
+<h4 class="font-bold text-slate-900 dark:text-white mb-6">熱門課程</h4>
+<ul class="space-y-4 text-sm text-slate-500 dark:text-slate-400">
+<li><a class="hover:text-primary transition-colors" href="#">全能精修班</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">基礎入門班</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">國考衝刺班</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">矯正裝置製作</a></li>
+</ul>
+</div>
+<div class="col-span-1">
+<h4 class="font-bold text-slate-900 dark:text-white mb-6">學員資源</h4>
+<ul class="space-y-4 text-sm text-slate-500 dark:text-slate-400">
+<li><a class="hover:text-primary transition-colors" href="#">學員登入</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">常見問題</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">作品集範例</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">課程條款</a></li>
+</ul>
+</div>
+<div class="col-span-1">
+<h4 class="font-bold text-slate-900 dark:text-white mb-6">聯絡我們</h4>
+<ul class="space-y-4 text-sm text-slate-500 dark:text-slate-400">
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-base">location_on</span>
+                        台北市中山區南京西路 123 號
+                    </li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-base">mail</span>
+                        hello@timecarve.com.tw
+                    </li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-base">call</span>
+                        02-2345-6789
+                    </li>
+</ul>
+</div>
+</div>
+<div class="border-t border-slate-100 dark:border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-400">
+<p>© 2024 TimeCarve 刻時. All rights reserved.</p>
+<div class="flex gap-6">
+<a class="hover:text-primary" href="#">隱私權政策</a>
+<a class="hover:text-primary" href="#">服務條款</a>
+</div>
+</div>
+</div>
+</footer>
+<div class="fixed bottom-0 left-0 w-full bg-white/90 dark:bg-surface-dark/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 p-4 md:hidden z-50 flex items-center justify-between gap-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+<div>
+<p class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Early Bird Offer</p>
+<p class="text-xl font-black text-slate-900 dark:text-white">NT$ 22,500</p>
+</div>
+<a class="flex-1 bg-slate-900 dark:bg-primary text-white font-bold py-3 px-6 rounded-xl text-center shadow-lg" href="#pricing">
+        立即預約
+    </a>
+</div>
+
+</body></html>

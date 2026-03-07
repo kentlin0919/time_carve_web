@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Super Admin - 維護費總覽</title>
+<!-- Google Fonts: Manrope -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13b6ec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#101d22",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1a2c32",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', "Noto Sans", sans-serif;
+        }
+        /* Custom scrollbar for better look in table if needed */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#111618] dark:text-gray-100 min-h-screen flex flex-col overflow-x-hidden transition-colors duration-200">
+<!-- Top Navigation -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#f0f3f4] dark:border-[#2a3c42] bg-surface-light dark:bg-surface-dark px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<div class="size-8 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-size: 32px;">admin_panel_settings</span>
+</div>
+<h2 class="text-[#111618] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Super Admin Console</h2>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<nav class="hidden md:flex items-center gap-9">
+<a class="text-[#111618] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">儀表板</a>
+<a class="text-[#111618] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">教師管理</a>
+<a class="text-[#111618] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">學生管理</a>
+<a class="text-primary text-sm font-bold leading-normal" href="#">財務報表</a>
+<a class="text-[#111618] dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">系統設定</a>
+</nav>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="User avatar placeholder showing a generic silhouette" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCWGx1OnBjzS-m0ObEJKeAyVNeE-3_KuiexGHf6SzC90KEohFh4hFShCTZ0L6WvJdiwWYM4zHJF1u1HsYL_MO9f2Gl_I_JWU2u9F8F8LAfWC1xuGBzCc0xkKbxBYgg-CTje6s41WRoMlf2ISt9mE0cvrbDAEmCtL_-QdTOnqyYeTLHqkjRQ6-2nYpQmPr64bZZ-v4QBX2NKl2Wqeb5F-E4tpzvDNzCavY72U9bMZOQsyvyS7RysGUxV5as90dntKtkHt3HVlC9GCcQ");'>
+</div>
+</div>
+</header>
+<div class="layout-container flex h-full grow flex-col">
+<div class="px-6 md:px-10 lg:px-40 flex flex-1 justify-center py-8">
+<div class="layout-content-container flex flex-col max-w-[1200px] flex-1 gap-6">
+<!-- Page Heading -->
+<div class="flex flex-wrap justify-between items-end gap-4">
+<div class="flex min-w-72 flex-col gap-2">
+<h1 class="text-[#111618] dark:text-white text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em]">維護費方案總覽</h1>
+<p class="text-[#617f89] dark:text-gray-400 text-base font-normal leading-normal">管理所有教師的維護費訂閱狀態與營收概況</p>
+</div>
+<button class="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-primary hover:bg-[#11a3d4] text-white text-sm font-bold leading-normal tracking-[0.015em] transition-colors shadow-sm hover:shadow-md">
+<span class="material-symbols-outlined" style="font-size: 20px;">download</span>
+<span class="truncate">匯出財務報表</span>
+</button>
+</div>
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Stat 1 -->
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-surface-light dark:bg-surface-dark border border-[#dbe3e6] dark:border-[#2a3c42] shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-[#617f89] dark:text-gray-400 text-sm font-medium leading-normal">本月總營收</p>
+<span class="material-symbols-outlined text-primary" style="font-size: 24px;">payments</span>
+</div>
+<p class="text-[#111618] dark:text-white tracking-tight text-2xl font-bold leading-tight mt-1">NT$ 452,000</p>
+<div class="flex items-center gap-1 text-[#078836] dark:text-green-400 text-sm font-medium">
+<span class="material-symbols-outlined" style="font-size: 16px;">trending_up</span>
+<span>+12.5%</span>
+<span class="text-[#617f89] dark:text-gray-500 font-normal ml-1">較上月</span>
+</div>
+</div>
+<!-- Stat 2 -->
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-surface-light dark:bg-surface-dark border border-[#dbe3e6] dark:border-[#2a3c42] shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-[#617f89] dark:text-gray-400 text-sm font-medium leading-normal">待收費用 (未結清)</p>
+<span class="material-symbols-outlined text-orange-500" style="font-size: 24px;">pending_actions</span>
+</div>
+<p class="text-[#111618] dark:text-white tracking-tight text-2xl font-bold leading-tight mt-1">NT$ 38,500</p>
+<div class="flex items-center gap-1 text-orange-600 dark:text-orange-400 text-sm font-medium">
+<span>24 筆</span>
+<span class="text-[#617f89] dark:text-gray-500 font-normal ml-1">待處理款項</span>
+</div>
+</div>
+<!-- Stat 3 -->
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-surface-light dark:bg-surface-dark border border-[#dbe3e6] dark:border-[#2a3c42] shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-[#617f89] dark:text-gray-400 text-sm font-medium leading-normal">活躍訂閱教師</p>
+<span class="material-symbols-outlined text-blue-500" style="font-size: 24px;">group</span>
+</div>
+<p class="text-[#111618] dark:text-white tracking-tight text-2xl font-bold leading-tight mt-1">124</p>
+<div class="flex items-center gap-1 text-[#078836] dark:text-green-400 text-sm font-medium">
+<span class="material-symbols-outlined" style="font-size: 16px;">trending_up</span>
+<span>+8</span>
+<span class="text-[#617f89] dark:text-gray-500 font-normal ml-1">本月新增</span>
+</div>
+</div>
+<!-- Stat 4 -->
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-surface-light dark:bg-surface-dark border border-[#dbe3e6] dark:border-[#2a3c42] shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-[#617f89] dark:text-gray-400 text-sm font-medium leading-normal">方案變更</p>
+<span class="material-symbols-outlined text-purple-500" style="font-size: 24px;">swap_horiz</span>
+</div>
+<p class="text-[#111618] dark:text-white tracking-tight text-2xl font-bold leading-tight mt-1">5</p>
+<div class="flex items-center gap-1 text-[#617f89] dark:text-gray-500 text-sm font-medium">
+<span class="material-symbols-outlined" style="font-size: 16px;">info</span>
+<span>升級: 3 / 降級: 2</span>
+</div>
+</div>
+</div>
+<!-- Filters & Search -->
+<div class="flex flex-col md:flex-row gap-4 justify-between items-center bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-[#f0f3f4] dark:border-[#2a3c42] shadow-sm">
+<!-- Search -->
+<div class="w-full md:w-auto md:flex-1 max-w-md">
+<div class="relative flex items-center w-full h-10 rounded-lg focus-within:ring-2 focus-within:ring-primary/50 overflow-hidden bg-background-light dark:bg-background-dark border border-transparent dark:border-[#2a3c42]">
+<div class="flex items-center justify-center pl-3 pr-2 text-[#617f89]">
+<span class="material-symbols-outlined" style="font-size: 20px;">search</span>
+</div>
+<input class="w-full bg-transparent border-none text-[#111618] dark:text-white placeholder-[#617f89] focus:ring-0 text-sm h-full" placeholder="搜尋教師姓名、Email 或 ID..."/>
+</div>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 hide-scrollbar">
+<button class="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 text-primary text-sm font-bold border border-primary/20 whitespace-nowrap">
+<span>所有狀態</span>
+<span class="material-symbols-outlined" style="font-size: 18px;">arrow_drop_down</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-2 rounded-lg bg-background-light dark:bg-[#101d22] hover:bg-[#e0e7e9] dark:hover:bg-[#1a2c32] text-[#111618] dark:text-gray-300 text-sm font-medium border border-transparent hover:border-[#dbe3e6] dark:hover:border-[#2a3c42] transition-all whitespace-nowrap">
+<span>方案類型</span>
+<span class="material-symbols-outlined" style="font-size: 18px;">arrow_drop_down</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-2 rounded-lg bg-background-light dark:bg-[#101d22] hover:bg-[#e0e7e9] dark:hover:bg-[#1a2c32] text-[#111618] dark:text-gray-300 text-sm font-medium border border-transparent hover:border-[#dbe3e6] dark:hover:border-[#2a3c42] transition-all whitespace-nowrap">
+<span>本月已繳費</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-2 rounded-lg bg-background-light dark:bg-[#101d22] hover:bg-[#e0e7e9] dark:hover:bg-[#1a2c32] text-[#111618] dark:text-gray-300 text-sm font-medium border border-transparent hover:border-[#dbe3e6] dark:hover:border-[#2a3c42] transition-all whitespace-nowrap">
+<span>逾期未繳</span>
+</button>
+</div>
+</div>
+<!-- Main Data Table -->
+<div class="overflow-hidden rounded-xl border border-[#dbe3e6] dark:border-[#2a3c42] bg-surface-light dark:bg-surface-dark shadow-sm">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-[#f8fafb] dark:bg-[#152328] border-b border-[#dbe3e6] dark:border-[#2a3c42]">
+<th class="px-6 py-4 text-xs font-bold text-[#617f89] uppercase tracking-wider">教師資訊</th>
+<th class="px-6 py-4 text-xs font-bold text-[#617f89] uppercase tracking-wider">訂閱方案</th>
+<th class="px-6 py-4 text-xs font-bold text-[#617f89] uppercase tracking-wider text-right">方案費用</th>
+<th class="px-6 py-4 text-xs font-bold text-[#617f89] uppercase tracking-wider">繳費狀態</th>
+<th class="px-6 py-4 text-xs font-bold text-[#617f89] uppercase tracking-wider">下次扣款日</th>
+<th class="px-6 py-4 text-xs font-bold text-[#617f89] uppercase tracking-wider text-right">操作</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#f0f3f4] dark:divide-[#2a3c42]">
+<!-- Row 1 -->
+<tr class="group hover:bg-[#f8fafb] dark:hover:bg-[#152328] transition-colors">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Teacher portrait" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDD2NnDv4IIf2Un9463ChALqs3ZoJ8-RqrEqo5kpoI8jrtGl7gNpp61LNTmC9vFGBH6sCMxDW-kNrKCZZ_-O63LW390rtRR_X3c04NWLEY8tu7hkTHabSmeW8js4Y7s2CmDjcYLykVL4NZqoFy4sToBvgTUO6rNhGXwUkmrpv9ITGUW1rKCwKXka7vWenz6GT1kmDkg7biGJWBCH3frT31BGEm_-Wt6lIWlHdyLGU3TG8GSoKxbPpLKP72H7MVidonhZGNJ9FlTafA");'></div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-[#111618] dark:text-white group-hover:text-primary transition-colors cursor-pointer">林雅婷</span>
+<span class="text-xs text-[#617f89]">ID: #T-8821</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-[#111618] dark:text-gray-200">專業版 (Pro)</span>
+<span class="text-xs text-[#617f89]">按月訂閱</span>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-right">
+<span class="text-sm font-bold text-[#111618] dark:text-white">NT$ 1,200</span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                            已繳費
+                                        </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-[#617f89]">
+                                        2023/11/15
+                                    </td>
+<td class="px-6 py-4 whitespace-nowrap text-right">
+<button class="text-[#617f89] hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined" style="font-size: 20px;">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="group hover:bg-[#f8fafb] dark:hover:bg-[#152328] transition-colors">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Teacher portrait" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCb1mlFZ-VIzCHQ87OX7WpFP7ypBjzJ8Q9MC7D9Et17EvXpfDanV4VAAqdHDVN63U9n_vAscTcw6WnkZM1zCF9N9nwatRjUSj4E6GpH2QYZtwAAK0SKgL6_tcuJ413Cjzyxe_tN__7IvnPypJt5nLGmORmxBGPlUYjop7RrlCmf_I3zkyX8pVo2L7OdDiaLPlKVGcB0AA44byBtE4x4WFKcR50CwL6ExkUB3I3oZ5THZ0rwpx9by5UdlCA7HeHv0vJye2OPlifq3Ds");'></div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-[#111618] dark:text-white group-hover:text-primary transition-colors cursor-pointer">陳建宏</span>
+<span class="text-xs text-[#617f89]">ID: #T-9004</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-[#111618] dark:text-gray-200">基礎版 (Basic)</span>
+<span class="text-xs text-[#617f89]">按季訂閱</span>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-right">
+<span class="text-sm font-bold text-[#111618] dark:text-white">NT$ 3,000</span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                                            待繳費
+                                        </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-[#617f89]">
+                                        2023/10/30
+                                    </td>
+<td class="px-6 py-4 whitespace-nowrap text-right">
+<button class="text-[#617f89] hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined" style="font-size: 20px;">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="group hover:bg-[#f8fafb] dark:hover:bg-[#152328] transition-colors">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Teacher portrait" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBlcyVRfv36dpXn0I2EAQd8T0A-d-MkrZIIkdQUjbZbUIgQuj_oS0jEL-dbpTV5h5n_EnNUGGC37_a7nTBmSRvUi3VnASqJb_fwL0zPkyuS-RLeHAMK-ZsezTn6-SgI9e8ta9kbeucMu-iV7oGyvrXugS9CfmolBtGewx9cvcjhhPKt8oRKuDqPotuld4npUtCMC70NzKFM3ethlZONHgrmMUwASro12gODlLC0zrwUyyTrE8dfylwpfGom2syYWWns-1XFd6D0mVk");'></div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-[#111618] dark:text-white group-hover:text-primary transition-colors cursor-pointer">張志偉</span>
+<span class="text-xs text-[#617f89]">ID: #T-7742</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-[#111618] dark:text-gray-200">企業版 (Enterprise)</span>
+<span class="text-xs text-[#617f89]">按年訂閱</span>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-right">
+<span class="text-sm font-bold text-[#111618] dark:text-white">NT$ 12,000</span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                                            逾期
+                                        </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-[#617f89]">
+                                        2023/10/15
+                                    </td>
+<td class="px-6 py-4 whitespace-nowrap text-right">
+<button class="text-[#617f89] hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined" style="font-size: 20px;">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="group hover:bg-[#f8fafb] dark:hover:bg-[#152328] transition-colors">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Teacher portrait" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCDEebpqX8f1j2sm8TKIJCVOwRUOxa0Bg6_G0RbK2gISAifjzmT9mkSrHN4hQ-4upCasaqo4Gmncr8RP5qcyaSP50If4-dI7_gxfbVv_Va8vOPZuyCUKNLCS_lNfaXuoX4Y3Q7YW1r2r24NJYnyfeNMs6MIMNhesVDm67MqFlDBMT_LCY3uniacNnrJwd8caFcPOAEfHkwi8ely5-DKVLm9XyxRHRMkKuaBRr155WClHFm9jrhcIPfrx6sMbQocbCyp9rK9f0dZleg");'></div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-[#111618] dark:text-white group-hover:text-primary transition-colors cursor-pointer">黃美玲</span>
+<span class="text-xs text-[#617f89]">ID: #T-9201</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-[#111618] dark:text-gray-200">專業版 (Pro)</span>
+<span class="text-xs text-[#617f89]">按月訂閱</span>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-right">
+<span class="text-sm font-bold text-[#111618] dark:text-white">NT$ 1,200</span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                            已繳費
+                                        </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-[#617f89]">
+                                        2023/11/18
+                                    </td>
+<td class="px-6 py-4 whitespace-nowrap text-right">
+<button class="text-[#617f89] hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined" style="font-size: 20px;">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="group hover:bg-[#f8fafb] dark:hover:bg-[#152328] transition-colors">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-cover bg-center" data-alt="Teacher portrait" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAlw47kdfamCfmc1ORDkUHdCjtBD2RLm0sKZghxUNFHkbdl8orDvITYRr6QbKEY8iTe9JcpDaMHOAj15dAvpNUzxvOtPzPeyx0Dfb2V4DpQrNPRpsajbwqshK1DJFePCjfVJYKhBUVLoFft6bDMz6pcUuzl19B6UZlRjy2SDkJI3tZ6wUuzI1f8uVz0G0W-Fole0_EJQFdDbFjadtsyLjbVc5XQPFYLXjxLGQkKA920Dd1uJjd6hZuLbXY0QOd--Wq35pOnnNoDq2w");'></div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-[#111618] dark:text-white group-hover:text-primary transition-colors cursor-pointer">吳淑芬</span>
+<span class="text-xs text-[#617f89]">ID: #T-8115</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-[#111618] dark:text-gray-200">基礎版 (Basic)</span>
+<span class="text-xs text-[#617f89]">按月訂閱</span>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-right">
+<span class="text-sm font-bold text-[#111618] dark:text-white">NT$ 600</span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700/50 dark:text-gray-300">
+                                            取消中
+                                        </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-[#617f89]">
+                                        -
+                                    </td>
+<td class="px-6 py-4 whitespace-nowrap text-right">
+<button class="text-[#617f89] hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined" style="font-size: 20px;">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-between px-6 py-4 border-t border-[#f0f3f4] dark:border-[#2a3c42]">
+<div class="flex items-center gap-2">
+<span class="text-sm text-[#617f89]">顯示第 1 到 5 筆，共 124 筆</span>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center justify-center size-8 rounded border border-[#dbe3e6] dark:border-[#2a3c42] bg-surface-light dark:bg-surface-dark text-[#617f89] hover:bg-[#f0f3f4] dark:hover:bg-[#1a2c32] disabled:opacity-50">
+<span class="material-symbols-outlined" style="font-size: 18px;">chevron_left</span>
+</button>
+<button class="flex items-center justify-center size-8 rounded bg-primary text-white text-sm font-bold">1</button>
+<button class="flex items-center justify-center size-8 rounded border border-[#dbe3e6] dark:border-[#2a3c42] bg-surface-light dark:bg-surface-dark text-[#617f89] hover:bg-[#f0f3f4] dark:hover:bg-[#1a2c32] text-sm">2</button>
+<button class="flex items-center justify-center size-8 rounded border border-[#dbe3e6] dark:border-[#2a3c42] bg-surface-light dark:bg-surface-dark text-[#617f89] hover:bg-[#f0f3f4] dark:hover:bg-[#1a2c32] text-sm">3</button>
+<span class="flex items-center justify-center size-8 text-[#617f89]">...</span>
+<button class="flex items-center justify-center size-8 rounded border border-[#dbe3e6] dark:border-[#2a3c42] bg-surface-light dark:bg-surface-dark text-[#617f89] hover:bg-[#f0f3f4] dark:hover:bg-[#1a2c32]">
+<span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

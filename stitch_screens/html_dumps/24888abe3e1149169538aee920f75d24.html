@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>教師預約管理 - 牙體雕刻課程管理系統</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;family=Noto+Sans+TC:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13b6ec",
+                        "primary-dark": "#0e9ac9",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#0f172a",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1e293b",
+                        "text-main": "#334155",
+                        "text-sub": "#64748b",
+                        "border-light": "#e2e8f0",
+                        "border-dark": "#334155",
+                        "success": "#10b981",
+                        "danger": "#ef4444",
+                        "warning": "#f59e0b",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "Noto Sans TC", "sans-serif"],
+                        "sans": ["Lexend", "Noto Sans TC", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.375rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                    boxShadow: {
+                        'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+                        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main dark:text-gray-200 font-display overflow-hidden antialiased">
+<div class="flex h-screen w-full">
+<aside class="w-72 flex-shrink-0 flex flex-col bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark h-full transition-all duration-300 z-20 shadow-sm relative">
+<div class="p-6 flex flex-col h-full justify-between">
+<div class="flex flex-col gap-8">
+<div class="flex flex-col gap-6">
+<div class="flex items-center gap-2 px-1">
+<span class="material-symbols-outlined text-primary text-3xl">draw_collage</span>
+<h2 class="text-xl font-bold tracking-tight text-slate-800 dark:text-white">雕刻時光</h2>
+</div>
+<div class="flex items-center gap-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-border-light dark:border-border-dark">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-12 shadow-sm ring-2 ring-white dark:ring-slate-700" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDO6reZcrIx4TpNaoa2cHckBMT5jGOVcSOgCiWFeFHvwR5BhOlm6EzZoO1nDA5jhhdVnLiS3xPcbfPeCVuaPW7x9yyQ1OpilXHhQqZf7s1ilC_fOFoonIf98HRVehAYuVriM8l3I0MrYHIn39RVWEj_4jU-wlh_BemOK4VeRUNedhA-sln2p5816fNCRlBCziM3mk1IHmY1EIx1yw45MJkIcGFi9fz7JcPrVe1C0mU8MYnl7CYlnU1BMQEyHUmuypSHuwydpWLgPOU");'>
+</div>
+<div class="flex flex-col min-w-0">
+<h1 class="text-slate-900 dark:text-white text-base font-bold truncate">林曉梅</h1>
+<p class="text-text-sub dark:text-gray-400 text-xs truncate">專業牙體雕刻導師</p>
+</div>
+</div>
+</div>
+<nav class="flex flex-col gap-1.5">
+<p class="px-3 text-xs font-semibold text-text-sub uppercase tracking-wider mb-2">管理中心</p>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">dashboard</span>
+<span>儀表板總覽</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary-dark dark:text-primary border-l-4 border-primary transition-all font-medium" href="#">
+<span class="material-symbols-outlined filled">calendar_month</span>
+<span>預約管理</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">school</span>
+<span>課程方案</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">photo_library</span>
+<span>作品集管理</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">group</span>
+<span>學生資訊</span>
+</a>
+<p class="px-3 text-xs font-semibold text-text-sub uppercase tracking-wider mt-6 mb-2">財務與分析</p>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">monitoring</span>
+<span>營收報表</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">edit_note</span>
+<span>記帳功能</span>
+</a>
+</nav>
+</div>
+<div class="flex flex-col gap-3 mt-4">
+<div class="h-px bg-border-light dark:bg-border-dark w-full"></div>
+<button class="flex w-full items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">系統設定</span>
+</button>
+<button class="flex w-full items-center gap-3 px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-sm font-medium">登出系統</span>
+</button>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col h-full overflow-hidden relative bg-background-light dark:bg-background-dark">
+<header class="w-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark px-8 py-4 flex justify-between items-center sticky top-0 z-10 transition-all">
+<div class="flex flex-col">
+<h2 class="text-slate-800 dark:text-white text-xl font-bold tracking-tight flex items-center gap-2">
+                    預約管理
+                </h2>
+<p class="text-text-sub dark:text-gray-400 text-sm mt-0.5">管理學生送出的課程預約、確認課程狀態並更新付款情形</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center justify-center gap-2 rounded-lg h-9 px-4 text-primary bg-primary/10 hover:bg-primary/20 transition-colors text-sm font-bold">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>手動新增預約</span>
+</button>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
+<div class="max-w-7xl mx-auto flex flex-col gap-6">
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-soft p-5">
+<div class="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
+<div class="flex flex-wrap gap-3 flex-1 w-full">
+<div class="relative min-w-[240px]">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-text-sub">search</span>
+<input class="w-full pl-10 pr-4 py-2 rounded-xl border border-border-light dark:border-border-dark bg-slate-50 dark:bg-slate-800/50 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition-all" placeholder="搜尋學生姓名..." type="text"/>
+</div>
+<div class="relative min-w-[180px]">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-text-sub">calendar_today</span>
+<input class="w-full pl-10 pr-4 py-2 rounded-xl border border-border-light dark:border-border-dark bg-slate-50 dark:bg-slate-800/50 text-slate-800 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm transition-all cursor-pointer" type="date"/>
+</div>
+<div class="h-8 w-px bg-border-light dark:bg-border-dark mx-1 hidden lg:block"></div>
+<select class="pl-3 pr-8 py-2 rounded-xl border border-border-light dark:border-border-dark bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-white text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none cursor-pointer">
+<option value="">所有課程狀態</option>
+<option value="pending">待確認</option>
+<option value="confirmed">已確認</option>
+<option value="completed">已完成</option>
+</select>
+<select class="pl-3 pr-8 py-2 rounded-xl border border-border-light dark:border-border-dark bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-white text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none cursor-pointer">
+<option value="">所有付款狀態</option>
+<option value="unpaid">待付款</option>
+<option value="paid">已付款</option>
+<option value="noshow">未出席</option>
+</select>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-xs text-text-sub">顯示 24 筆預約</span>
+<button class="p-2 text-text-sub hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<div class="group bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark shadow-card p-4 hover:shadow-md transition-all hover:border-primary/50 relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-warning"></div> 
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+<div class="lg:col-span-3 flex items-center gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 font-bold">
+                                        JD
+                                    </div>
+<div class="absolute -bottom-1 -right-1 bg-white dark:bg-slate-800 rounded-full p-0.5">
+<div class="size-2.5 rounded-full bg-green-500 border border-white dark:border-slate-800"></div>
+</div>
+</div>
+<div class="flex flex-col">
+<h3 class="font-bold text-slate-800 dark:text-white text-sm">張雅婷 (Joy)</h3>
+<span class="text-xs text-text-sub">ID: S-2023001</span>
+</div>
+</div>
+<div class="lg:col-span-4 flex flex-col gap-1.5">
+<div class="flex items-center gap-2">
+<span class="bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300 text-[10px] px-2 py-0.5 rounded font-medium">全口假牙</span>
+<span class="text-sm font-semibold text-slate-800 dark:text-gray-200 truncate">進階前牙排列與雕刻實作</span>
+</div>
+<div class="flex items-center gap-4 text-xs text-text-sub">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">event</span>
+<span>2023年11月02日 (四)</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>14:00 - 16:00</span>
+</div>
+</div>
+</div>
+<div class="lg:col-span-2">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-warning/10 text-warning border border-warning/20">
+<span class="size-1.5 rounded-full bg-warning animate-pulse"></span>
+<span class="text-xs font-bold">待確認 (Pending)</span>
+</div>
+</div>
+<div class="lg:col-span-2">
+<div class="relative group/payment">
+<label class="block text-[10px] text-text-sub mb-1 font-medium ml-1">付款狀態 (點擊修改)</label>
+<div class="relative">
+<select class="appearance-none w-full pl-3 pr-8 py-1.5 rounded-lg text-xs font-bold border cursor-pointer transition-all bg-red-50 text-red-600 border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/40 focus:ring-2 focus:ring-red-500/20">
+<option selected="">待付款 (Unpaid)</option>
+<option>已付款 (Paid)</option>
+<option>未出席 (No Show)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1.5 text-red-500 dark:text-red-400 text-sm pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<div class="lg:col-span-1 flex items-center justify-end gap-1">
+<button class="p-2 text-text-sub hover:text-primary hover:bg-primary/5 rounded-full transition-colors tooltip" title="查看詳情">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+<button class="p-2 text-text-sub hover:text-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors" title="更多選項">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark shadow-card p-4 hover:shadow-md transition-all hover:border-primary/50 relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-success"></div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+<div class="lg:col-span-3 flex items-center gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-primary/20 text-primary-dark dark:text-primary flex items-center justify-center font-bold">
+                                        林
+                                    </div>
+</div>
+<div class="flex flex-col">
+<h3 class="font-bold text-slate-800 dark:text-white text-sm">林依晨</h3>
+<span class="text-xs text-text-sub">ID: S-2023045</span>
+</div>
+</div>
+<div class="lg:col-span-4 flex flex-col gap-1.5">
+<div class="flex items-center gap-2">
+<span class="bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300 text-[10px] px-2 py-0.5 rounded font-medium">雕刻基礎</span>
+<span class="text-sm font-semibold text-slate-800 dark:text-gray-200 truncate">牙體形態學入門：第一大臼齒</span>
+</div>
+<div class="flex items-center gap-4 text-xs text-text-sub">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">event</span>
+<span>2023年10月30日 (一)</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>18:30 - 20:30</span>
+</div>
+</div>
+</div>
+<div class="lg:col-span-2">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success/10 text-success border border-success/20">
+<span class="material-symbols-outlined text-[14px] font-bold">check</span>
+<span class="text-xs font-bold">已確認 (Confirmed)</span>
+</div>
+</div>
+<div class="lg:col-span-2">
+<div class="relative group/payment">
+<label class="block text-[10px] text-text-sub mb-1 font-medium ml-1">付款狀態</label>
+<div class="relative">
+<select class="appearance-none w-full pl-3 pr-8 py-1.5 rounded-lg text-xs font-bold border cursor-pointer transition-all bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800 dark:hover:bg-emerald-900/40 focus:ring-2 focus:ring-emerald-500/20">
+<option>待付款 (Unpaid)</option>
+<option selected="">已付款 (Paid)</option>
+<option>未出席 (No Show)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1.5 text-emerald-500 dark:text-emerald-400 text-sm pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<div class="lg:col-span-1 flex items-center justify-end gap-1">
+<button class="p-2 text-text-sub hover:text-primary hover:bg-primary/5 rounded-full transition-colors tooltip" title="查看詳情">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+<button class="p-2 text-text-sub hover:text-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors" title="更多選項">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark shadow-card p-4 hover:shadow-md transition-all hover:border-primary/50 relative overflow-hidden opacity-80 hover:opacity-100">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-slate-300 dark:bg-slate-600"></div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+<div class="lg:col-span-3 flex items-center gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-300 flex items-center justify-center font-bold">
+                                        陳
+                                    </div>
+</div>
+<div class="flex flex-col">
+<h3 class="font-bold text-slate-800 dark:text-white text-sm">陳志豪</h3>
+<span class="text-xs text-text-sub">ID: S-2023012</span>
+</div>
+</div>
+<div class="lg:col-span-4 flex flex-col gap-1.5">
+<div class="flex items-center gap-2">
+<span class="bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300 text-[10px] px-2 py-0.5 rounded font-medium">全口假牙</span>
+<span class="text-sm font-semibold text-slate-800 dark:text-gray-200 truncate">總義齒排列排牙技巧</span>
+</div>
+<div class="flex items-center gap-4 text-xs text-text-sub">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">event</span>
+<span>2023年10月28日 (六)</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>09:00 - 12:00</span>
+</div>
+</div>
+</div>
+<div class="lg:col-span-2">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+<span class="text-xs font-bold">已完成 (Completed)</span>
+</div>
+</div>
+<div class="lg:col-span-2">
+<div class="relative group/payment">
+<label class="block text-[10px] text-text-sub mb-1 font-medium ml-1">付款狀態</label>
+<div class="relative">
+<select class="appearance-none w-full pl-3 pr-8 py-1.5 rounded-lg text-xs font-bold border cursor-pointer transition-all bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800 dark:hover:bg-emerald-900/40 focus:ring-2 focus:ring-emerald-500/20">
+<option>待付款 (Unpaid)</option>
+<option selected="">已付款 (Paid)</option>
+<option>未出席 (No Show)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1.5 text-emerald-500 dark:text-emerald-400 text-sm pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<div class="lg:col-span-1 flex items-center justify-end gap-1">
+<button class="p-2 text-text-sub hover:text-primary hover:bg-primary/5 rounded-full transition-colors tooltip" title="查看詳情">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+<button class="p-2 text-text-sub hover:text-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors" title="更多選項">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark shadow-card p-4 hover:shadow-md transition-all hover:border-primary/50 relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-primary"></div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+<div class="lg:col-span-3 flex items-center gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-orange-100 text-orange-600 dark:bg-orange-900/50 dark:text-orange-300 flex items-center justify-center font-bold">
+                                        黃
+                                    </div>
+</div>
+<div class="flex flex-col">
+<h3 class="font-bold text-slate-800 dark:text-white text-sm">黃美玲</h3>
+<span class="text-xs text-text-sub">ID: S-2023088</span>
+</div>
+</div>
+<div class="lg:col-span-4 flex flex-col gap-1.5">
+<div class="flex items-center gap-2">
+<span class="bg-pink-50 text-pink-600 dark:bg-pink-900/30 dark:text-pink-300 text-[10px] px-2 py-0.5 rounded font-medium">局部假牙</span>
+<span class="text-sm font-semibold text-slate-800 dark:text-gray-200 truncate">R.P.D. 設計與雕刻</span>
+</div>
+<div class="flex items-center gap-4 text-xs text-text-sub">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-primary">event_upcoming</span>
+<span class="text-primary font-medium">明日 10:00</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">payments</span>
+<span class="text-danger">費用未結</span>
+</div>
+</div>
+</div>
+<div class="lg:col-span-2">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+<span class="text-xs font-bold">已確認 (Confirmed)</span>
+</div>
+</div>
+<div class="lg:col-span-2">
+<div class="relative group/payment">
+<label class="block text-[10px] text-text-sub mb-1 font-medium ml-1">付款狀態 (請催繳)</label>
+<div class="relative">
+<select class="appearance-none w-full pl-3 pr-8 py-1.5 rounded-lg text-xs font-bold border cursor-pointer transition-all bg-red-50 text-red-600 border-red-200 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/40 focus:ring-2 focus:ring-red-500/20">
+<option selected="">待付款 (Unpaid)</option>
+<option>已付款 (Paid)</option>
+<option>未出席 (No Show)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1.5 text-red-500 dark:text-red-400 text-sm pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<div class="lg:col-span-1 flex items-center justify-end gap-1">
+<button class="p-2 text-text-sub hover:text-primary hover:bg-primary/5 rounded-full transition-colors tooltip" title="查看詳情">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+<button class="p-2 text-text-sub hover:text-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors" title="更多選項">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group bg-surface-light dark:bg-surface-dark rounded-xl border border-border-light dark:border-border-dark shadow-card p-4 hover:shadow-md transition-all relative overflow-hidden opacity-60 hover:opacity-100">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-slate-400"></div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+<div class="lg:col-span-3 flex items-center gap-3">
+<div class="relative">
+<div class="size-10 rounded-full bg-slate-200 text-slate-500 dark:bg-slate-700 flex items-center justify-center font-bold">
+                                        劉
+                                    </div>
+</div>
+<div class="flex flex-col">
+<h3 class="font-bold text-slate-800 dark:text-white text-sm line-through decoration-slate-400">劉德華</h3>
+<span class="text-xs text-text-sub">ID: S-2023055</span>
+</div>
+</div>
+<div class="lg:col-span-4 flex flex-col gap-1.5">
+<div class="flex items-center gap-2">
+<span class="bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 text-[10px] px-2 py-0.5 rounded font-medium">基礎課程</span>
+<span class="text-sm font-semibold text-slate-600 dark:text-gray-400 truncate">牙科材料學概論</span>
+</div>
+<div class="flex items-center gap-4 text-xs text-text-sub">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">event_busy</span>
+<span>2023年10月20日</span>
+</div>
+</div>
+</div>
+<div class="lg:col-span-2">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+<span class="text-xs font-bold">已取消 (Cancelled)</span>
+</div>
+</div>
+<div class="lg:col-span-2">
+<div class="relative group/payment">
+<label class="block text-[10px] text-text-sub mb-1 font-medium ml-1">付款狀態</label>
+<div class="relative">
+<select class="appearance-none w-full pl-3 pr-8 py-1.5 rounded-lg text-xs font-bold border cursor-pointer transition-all bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:hover:bg-slate-700 focus:ring-2 focus:ring-slate-500/20">
+<option>待付款 (Unpaid)</option>
+<option>已付款 (Paid)</option>
+<option selected="">未出席 (No Show)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1.5 text-slate-500 dark:text-slate-400 text-sm pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<div class="lg:col-span-1 flex items-center justify-end gap-1">
+<button class="p-2 text-text-sub hover:text-primary hover:bg-primary/5 rounded-full transition-colors tooltip" title="查看詳情">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+<button class="p-2 text-text-sub hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors" title="刪除記錄">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between border-t border-border-light dark:border-border-dark pt-4">
+<button class="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-600 dark:text-gray-400 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-50">
+<span class="material-symbols-outlined text-lg">arrow_back</span>
+                        上一頁
+                    </button>
+<div class="flex items-center gap-1">
+<button class="size-8 flex items-center justify-center rounded-lg bg-primary text-white text-sm font-bold shadow-md shadow-primary/20">1</button>
+<button class="size-8 flex items-center justify-center rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-medium transition-colors">2</button>
+<button class="size-8 flex items-center justify-center rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-medium transition-colors">3</button>
+<span class="text-text-sub text-sm">...</span>
+<button class="size-8 flex items-center justify-center rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-medium transition-colors">12</button>
+</div>
+<button class="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-600 dark:text-gray-400 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                        下一頁
+                        <span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TimeCarve 刻時 - 手作藝術家教</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;family=Noto+Sans+TC:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#38bdf8","primary-dark": "#0ea5e9",
+                        "background-light": "#f8fafc",
+                        "background-dark": "#0f172a",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "Noto Sans TC", "sans-serif"],
+                        "sans": ["Lexend", "Noto Sans TC", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 font-display antialiased selection:bg-primary/20">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-100 dark:border-slate-800 px-6 lg:px-10 py-4 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md sticky top-0 z-50">
+<div class="flex items-center gap-3">
+<div class="size-9 text-primary">
+<svg class="w-full h-full" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM15.07 11.25L14.17 12.17C13.45 12.9 13 13.5 13 15H11V14.5C11 13.4 11.45 12.4 12.17 11.67L13.41 10.41C13.78 10.05 14 9.55 14 9C14 7.9 13.1 7 12 7C10.9 7 10 7.9 10 9H8C8 6.79 9.79 5 12 5C14.21 5 16 6.79 16 9C16 9.88 15.64 10.68 15.07 11.25Z" fill="none"></path>
+<path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor" opacity="0.3"></path>
+<path d="M11.5 8C12.8807 8 14 9.11929 14 10.5C14 11.8807 12.8807 13 11.5 13C10.1193 13 9 11.8807 9 10.5C9 9.11929 10.1193 8 11.5 8Z" fill="currentColor" style="display:none;"></path>
+<path d="M16.24 7.76C15.07 6.59 13.54 6 12 6V12L7.76 16.24C10.1 18.58 13.9 18.58 16.24 16.24C18.58 13.9 18.58 10.1 16.24 7.76Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-slate-900 dark:text-white text-xl font-bold leading-tight tracking-tight">TimeCarve 刻時</h2>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<div class="hidden lg:flex items-center gap-9">
+<a class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">首頁</a>
+<a class="text-slate-900 dark:text-white text-sm font-bold leading-normal text-primary" href="#">課程列表</a>
+<a class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">藝術導師</a>
+<a class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">學員作品</a>
+<a class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">預約體驗</a>
+</div>
+<div class="flex gap-4 items-center">
+<button class="lg:hidden text-slate-900 dark:text-white">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<button class="hidden lg:flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-primary hover:bg-primary-dark transition-colors text-white text-sm font-bold leading-normal tracking-wide shadow-lg shadow-primary/20">
+<span class="truncate">登入 / 註冊</span>
+</button>
+</div>
+</div>
+</header>
+<div class="layout-container flex h-full grow flex-col">
+<div class="px-4 md:px-10 lg:px-20 xl:px-40 flex flex-1 justify-center py-12">
+<div class="layout-content-container flex flex-col max-w-[1200px] flex-1">
+<div class="flex flex-col items-center justify-center gap-6 text-center mb-12">
+<span class="text-primary font-bold tracking-widest text-sm uppercase bg-primary/10 px-3 py-1 rounded-full">Explore Your Creativity</span>
+<h1 class="text-slate-900 dark:text-white text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight">手作藝術課程方案</h1>
+<p class="text-slate-500 dark:text-slate-400 text-base md:text-lg font-normal leading-relaxed max-w-2xl">
+                            在繁忙的生活中刻畫出屬於自己的靜謐時光。專為女性設計的手作藝術課程，提供最細膩的教學與療癒的創作空間。
+                        </p>
+</div>
+<div class="flex justify-center gap-3 p-3 flex-wrap mb-12">
+<button class="flex h-10 items-center justify-center gap-x-2 rounded-full bg-primary px-6 transition-all shadow-md shadow-primary/25 hover:shadow-lg hover:-translate-y-0.5">
+<p class="text-white text-sm font-bold leading-normal">全部課程</p>
+</button>
+<button class="flex h-10 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-slate-700 px-6 transition-all">
+<p class="text-slate-700 dark:text-slate-200 text-sm font-medium leading-normal">陶藝捏塑</p>
+</button>
+<button class="flex h-10 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-slate-700 px-6 transition-all">
+<p class="text-slate-700 dark:text-slate-200 text-sm font-medium leading-normal">金工飾品</p>
+</button>
+<button class="flex h-10 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-slate-700 px-6 transition-all">
+<p class="text-slate-700 dark:text-slate-200 text-sm font-medium leading-normal">花藝設計</p>
+</button>
+<button class="flex h-10 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-slate-700 px-6 transition-all">
+<p class="text-slate-700 dark:text-slate-200 text-sm font-medium leading-normal">一對一指導</p>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+<div class="group flex flex-col bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-slate-100 dark:border-slate-700/50 h-full">
+<div class="relative h-64 overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Close up of pottery making hands" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBHhqJqS-VgLptXAcCrNziettbp0-KH-cAC-oY7-qxcwZYspiupMFZMYTZmQSJqGYokazzYf31feFqozjVqQF5HyHuvKkZGz64lFzSWHrbd5eSVqsgr25QOyYUyD0QmGQ68tOAX8JZeAFTu72ATHh7m-IF1bgfrMZBT5moP5QMWBSoWQVf4HJYudJAFQCKV6GS2gLZIw7EVw-bFeQ1EAfPoglVwm-NI69IRGWk7vQmqDnv-qp6kGs1pYiMiyOzxQHuaWhsmcU1SjQE");'>
+<div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-60"></div>
+</div>
+<div class="absolute top-5 left-5">
+<span class="inline-flex items-center rounded-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-4 py-1.5 text-xs font-bold text-primary shadow-sm">
+                                        入門首選
+                                    </span>
+</div>
+</div>
+<div class="flex flex-col flex-1 p-8">
+<div class="mb-4">
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2 leading-snug group-hover:text-primary transition-colors">基礎陶藝捏塑課</h3>
+<div class="flex items-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400 mb-6">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+                                            3 小時/堂
+                                        </div>
+<div class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">group</span>
+                                            6人小班
+                                        </div>
+</div>
+<div class="space-y-4 mb-8">
+<div class="flex items-start gap-3">
+<div class="rounded-full bg-primary/10 p-1 mt-0.5 shrink-0">
+<span class="material-symbols-outlined text-primary text-[14px] block font-bold">check</span>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">零基礎也能上手，從認識陶土特性開始，學習手捏成型技法。</p>
+</div>
+<div class="flex items-start gap-3">
+<div class="rounded-full bg-primary/10 p-1 mt-0.5 shrink-0">
+<span class="material-symbols-outlined text-primary text-[14px] block font-bold">check</span>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">包含：專用陶土、釉料燒製費、全套創作工具借用。</p>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-6 border-t border-slate-100 dark:border-slate-700 flex items-end justify-between">
+<div class="flex flex-col">
+<span class="text-xs font-medium text-slate-400 mb-1">課程費用</span>
+<div class="flex items-baseline gap-1">
+<span class="text-2xl font-black text-primary">NT$ 2,800</span>
+<span class="text-xs font-medium text-slate-400">/ 堂</span>
+</div>
+</div>
+<button class="flex items-center justify-center w-12 h-12 rounded-full bg-slate-50 dark:bg-slate-700 text-primary hover:bg-primary hover:text-white transition-all shadow-sm group-hover:shadow-md">
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group flex flex-col bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-slate-100 dark:border-slate-700/50 h-full relative">
+<div class="absolute -right-12 top-8 rotate-45 bg-rose-500 text-white text-[10px] font-bold py-1.5 w-40 text-center z-20 shadow-sm uppercase tracking-wider">
+                                熱門推薦
+                            </div>
+<div class="relative h-64 overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Student crafting metal jewelry" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuClhyNdB1oj2tkZdYJl-CN8utJWWSnZVM1V_XtglLb7_t-3Fispuz-fjUhq2M_P43LIZLYM_K7NrIaHLarfkIfeCr0CCGdXXxWAfN10Tx5zlCzO34sBF-hcG4psII50g-9lE2bhJvqix8g39JCj5D2rN4L-globC9nSzwCMrWHZ5HfRLQAG18dfEnyepUhPzmpU-sHZceNya9qnlSmdEl0vOeiyLAm-AnG6GhOF8wRCOYQq-tqqTVZQSKFNvF0xk7mvww-a_tbbKWY");'>
+<div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-60"></div>
+</div>
+<div class="absolute top-5 left-5">
+<span class="inline-flex items-center rounded-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-4 py-1.5 text-xs font-bold text-rose-500 shadow-sm ring-1 ring-rose-500/10">
+                                        獨家設計
+                                    </span>
+</div>
+</div>
+<div class="flex flex-col flex-1 p-8">
+<div class="mb-4">
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2 leading-snug group-hover:text-primary transition-colors">輕珠寶金工手作坊</h3>
+<div class="flex items-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400 mb-6">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+                                            4 小時/堂
+                                        </div>
+<div class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">diamond</span>
+                                            925純銀
+                                        </div>
+</div>
+<div class="space-y-4 mb-8">
+<div class="flex items-start gap-3">
+<div class="rounded-full bg-rose-100 dark:bg-rose-900/30 p-1 mt-0.5 shrink-0">
+<span class="material-symbols-outlined text-rose-500 text-[14px] block font-bold">check</span>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">學習金屬鋸切、銼修、退火、敲紋與拋光等專業金工技法。</p>
+</div>
+<div class="flex items-start gap-3">
+<div class="rounded-full bg-rose-100 dark:bg-rose-900/30 p-1 mt-0.5 shrink-0">
+<span class="material-symbols-outlined text-rose-500 text-[14px] block font-bold">check</span>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">完成獨一無二的純銀戒指或項鍊，附贈精美包裝禮盒。</p>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-6 border-t border-slate-100 dark:border-slate-700 flex items-end justify-between">
+<div class="flex flex-col">
+<span class="text-xs font-medium text-slate-400 mb-1">課程費用</span>
+<div class="flex items-baseline gap-1">
+<span class="text-2xl font-black text-primary">NT$ 3,800</span>
+<span class="text-xs font-medium text-slate-400">/ 堂</span>
+</div>
+</div>
+<button class="flex items-center justify-center w-12 h-12 rounded-full bg-slate-50 dark:bg-slate-700 text-primary hover:bg-primary hover:text-white transition-all shadow-sm group-hover:shadow-md">
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<div class="group flex flex-col bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-slate-100 dark:border-slate-700/50 h-full">
+<div class="relative h-64 overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Beautiful flower arrangement" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA2dbubbbTBGL1aSfhXvv09ZH1FZ6MLLKdLtSOTSue4W4HSGbhZjCqzVK-YRR0JTV9CHJrM7xjeIfzeDk5Q1Z0dXzZrSQaU9YBqtCTddjqhCDRRRKjgHCgwQGf2pQLYVnc5XxXM597wVFu89XGeRsUUWhULCmrtx_natZ1gxyb0_gRD0GwBZp2kNtNNQkdX0EnHLqW_Nv3vx4ZNBLwa6HdePee92Yvnv-KsSP1MlnsCTUTgJw3qBcr0y8GSa1IbYaus7iqBKaAGI0k");'>
+<div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-60"></div>
+</div>
+<div class="absolute top-5 left-5">
+<span class="inline-flex items-center rounded-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-4 py-1.5 text-xs font-bold text-violet-600 shadow-sm ring-1 ring-violet-600/10">
+                                        生活美學
+                                    </span>
+</div>
+</div>
+<div class="flex flex-col flex-1 p-8">
+<div class="mb-4">
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2 leading-snug group-hover:text-primary transition-colors">四季花藝設計課</h3>
+<div class="flex items-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400 mb-6">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+                                            2.5 小時/堂
+                                        </div>
+<div class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">local_florist</span>
+                                            鮮花素材
+                                        </div>
+</div>
+<div class="space-y-4 mb-8">
+<div class="flex items-start gap-3">
+<div class="rounded-full bg-violet-100 dark:bg-violet-900/30 p-1 mt-0.5 shrink-0">
+<span class="material-symbols-outlined text-violet-600 text-[14px] block font-bold">check</span>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">運用當季花材，學習色彩搭配、空間層次與插花技巧。</p>
+</div>
+<div class="flex items-start gap-3">
+<div class="rounded-full bg-violet-100 dark:bg-violet-900/30 p-1 mt-0.5 shrink-0">
+<span class="material-symbols-outlined text-violet-600 text-[14px] block font-bold">check</span>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">適合喜愛居家佈置、提升生活質感的妳，每堂課完成一件作品。</p>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-6 border-t border-slate-100 dark:border-slate-700 flex items-end justify-between">
+<div class="flex flex-col">
+<span class="text-xs font-medium text-slate-400 mb-1">課程費用</span>
+<div class="flex items-baseline gap-1">
+<span class="text-2xl font-black text-primary">NT$ 2,500</span>
+<span class="text-xs font-medium text-slate-400">/ 堂</span>
+</div>
+</div>
+<button class="flex items-center justify-center w-12 h-12 rounded-full bg-slate-50 dark:bg-slate-700 text-primary hover:bg-primary hover:text-white transition-all shadow-sm group-hover:shadow-md">
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="mb-12">
+<div class="bg-gradient-to-br from-white to-sky-50 dark:from-slate-800 dark:to-slate-900 rounded-[2.5rem] p-8 lg:p-16 border border-sky-100 dark:border-slate-700 shadow-sm relative overflow-hidden">
+<div class="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute bottom-0 left-0 w-64 h-64 bg-violet-500/5 rounded-full blur-3xl -translate-x-1/3 translate-y-1/3"></div>
+<h3 class="text-slate-900 dark:text-white text-3xl font-bold mb-12 text-center relative z-10">Why TimeCarve?</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-10 relative z-10">
+<div class="flex flex-col items-center text-center gap-5 group">
+<div class="size-20 rounded-3xl bg-white dark:bg-slate-700 flex items-center justify-center shadow-lg shadow-sky-100 dark:shadow-none text-primary group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-5xl">spa</span>
+</div>
+<div class="space-y-3">
+<h4 class="font-bold text-slate-900 dark:text-white text-xl">療癒放鬆空間</h4>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed px-4">舒適明亮的工作室，提供茶點與輕音樂，讓創作成為一種享受。</p>
+</div>
+</div>
+<div class="flex flex-col items-center text-center gap-5 group">
+<div class="size-20 rounded-3xl bg-white dark:bg-slate-700 flex items-center justify-center shadow-lg shadow-sky-100 dark:shadow-none text-primary group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-5xl">palette</span>
+</div>
+<div class="space-y-3">
+<h4 class="font-bold text-slate-900 dark:text-white text-xl">專業師資指導</h4>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed px-4">由經驗豐富的女性藝術家親自授課，手把手教學，不怕學不會。</p>
+</div>
+</div>
+<div class="flex flex-col items-center text-center gap-5 group">
+<div class="size-20 rounded-3xl bg-white dark:bg-slate-700 flex items-center justify-center shadow-lg shadow-sky-100 dark:shadow-none text-primary group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-5xl">handshake</span>
+</div>
+<div class="space-y-3">
+<h4 class="font-bold text-slate-900 dark:text-white text-xl">社群交流</h4>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed px-4">定期舉辦學員作品展與交流茶會，認識更多喜愛手作的朋友。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<footer class="bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 py-12 px-6 lg:px-40">
+<div class="flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="size-7 text-primary">
+<svg class="w-full h-full" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM15.07 11.25L14.17 12.17C13.45 12.9 13 13.5 13 15H11V14.5C11 13.4 11.45 12.4 12.17 11.67L13.41 10.41C13.78 10.05 14 9.55 14 9C14 7.9 13.1 7 12 7C10.9 7 10 7.9 10 9H8C8 6.79 9.79 5 12 5C14.21 5 16 6.79 16 9C16 9.88 15.64 10.68 15.07 11.25Z" fill="none"></path>
+<path d="M16.24 7.76C15.07 6.59 13.54 6 12 6V12L7.76 16.24C10.1 18.58 13.9 18.58 16.24 16.24C18.58 13.9 18.58 10.1 16.24 7.76Z" fill="currentColor"></path>
+</svg>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm">© 2023 TimeCarve 刻時. All rights reserved.</p>
+</div>
+<div class="flex gap-8">
+<a class="text-slate-500 dark:text-slate-400 hover:text-primary transition-colors text-sm font-medium" href="#">隱私權政策</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-primary transition-colors text-sm font-medium" href="#">服務條款</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-primary transition-colors text-sm font-medium" href="#">常見問題</a>
+</div>
+</div>
+</footer>
+</div>
+</div>
+
+</body></html>

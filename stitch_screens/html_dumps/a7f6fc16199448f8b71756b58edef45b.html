@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TimeCarve 刻時 - 通知中心</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;family=Noto+Sans+TC:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13b6ec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#101d22",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "Noto Sans TC", "sans-serif"],
+                        "sans": ["Lexend", "Noto Sans TC", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+        .icon-filled {
+             font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#111618] dark:text-white overflow-x-hidden">
+<div class="relative flex min-h-screen w-full flex-col">
+<!-- Top Navigation -->
+<header class="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-[#101d22]/90 backdrop-blur-md px-6 py-3 lg:px-10">
+<div class="flex items-center gap-4">
+<div class="size-8 text-primary">
+<!-- Streamlined Sky Blue Icon -->
+<svg class="w-full h-full" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 4C12.95 4 4 12.95 4 24C4 35.05 12.95 44 24 44C35.05 44 44 35.05 44 24C44 12.95 35.05 4 24 4ZM34.6 31.8L22.6 19.8V11H25.4V18.6L36.2 29.4L34.6 31.8Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-[#111618] dark:text-white text-xl font-bold leading-tight tracking-[-0.015em]">TimeCarve 刻時</h2>
+</div>
+<!-- Desktop Nav Links -->
+<div class="hidden md:flex flex-1 justify-center gap-8">
+<a class="text-[#617f89] dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">首頁</a>
+<a class="text-[#617f89] dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">我的課程</a>
+<a class="text-[#617f89] dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal" href="#">行事曆</a>
+<a class="text-primary font-bold text-sm leading-normal relative after:content-[''] after:absolute after:-bottom-5 after:left-0 after:w-full after:h-0.5 after:bg-primary" href="#">通知中心</a>
+</div>
+<!-- Right Actions -->
+<div class="flex items-center gap-4">
+<button class="flex items-center justify-center rounded-full size-10 bg-[#f0f3f4] dark:bg-slate-800 text-[#111618] dark:text-white hover:bg-primary/10 hover:text-primary transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border border-white dark:border-[#101d22]"></span>
+</button>
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-white dark:border-slate-700 shadow-sm" data-alt="User profile picture showing a smiling woman" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBp39vCfUilvpqSCyJn2OJ5wmpTfB0Dwbke1_0hxABQoLnxYLsX5kc8gCMPPiY0PFjJvBLJU7rdmJ4XUsJLZ_mZC0lLnBZYnaiujxMytCpln1D6X5czVmfe4wMaJviq9gbAG1UrQNi9ysfnK0tP1h-GwYeCWmq1jdgzvVgBmL7TM7Kv5yvgMpR9B5GO0aXDAop4O3LcSe5JiqNDYub0HeyMkMvf9RYQOaZN7TOgJ4x7iUH-FhDEtPy3fs4hZvEk-pC3paMly5O8PmQ");'></div>
+</div>
+</header>
+<!-- Main Content Layout -->
+<main class="flex-1 flex justify-center py-8 px-4 sm:px-6 lg:px-8">
+<div class="flex flex-col w-full max-w-5xl gap-6">
+<!-- Page Heading Section -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<div class="flex flex-col gap-2">
+<h1 class="text-[#111618] dark:text-white text-3xl md:text-4xl font-black leading-tight tracking-[-0.02em]">通知中心</h1>
+<p class="text-[#617f89] dark:text-slate-400 text-base">查看您的課程提醒、預約更新與系統公告，掌握最新動態。</p>
+</div>
+<!-- Mark all read button (Mobile hidden, shown in controls below, or kept here for desktop) -->
+</div>
+<!-- Controls: Filters & Actions -->
+<div class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-[#152329] p-2 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+<!-- Filter Chips -->
+<div class="flex gap-2 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 px-2 no-scrollbar">
+<button class="whitespace-nowrap flex h-9 items-center justify-center gap-x-2 rounded-lg bg-[#111618] dark:bg-white text-white dark:text-[#111618] px-4 text-sm font-medium transition-transform active:scale-95 shadow-sm">
+                            全部
+                        </button>
+<button class="whitespace-nowrap flex h-9 items-center justify-center gap-x-2 rounded-lg bg-[#f0f3f4] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-[#111618] dark:text-slate-300 px-4 text-sm font-medium transition-colors">
+                            課程提醒
+                        </button>
+<button class="whitespace-nowrap flex h-9 items-center justify-center gap-x-2 rounded-lg bg-[#f0f3f4] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-[#111618] dark:text-slate-300 px-4 text-sm font-medium transition-colors">
+                            預約更新
+                        </button>
+<button class="whitespace-nowrap flex h-9 items-center justify-center gap-x-2 rounded-lg bg-[#f0f3f4] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-[#111618] dark:text-slate-300 px-4 text-sm font-medium transition-colors">
+                            新訊息
+                        </button>
+<button class="whitespace-nowrap flex h-9 items-center justify-center gap-x-2 rounded-lg bg-[#f0f3f4] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-[#111618] dark:text-slate-300 px-4 text-sm font-medium transition-colors">
+                            系統公告
+                        </button>
+</div>
+<!-- Secondary Action -->
+<button class="hidden sm:flex shrink-0 items-center justify-center h-9 px-4 text-primary hover:bg-primary/10 rounded-lg text-sm font-bold transition-colors gap-2">
+<span class="material-symbols-outlined text-[20px]">done_all</span>
+<span>全部標記為已讀</span>
+</button>
+</div>
+<!-- Notifications List -->
+<div class="flex flex-col gap-3">
+<!-- Today Heading -->
+<div class="text-sm font-bold text-[#617f89] dark:text-slate-500 uppercase tracking-wider mt-2 mb-1 pl-1">今天</div>
+<!-- Item 1: Unread Reminder -->
+<div class="group relative flex items-start gap-4 bg-white dark:bg-[#152329] p-4 rounded-xl shadow-sm border-l-[6px] border-l-primary cursor-pointer hover:shadow-md hover:translate-y-[-2px] transition-all duration-200">
+<!-- Icon -->
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined icon-filled">event</span>
+</div>
+<!-- Content -->
+<div class="flex flex-col flex-1 gap-1">
+<div class="flex justify-between items-start">
+<p class="text-[#111618] dark:text-white text-base font-bold leading-tight">課程提醒：手作陶藝基礎班</p>
+<span class="size-2.5 rounded-full bg-primary shrink-0 mt-1.5 animate-pulse"></span>
+</div>
+<p class="text-[#4e656d] dark:text-slate-400 text-sm leading-normal line-clamp-2">溫馨提醒：您的課程將於今日 14:00 開始。請記得攜帶您的圍裙與工具包，我們教室見！</p>
+<p class="text-[#9aaeb6] dark:text-slate-500 text-xs mt-1">10 分鐘前</p>
+</div>
+</div>
+<!-- Item 2: Unread Message -->
+<div class="group relative flex items-start gap-4 bg-white dark:bg-[#152329] p-4 rounded-xl shadow-sm border-l-[6px] border-l-primary cursor-pointer hover:shadow-md hover:translate-y-[-2px] transition-all duration-200">
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined icon-filled">chat</span>
+</div>
+<div class="flex flex-col flex-1 gap-1">
+<div class="flex justify-between items-start">
+<p class="text-[#111618] dark:text-white text-base font-bold leading-tight">新訊息：來自導師 Alice</p>
+<span class="size-2.5 rounded-full bg-primary shrink-0 mt-1.5"></span>
+</div>
+<p class="text-[#4e656d] dark:text-slate-400 text-sm leading-normal line-clamp-1">Hi, 關於你詢問的釉藥配方，我已經整理好一份檔案...</p>
+<p class="text-[#9aaeb6] dark:text-slate-500 text-xs mt-1">2 小時前</p>
+</div>
+</div>
+<!-- Yesterday Heading -->
+<div class="text-sm font-bold text-[#617f89] dark:text-slate-500 uppercase tracking-wider mt-6 mb-1 pl-1">昨天</div>
+<!-- Item 3: Read Booking Update -->
+<div class="group relative flex items-start gap-4 bg-white dark:bg-[#152329] p-4 rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all duration-200">
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400">
+<span class="material-symbols-outlined">edit_calendar</span>
+</div>
+<div class="flex flex-col flex-1 gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+<div class="flex justify-between items-start">
+<p class="text-[#111618] dark:text-slate-200 text-base font-medium leading-tight">預約更新：油畫進階班</p>
+</div>
+<p class="text-[#617f89] dark:text-slate-400 text-sm leading-normal line-clamp-2">您的預約狀態已更新為「已確認」。上課地點：B 棟 302 教室。</p>
+<p class="text-[#9aaeb6] dark:text-slate-500 text-xs mt-1">昨天 09:30</p>
+</div>
+</div>
+<!-- Item 4: Read System Announcement -->
+<div class="group relative flex items-start gap-4 bg-white dark:bg-[#152329] p-4 rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all duration-200">
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400">
+<span class="material-symbols-outlined">campaign</span>
+</div>
+<div class="flex flex-col flex-1 gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+<div class="flex justify-between items-start">
+<p class="text-[#111618] dark:text-slate-200 text-base font-medium leading-tight">系統公告：平台維護通知</p>
+</div>
+<p class="text-[#617f89] dark:text-slate-400 text-sm leading-normal line-clamp-2">為了提供更優質的服務，TimeCarve 將於本週日凌晨 02:00 至 04:00 進行系統維護。</p>
+<p class="text-[#9aaeb6] dark:text-slate-500 text-xs mt-1">昨天 08:00</p>
+</div>
+</div>
+<!-- Earlier Heading -->
+<div class="text-sm font-bold text-[#617f89] dark:text-slate-500 uppercase tracking-wider mt-6 mb-1 pl-1">更早之前</div>
+<!-- Item 5: Read Completion -->
+<div class="group relative flex items-start gap-4 bg-white dark:bg-[#152329] p-4 rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all duration-200">
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+<div class="flex flex-col flex-1 gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+<div class="flex justify-between items-start">
+<p class="text-[#111618] dark:text-slate-200 text-base font-medium leading-tight">課程完成：水彩入門</p>
+</div>
+<p class="text-[#617f89] dark:text-slate-400 text-sm leading-normal">恭喜您完成課程！請花一點時間為您的導師評分。</p>
+<p class="text-[#9aaeb6] dark:text-slate-500 text-xs mt-1">3 天前</p>
+</div>
+</div>
+</div>
+<!-- Load More -->
+<div class="flex justify-center mt-4 mb-8">
+<button class="text-[#617f89] dark:text-slate-400 hover:text-primary text-sm font-medium flex items-center gap-2 transition-colors">
+                        顯示更多通知
+                        <span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+</div>
+</div>
+</main>
+</div>
+</body></html>

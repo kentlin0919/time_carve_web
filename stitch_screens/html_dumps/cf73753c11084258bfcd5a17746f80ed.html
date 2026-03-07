@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TimeCarve 刻時</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        brand: "#38bdf8", // Sky blue from the logo reference
+                        primary: "#0f172a", // Dark slate for main text (modern & high contrast)
+                        secondary: "#f8fafc", // Very light cool gray for headers
+                        "background-light": "#ffffff", // Pure white for modern streamlined look
+                        "background-dark": "#0f172a", // Dark slate for dark mode
+                        "surface-light": "#f1f5f9", // Light gray surface
+                        "surface-dark": "#1e293b", // Slate 800
+                        "border-light": "#e2e8f0",
+                        "border-dark": "#334155",
+                    },
+                    fontFamily: {
+                        display: ["'Noto Sans TC'", "sans-serif"],
+                        sans: ["'Noto Sans TC'", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+</head>
+<body class="font-sans bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 transition-colors duration-300">
+<nav class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-border-light dark:border-border-dark sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+<div class="flex items-center space-x-3">
+<svg class="h-8 w-10" fill="none" viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg">
+<path class="drop-shadow-sm" d="M10 35C15 35 45 5 55 5" stroke="#38bdf8" stroke-linecap="round" stroke-width="4"></path>
+<path class="dark:fill-slate-500" d="M35 30L45 20L42 32Z" fill="#94a3b8"></path>
+</svg>
+<span class="text-xl font-bold text-primary dark:text-white tracking-wide">TimeCarve 刻時</span>
+</div>
+<div class="hidden md:flex space-x-8 text-sm font-medium text-slate-600 dark:text-slate-400">
+<a class="hover:text-brand dark:hover:text-brand transition-colors" href="#">課程</a>
+<a class="hover:text-brand dark:hover:text-brand transition-colors" href="#">關於我們</a>
+<a class="hover:text-brand dark:hover:text-brand transition-colors" href="#">聯繫</a>
+<a class="hover:text-brand dark:hover:text-brand transition-colors" href="#">登入</a>
+</div>
+</div>
+</nav>
+<header class="bg-secondary dark:bg-slate-900 px-6 py-16 border-b border-border-light dark:border-border-dark relative overflow-hidden">
+<div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-brand/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="max-w-5xl mx-auto relative z-10">
+<h1 class="text-4xl md:text-5xl font-bold text-primary dark:text-white mb-6 tracking-tight">使用者條款</h1>
+<p class="text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl text-lg">
+            歡迎使用 TimeCarve 刻時。我們致力於為您提供最優質的網站管理系統與假牙雕刻家教服務。請仔細閱讀以下條款，繼續使用即表示您同意受其約束。
+        </p>
+<div class="mt-4 text-sm text-slate-500 dark:text-slate-500">最後更新日期：2024年5月20日</div>
+</div>
+</header>
+<main class="max-w-5xl mx-auto px-6 py-12 flex flex-col md:flex-row gap-12">
+<aside class="md:w-1/4 flex-shrink-0">
+<div class="sticky top-24 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-border-light dark:border-border-dark overflow-hidden ring-1 ring-slate-900/5">
+<div class="px-5 py-4 border-b border-border-light dark:border-border-dark bg-slate-50 dark:bg-slate-800/50">
+<h3 class="font-bold text-slate-900 dark:text-white text-sm uppercase tracking-wider">目錄導覽</h3>
+</div>
+<nav class="flex flex-col text-sm py-2">
+<a class="group flex items-center px-5 py-3 bg-brand/5 dark:bg-brand/10 text-brand font-medium border-l-[3px] border-brand transition-all" href="#section-1">
+<span class="material-symbols-outlined text-[20px] mr-3">description</span>
+                    1. 用戶權利與義務
+                </a>
+<a class="group flex items-center px-5 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-brand dark:hover:text-brand transition-colors border-l-[3px] border-transparent hover:border-brand/30" href="#section-2">
+<span class="material-symbols-outlined text-[20px] mr-3">layers</span>
+                    2. 服務內容與存取
+                </a>
+<a class="group flex items-center px-5 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-brand dark:hover:text-brand transition-colors border-l-[3px] border-transparent hover:border-brand/30" href="#section-3">
+<span class="material-symbols-outlined text-[20px] mr-3">payments</span>
+                    3. 付款與退款政策
+                </a>
+<a class="group flex items-center px-5 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-brand dark:hover:text-brand transition-colors border-l-[3px] border-transparent hover:border-brand/30" href="#section-4">
+<span class="material-symbols-outlined text-[20px] mr-3">copyright</span>
+                    4. 知識產權
+                </a>
+<a class="group flex items-center px-5 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-brand dark:hover:text-brand transition-colors border-l-[3px] border-transparent hover:border-brand/30" href="#section-5">
+<span class="material-symbols-outlined text-[20px] mr-3">gavel</span>
+                    5. 責任限制
+                </a>
+<a class="group flex items-center px-5 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-brand dark:hover:text-brand transition-colors border-l-[3px] border-transparent hover:border-brand/30" href="#section-6">
+<span class="material-symbols-outlined text-[20px] mr-3">lock</span>
+                    6. 隱私政策
+                </a>
+<a class="group flex items-center px-5 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-brand dark:hover:text-brand transition-colors border-l-[3px] border-transparent hover:border-brand/30" href="#section-7">
+<span class="material-symbols-outlined text-[20px] mr-3">update</span>
+                    7. 條款變更與終止
+                </a>
+</nav>
+</div>
+</aside>
+<article class="md:w-3/4 space-y-12">
+<section class="scroll-mt-28" id="section-1">
+<h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center">
+<span class="text-brand mr-3 text-lg font-light">01.</span> 用戶權利與義務
+            </h2>
+<div class="bg-white dark:bg-slate-800 p-6 rounded-lg border border-border-light dark:border-border-dark space-y-4 text-slate-600 dark:text-slate-300 leading-relaxed shadow-sm">
+<div class="flex gap-4">
+<div class="flex-shrink-0 mt-1"><span class="material-symbols-outlined text-brand">check_circle</span></div>
+<p><span class="font-bold text-slate-900 dark:text-white">帳戶註冊：</span>您需提供準確、完整的資訊以註冊帳戶，並對您的帳戶安全負責。請勿與他人分享您的登入憑證。</p>
+</div>
+<div class="flex gap-4">
+<div class="flex-shrink-0 mt-1"><span class="material-symbols-outlined text-brand">check_circle</span></div>
+<p><span class="font-bold text-slate-900 dark:text-white">使用行為：</span>您同意僅出於合法目的使用本服務，不傳播任何可能損害、誤用、過載或損害系統的行為。</p>
+</div>
+<div class="flex gap-4">
+<div class="flex-shrink-0 mt-1"><span class="material-symbols-outlined text-brand">check_circle</span></div>
+<p><span class="font-bold text-slate-900 dark:text-white">尊重他人：</span>在使用 TimeCarve 的家教互動功能時，請保持尊重和專業的態度，禁止任何形式的騷擾或歧視。</p>
+</div>
+</div>
+</section>
+<section class="scroll-mt-28" id="section-2">
+<h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center">
+<span class="text-brand mr-3 text-lg font-light">02.</span> 服務內容與存取
+            </h2>
+<div class="space-y-4 text-slate-600 dark:text-slate-300 leading-relaxed">
+<p>您將獲得訪問課程資料的權限，這包括線上提問與互動功能，以及未來可能更新的課程補充資料。TimeCarve 平台提供專屬的閱讀介面、課程輔助練習、範例庫瀏覽等功能，旨在輔助學習者掌握雕刻技藝。</p>
+<p>請注意，我們會定期維護系統以確保服務穩定，特定情況下可能會暫停部分功能進行更新。</p>
+</div>
+</section>
+<section class="scroll-mt-28" id="section-3">
+<h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center">
+<span class="text-brand mr-3 text-lg font-light">03.</span> 付款與退款政策
+            </h2>
+<div class="space-y-4 text-slate-600 dark:text-slate-300 leading-relaxed">
+<p>本課程支援信用卡及第三方支付等管道。您同意承擔支付過程中所產生的任何轉帳手續費。由於本課程屬於數位內容服務，一經授權存取後，除法律規定之特殊情況外，原則上不適用無條件退款政策。</p>
+<div class="bg-blue-50 dark:bg-slate-800/50 p-4 rounded-md border-l-4 border-brand">
+<p class="text-sm">關於詳細的退款條件分析與個案處理，請聯繫客服團隊，我們將依據您的使用情況與誠信原則進行評估。</p>
+</div>
+</div>
+</section>
+<section class="scroll-mt-28" id="section-4">
+<h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center">
+<span class="text-brand mr-3 text-lg font-light">04.</span> 知識產權
+            </h2>
+<div class="space-y-4 text-slate-600 dark:text-slate-300 leading-relaxed">
+<p>TimeCarve 刻時平台上的所有課程資料、影片、圖解及文字內容均受版權法保護。未經書面授權，嚴禁複製、轉載、錄製或用於商業用途。</p>
+</div>
+</section>
+<section class="scroll-mt-28" id="section-5">
+<h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center">
+<span class="text-brand mr-3 text-lg font-light">05.</span> 責任限制
+            </h2>
+<div class="space-y-4 text-slate-600 dark:text-slate-300 leading-relaxed">
+<p>本平台致力於提供準確的教學內容，但不對因個人操作不當、誤解教學內容所導致的任何直接或間接損失承擔賠償責任。家教服務僅作為學習輔助，學習成果因人而異。</p>
+</div>
+</section>
+<section class="scroll-mt-28" id="section-6">
+<h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center">
+<span class="text-brand mr-3 text-lg font-light">06.</span> 隱私政策
+            </h2>
+<div class="space-y-4 text-slate-600 dark:text-slate-300 leading-relaxed">
+<p>我們重視您的隱私。有關我們如何收集、使用和保護您個人資訊的詳細資訊，請參閱我們的 <a class="text-brand underline decoration-brand/50 underline-offset-4 hover:text-sky-600 dark:hover:text-sky-300 hover:decoration-brand transition-all" href="#">隱私政策頁面</a>。</p>
+</div>
+</section>
+<section class="scroll-mt-28 border-t border-border-light dark:border-border-dark pt-8" id="section-7">
+<div class="flex items-start">
+<span class="material-symbols-outlined text-slate-400 mr-3 mt-1">info</span>
+<div>
+<h3 class="font-bold text-slate-900 dark:text-white text-lg">條款變更</h3>
+<p class="text-slate-500 dark:text-slate-400 mt-2 text-sm">TimeCarve 保留隨時修改本條款的權利。重大變更將通過電子郵件或網站公告通知您。繼續使用服務即表示您接受修訂後的條款。</p>
+</div>
+</div>
+</section>
+</article>
+</main>
+<footer class="bg-white dark:bg-slate-900 border-t border-border-light dark:border-border-dark py-12 px-6 mt-12">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-sm text-slate-500 dark:text-slate-400">
+<div class="mb-4 md:mb-0 flex items-center">
+<span class="font-bold text-slate-700 dark:text-slate-300 mr-2">TimeCarve 刻時</span>
+<span>© 2024 版權所有</span>
+</div>
+<div class="flex space-x-8">
+<a class="hover:text-brand dark:hover:text-brand transition-colors" href="#">隱私政策</a>
+<a class="hover:text-brand dark:hover:text-brand transition-colors" href="#">Cookie 政策</a>
+<a class="hover:text-brand dark:hover:text-brand transition-colors" href="#">聯繫我們</a>
+</div>
+</div>
+</footer>
+
+</body></html>

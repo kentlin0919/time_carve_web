@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Super Admin - 財務報表分析</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0ea5e9", // Sky blue/Cyan
+                        secondary: "#10b981", // Green for money
+                        warning: "#f59e0b",
+                        danger: "#ef4444",
+                        "background-light": "#f3f4f6",
+                        "background-dark": "#0f172a",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1e293b",
+                        "text-light": "#1f2937",
+                        "text-dark": "#f3f4f6",
+                        "subtext-light": "#6b7280",
+                        "subtext-dark": "#94a3b8",
+                    },
+                    fontFamily: {
+                        display: ["Noto Sans TC", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.75rem", // 12px
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }.donut-chart {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #0ea5e9 0% 65%, 
+                #10b981 65% 85%, 
+                #f59e0b 85% 100%
+            );
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .donut-hole {
+            width: 70%;
+            height: 70%;
+            border-radius: 50%;
+            background-color: var(--bg-card);
+            position: absolute;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark antialiased min-h-screen flex transition-colors duration-300">
+<style>
+        .bg-card-light { --bg-card: #ffffff; }
+        .dark .bg-card-dark { --bg-card: #1e293b; }
+    </style>
+<aside class="w-64 bg-card-light dark:bg-card-dark border-r border-gray-200 dark:border-gray-700 flex flex-col fixed h-full z-20 hidden lg:flex transition-colors duration-300">
+<div class="p-6 flex items-center space-x-3 border-b border-gray-100 dark:border-gray-800">
+<div class="relative">
+<img alt="Super Admin Profile" class="w-10 h-10 rounded-full object-cover ring-2 ring-primary ring-offset-2 dark:ring-offset-gray-900" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAt6W3eIXk2fHV7ExtV5kB8M6gkgNH91LHPohYHNEV1GR6Ot_YkeOJzTvmE-1EVYqbI66jY480BTxj0G_uPFRLhIIaT-Ved3efBy1SOMqYXPWFlp3guuL8uwqw6KIwgIx825PFTnA65hOhzb0NlEsA5IrD3evHcAGrODr9IcrhcTOkPzQ_BQjfhC98fgy_rXLJFcrx2hbzXDC0V0zEp-TM1pR9xacPJ2rvzyzLn68TK8-qB_ZiFcmPH_iNeakodt5pVW8tC86Uro24"/>
+<div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
+</div>
+<div>
+<h2 class="text-sm font-bold text-gray-900 dark:text-white">Super Admin</h2>
+<p class="text-xs text-subtext-light dark:text-subtext-dark">牙牙學語 系統管理</p>
+</div>
+</div>
+<nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+<a class="flex items-center space-x-3 px-3 py-2.5 text-subtext-light dark:text-subtext-dark hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg group transition-colors" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">dashboard</span>
+<span class="font-medium text-sm">儀表板</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 text-subtext-light dark:text-subtext-dark hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg group transition-colors" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">school</span>
+<span class="font-medium text-sm">教師管理</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 text-subtext-light dark:text-subtext-dark hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg group transition-colors" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">menu_book</span>
+<span class="font-medium text-sm">課程管理</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 text-subtext-light dark:text-subtext-dark hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg group transition-colors" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">people</span>
+<span class="font-medium text-sm">學生管理</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 bg-blue-50 dark:bg-primary/20 text-primary rounded-lg group" href="#">
+<span class="material-symbols-outlined text-xl">payments</span>
+<span class="font-medium text-sm">財務報表</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 text-subtext-light dark:text-subtext-dark hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg group transition-colors" href="#">
+<span class="material-symbols-outlined text-xl group-hover:text-primary transition-colors">settings</span>
+<span class="font-medium text-sm">系統設定</span>
+</a>
+</nav>
+<div class="p-4 border-t border-gray-200 dark:border-gray-800">
+<a class="flex items-center space-x-3 px-3 py-2 text-subtext-light dark:text-subtext-dark hover:text-red-500 dark:hover:text-red-400 transition-colors" href="#">
+<span class="material-symbols-outlined text-xl">logout</span>
+<span class="font-medium text-sm">登出系統</span>
+</a>
+</div>
+</aside>
+<header class="lg:hidden fixed w-full z-30 top-0 bg-card-light dark:bg-card-dark border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center">
+<h1 class="text-lg font-bold text-gray-900 dark:text-white">財務報表</h1>
+<button class="text-gray-500 dark:text-gray-400">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</header>
+<main class="flex-1 lg:ml-64 p-6 lg:p-10 pt-20 lg:pt-10 overflow-x-hidden">
+<div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
+<div>
+<h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">財務報表分析</h1>
+<p class="text-subtext-light dark:text-subtext-dark">檢視平台營收、維護費收入與財務趨勢</p>
+</div>
+<div class="flex flex-wrap gap-3">
+<button class="flex items-center gap-2 px-4 py-2 bg-card-light dark:bg-card-dark border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+<span class="material-symbols-outlined text-sm">calendar_month</span>
+<span class="text-sm font-medium">2023年 10月</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg shadow hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined text-sm">download</span>
+<span class="text-sm font-medium">匯出報表</span>
+</button>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+<div class="flex flex-wrap items-center gap-4 w-full">
+<div class="flex items-center gap-2 min-w-[200px]">
+<span class="material-symbols-outlined text-gray-400">filter_alt</span>
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">篩選:</span>
+</div>
+<div class="relative group">
+<select class="pl-3 pr-8 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary w-full md:w-auto text-gray-700 dark:text-gray-200">
+<option>所有日期範圍</option>
+<option>本月</option>
+<option>本季</option>
+<option>今年</option>
+</select>
+</div>
+<div class="relative group">
+<select class="pl-3 pr-8 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary w-full md:w-auto text-gray-700 dark:text-gray-200">
+<option>所有教師</option>
+<option>陳怡君 老師</option>
+<option>林雅婷 老師</option>
+<option>黃筱涵 老師</option>
+</select>
+</div>
+<div class="relative group">
+<select class="pl-3 pr-8 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary w-full md:w-auto text-gray-700 dark:text-gray-200">
+<option>所有課程類型</option>
+<option>基礎假牙雕刻</option>
+<option>進階全口排牙</option>
+<option>考前衝刺班</option>
+</select>
+</div>
+<button class="ml-auto text-primary hover:text-primary/80 text-sm font-medium">
+                    清除篩選
+                </button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+<div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-primary">payments</span>
+</div>
+<p class="text-sm text-subtext-light dark:text-subtext-dark font-medium mb-1">本年度總營收</p>
+<div class="flex items-baseline gap-2">
+<h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">NT$ 2,850,000</h3>
+</div>
+<div class="mt-2 flex items-center text-xs text-secondary font-medium">
+<span class="material-symbols-outlined text-sm mr-1">trending_up</span>
+<span>+12.5%</span>
+<span class="text-subtext-light dark:text-subtext-dark ml-1 font-normal">較去年同期</span>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+<div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-secondary">savings</span>
+</div>
+<p class="text-sm text-subtext-light dark:text-subtext-dark font-medium mb-1">平台維護費收入 (10%)</p>
+<div class="flex items-baseline gap-2">
+<h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">NT$ 285,000</h3>
+</div>
+<div class="mt-2 flex items-center text-xs text-secondary font-medium">
+<span class="material-symbols-outlined text-sm mr-1">trending_up</span>
+<span>+8.2%</span>
+<span class="text-subtext-light dark:text-subtext-dark ml-1 font-normal">較去年同期</span>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+<div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-warning">account_balance_wallet</span>
+</div>
+<p class="text-sm text-subtext-light dark:text-subtext-dark font-medium mb-1">已撥款給教師金額</p>
+<div class="flex items-baseline gap-2">
+<h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">NT$ 2,450,000</h3>
+</div>
+<div class="mt-2 flex items-center text-xs text-subtext-light dark:text-subtext-dark">
+<span>本月已結算 98%</span>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+<div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-blue-400">receipt_long</span>
+</div>
+<p class="text-sm text-subtext-light dark:text-subtext-dark font-medium mb-1">待結算金額</p>
+<div class="flex items-baseline gap-2">
+<h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">NT$ 115,000</h3>
+</div>
+<div class="mt-2 flex items-center text-xs text-warning font-medium">
+<span class="material-symbols-outlined text-sm mr-1">pending</span>
+<span>預計下週一撥款</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-6 mb-8">
+<div class="col-span-12 lg:col-span-8 bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+<div class="flex justify-between items-center mb-6">
+<div>
+<h3 class="text-lg font-bold text-gray-900 dark:text-white">月度營收趨勢</h3>
+<p class="text-xs text-subtext-light dark:text-subtext-dark mt-1">2023 年度全平台總營收與淨利比較</p>
+</div>
+<div class="flex items-center space-x-4">
+<div class="flex items-center space-x-2">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="text-xs text-subtext-light dark:text-subtext-dark">總營收</span>
+</div>
+<div class="flex items-center space-x-2">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<span class="text-xs text-subtext-light dark:text-subtext-dark">維護費收入</span>
+</div>
+</div>
+</div>
+<div class="relative h-72 w-full">
+<div class="absolute inset-0 flex flex-col justify-between text-xs text-subtext-light dark:text-subtext-dark pointer-events-none pr-4">
+<div class="flex items-center w-full"><span class="w-12 text-right mr-2">300k</span><div class="border-b border-dashed border-gray-200 dark:border-gray-700 w-full"></div></div>
+<div class="flex items-center w-full"><span class="w-12 text-right mr-2">225k</span><div class="border-b border-dashed border-gray-200 dark:border-gray-700 w-full"></div></div>
+<div class="flex items-center w-full"><span class="w-12 text-right mr-2">150k</span><div class="border-b border-dashed border-gray-200 dark:border-gray-700 w-full"></div></div>
+<div class="flex items-center w-full"><span class="w-12 text-right mr-2">75k</span><div class="border-b border-dashed border-gray-200 dark:border-gray-700 w-full"></div></div>
+<div class="flex items-center w-full"><span class="w-12 text-right mr-2">0</span><div class="border-b border-gray-300 dark:border-gray-600 w-full"></div></div>
+</div>
+<svg class="absolute inset-0 w-full h-full pt-1.5 pb-2 pl-14" preserveAspectRatio="none" viewBox="0 0 100 100">
+<defs>
+<linearGradient id="gradientRevenue" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:0.2"></stop>
+<stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:0"></stop>
+</linearGradient>
+</defs>
+<path class="text-primary" d="M0,70 Q10,65 20,40 T40,30 T60,20 T80,10 L100,5 L100,100 L0,100 Z" fill="url(#gradientRevenue)"></path>
+<path class="text-primary" d="M0,70 Q10,65 20,40 T40,30 T60,20 T80,10 L100,5" fill="none" stroke="currentColor" stroke-width="3" vector-effect="non-scaling-stroke"></path>
+<path class="text-secondary" d="M0,90 Q10,88 20,85 T40,82 T60,80 T80,78 L100,75" fill="none" stroke="currentColor" stroke-dasharray="4" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+</svg>
+<div class="absolute bottom-0 w-full flex justify-between text-xs text-subtext-light dark:text-subtext-dark pl-14 pt-2">
+<span>1月</span><span>3月</span><span>5月</span><span>7月</span><span>9月</span><span>11月</span>
+</div>
+</div>
+</div>
+<div class="col-span-12 lg:col-span-4 bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6">營收來源佔比</h3>
+<div class="flex flex-col items-center justify-center">
+<div class="donut-chart mb-6">
+<div class="donut-hole bg-card-light dark:bg-card-dark"></div>
+</div>
+<div class="w-full space-y-4">
+<div class="flex justify-between items-center p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="text-sm font-medium text-gray-700 dark:text-gray-200">基礎雕刻課程</span>
+</div>
+<span class="text-sm font-bold text-gray-900 dark:text-white">65%</span>
+</div>
+<div class="flex justify-between items-center p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<span class="text-sm font-medium text-gray-700 dark:text-gray-200">進階排牙實作</span>
+</div>
+<span class="text-sm font-bold text-gray-900 dark:text-white">20%</span>
+</div>
+<div class="flex justify-between items-center p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-warning"></span>
+<span class="text-sm font-medium text-gray-700 dark:text-gray-200">國考衝刺班</span>
+</div>
+<span class="text-sm font-bold text-gray-900 dark:text-white">15%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+<div class="p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white">近期交易紀錄</h3>
+<div class="relative w-full md:w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">search</span>
+<input class="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary text-gray-700 dark:text-gray-200" placeholder="搜尋交易編號或教師..." type="text"/>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left text-sm text-subtext-light dark:text-subtext-dark">
+<thead class="bg-gray-50 dark:bg-gray-800/50 uppercase text-xs font-semibold">
+<tr>
+<th class="px-6 py-4">交易編號 / 日期</th>
+<th class="px-6 py-4">教師姓名</th>
+<th class="px-6 py-4">課程方案</th>
+<th class="px-6 py-4 text-right">交易金額</th>
+<th class="px-6 py-4 text-right">維護費 (10%)</th>
+<th class="px-6 py-4 text-right">實付金額</th>
+<th class="px-6 py-4 text-center">狀態</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
+<td class="px-6 py-4">
+<div class="font-medium text-gray-900 dark:text-white">#TRX-88291</div>
+<div class="text-xs mt-0.5">2023/10/24 14:30</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-bold text-xs">陳</div>
+<span class="font-medium text-gray-900 dark:text-white">陳怡君</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-blue-50 dark:bg-blue-900/30 text-primary px-2 py-1 rounded text-xs font-medium">基礎雕刻 10堂</span>
+</td>
+<td class="px-6 py-4 text-right font-medium text-gray-900 dark:text-white">NT$ 15,000</td>
+<td class="px-6 py-4 text-right text-secondary font-medium">+ NT$ 1,500</td>
+<td class="px-6 py-4 text-right text-gray-900 dark:text-white font-bold">NT$ 13,500</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                    已撥款
+                                </span>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
+<td class="px-6 py-4">
+<div class="font-medium text-gray-900 dark:text-white">#TRX-88292</div>
+<div class="text-xs mt-0.5">2023/10/24 16:15</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-xs">林</div>
+<span class="font-medium text-gray-900 dark:text-white">林雅婷</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 px-2 py-1 rounded text-xs font-medium">進階排牙 5堂</span>
+</td>
+<td class="px-6 py-4 text-right font-medium text-gray-900 dark:text-white">NT$ 8,000</td>
+<td class="px-6 py-4 text-right text-secondary font-medium">+ NT$ 800</td>
+<td class="px-6 py-4 text-right text-gray-900 dark:text-white font-bold">NT$ 7,200</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                                    待結算
+                                </span>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
+<td class="px-6 py-4">
+<div class="font-medium text-gray-900 dark:text-white">#TRX-88293</div>
+<div class="text-xs mt-0.5">2023/10/23 09:10</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs">黃</div>
+<span class="font-medium text-gray-900 dark:text-white">黃筱涵</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-300 px-2 py-1 rounded text-xs font-medium">國考衝刺 單堂</span>
+</td>
+<td class="px-6 py-4 text-right font-medium text-gray-900 dark:text-white">NT$ 2,000</td>
+<td class="px-6 py-4 text-right text-secondary font-medium">+ NT$ 200</td>
+<td class="px-6 py-4 text-right text-gray-900 dark:text-white font-bold">NT$ 1,800</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                    已撥款
+                                </span>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
+<td class="px-6 py-4">
+<div class="font-medium text-gray-900 dark:text-white">#TRX-88294</div>
+<div class="text-xs mt-0.5">2023/10/23 11:45</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">張</div>
+<span class="font-medium text-gray-900 dark:text-white">張美玲</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="bg-blue-50 dark:bg-blue-900/30 text-primary px-2 py-1 rounded text-xs font-medium">基礎雕刻 20堂</span>
+</td>
+<td class="px-6 py-4 text-right font-medium text-gray-900 dark:text-white">NT$ 28,000</td>
+<td class="px-6 py-4 text-right text-secondary font-medium">+ NT$ 2,800</td>
+<td class="px-6 py-4 text-right text-gray-900 dark:text-white font-bold">NT$ 25,200</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                    已撥款
+                                </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center">
+<span class="text-xs text-subtext-light dark:text-subtext-dark">顯示 1 到 4 筆，共 142 筆資料</span>
+<div class="flex space-x-2">
+<button class="px-3 py-1 rounded border border-gray-200 dark:border-gray-700 text-xs hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50" disabled="">上一頁</button>
+<button class="px-3 py-1 rounded border border-gray-200 dark:border-gray-700 text-xs hover:bg-gray-50 dark:hover:bg-gray-800">下一頁</button>
+</div>
+</div>
+</div>
+<div class="mt-12 text-center text-xs text-subtext-light dark:text-subtext-dark">
+            © 2023 牙牙學語 Denture Carving Tutoring System. All rights reserved.
+        </div>
+</main>
+<button class="fixed bottom-6 right-6 bg-gray-900 dark:bg-white text-white dark:text-gray-900 p-3 rounded-full shadow-lg z-50 hover:scale-110 transition-transform" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-symbols-outlined block dark:hidden">dark_mode</span>
+<span class="material-symbols-outlined hidden dark:block">light_mode</span>
+</button>
+
+</body></html>

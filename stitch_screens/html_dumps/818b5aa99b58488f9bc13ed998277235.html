@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Super Admin - 新增教師</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13b6ec",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#101d22",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1a2c32",
+                        "text-main-light": "#111618",
+                        "text-main-dark": "#ffffff",
+                        "text-sec-light": "#617f89",
+                        "text-sec-dark": "#9aaeb5",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark font-display transition-colors duration-200">
+<div class="flex min-h-screen w-full overflow-hidden">
+<aside class="hidden lg:flex flex-col w-72 bg-surface-light dark:bg-surface-dark border-r border-gray-200 dark:border-gray-800 h-screen sticky top-0 shrink-0 z-20">
+<div class="flex flex-col h-full p-4 justify-between">
+<div class="flex flex-col gap-6">
+<div class="flex items-center gap-3 px-2">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-12 shadow-sm relative" data-alt="Portrait of the system administrator" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDyycIGclFhToLYQNYLjMpDgi04Nf_zsuNAiUBjA2UToggrE45TUdPcf1iAWKAIt9rsLCcRsth3rc_nPnqEl-8EGHpyVj2EJY-oFdOkPw9XR3tFOSLkVLV3xZE39YZarqV_m4VRwguog0fsafW5GSmKCKVmJ39M4GE1hCS9yjq_nbMErtgtLYzhwjoYSsnfjXrdPZtQhZysLywEMIjSeaxLMGG0aExbdOrwfVxs1foU7yTKO0h72Nzwrui6Afzz3_IFH6BHTIT3MUM");'>
+<span class="absolute bottom-0 right-0 size-3 bg-green-500 border-2 border-white dark:border-surface-dark rounded-full"></span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-text-main-light dark:text-text-main-dark text-base font-bold leading-tight">Super Admin</h1>
+<p class="text-text-sec-light dark:text-text-sec-dark text-xs font-medium">牙牙學語 系統管理</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-text-sec-light dark:text-text-sec-dark hover:bg-background-light dark:hover:bg-gray-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-primary transition-colors">dashboard</span>
+<span class="text-sm font-medium">儀表板</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg bg-primary/10 text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px] fill-1">school</span>
+<span class="text-sm font-bold">教師管理</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-text-sec-light dark:text-text-sec-dark hover:bg-background-light dark:hover:bg-gray-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-primary transition-colors">book_2</span>
+<span class="text-sm font-medium">課程管理</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-text-sec-light dark:text-text-sec-dark hover:bg-background-light dark:hover:bg-gray-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-primary transition-colors">groups</span>
+<span class="text-sm font-medium">學生管理</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-text-sec-light dark:text-text-sec-dark hover:bg-background-light dark:hover:bg-gray-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-primary transition-colors">payments</span>
+<span class="text-sm font-medium">財務報表</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-text-sec-light dark:text-text-sec-dark hover:bg-background-light dark:hover:bg-gray-800 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-primary transition-colors">settings</span>
+<span class="text-sm font-medium">系統設定</span>
+</a>
+</nav>
+</div>
+<button class="flex w-full items-center gap-3 px-3 py-3 rounded-lg text-text-sec-light dark:text-text-sec-dark hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400 transition-colors mt-auto">
+<span class="material-symbols-outlined text-[24px]">logout</span>
+<span class="text-sm font-medium">登出系統</span>
+</button>
+</div>
+</aside>
+<main class="flex-1 flex flex-col h-screen overflow-y-auto relative scroll-smooth">
+<div class="flex-1 px-6 py-8 md:px-12 md:py-10 max-w-[1000px] mx-auto w-full">
+<div class="mb-6">
+<a class="inline-flex items-center gap-1.5 text-text-sec-light dark:text-text-sec-dark hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
+<span class="text-sm font-bold">返回教師列表</span>
+</a>
+</div>
+<header class="mb-10">
+<h2 class="text-3xl md:text-4xl font-black text-text-main-light dark:text-text-main-dark tracking-tight mb-2">新增教師</h2>
+<p class="text-text-sec-light dark:text-text-sec-dark text-base">填寫以下資訊以為牙牙學語系統建立新的教師帳號。</p>
+</header>
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm p-6 md:p-10">
+<form class="flex flex-col gap-8">
+<div class="flex flex-col gap-6">
+<h3 class="text-lg font-bold text-text-main-light dark:text-text-main-dark flex items-center gap-2">
+<span class="w-1 h-5 rounded-full bg-primary"></span>
+                            基本資料
+                        </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex flex-col gap-2">
+<label class="text-sm font-bold text-text-main-light dark:text-text-main-dark">教師姓名 <span class="text-red-500">*</span></label>
+<input class="w-full h-12 px-4 rounded-xl bg-background-light dark:bg-background-dark border-2 border-transparent focus:border-primary focus:bg-surface-light dark:focus:bg-surface-dark focus:ring-0 text-text-main-light dark:text-text-main-dark placeholder:text-text-sec-light/60 transition-all outline-none" placeholder="請輸入真實姓名" required="" type="text"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-bold text-text-main-light dark:text-text-main-dark">電子郵件 <span class="text-red-500">*</span></label>
+<input class="w-full h-12 px-4 rounded-xl bg-background-light dark:bg-background-dark border-2 border-transparent focus:border-primary focus:bg-surface-light dark:focus:bg-surface-dark focus:ring-0 text-text-main-light dark:text-text-main-dark placeholder:text-text-sec-light/60 transition-all outline-none" placeholder="name@example.com" required="" type="email"/>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex flex-col gap-2">
+<label class="text-sm font-bold text-text-main-light dark:text-text-main-dark">初始密碼 <span class="text-red-500">*</span></label>
+<div class="relative group">
+<input class="w-full h-12 px-4 rounded-xl bg-background-light dark:bg-background-dark border-2 border-transparent focus:border-primary focus:bg-surface-light dark:focus:bg-surface-dark focus:ring-0 text-text-main-light dark:text-text-main-dark placeholder:text-text-sec-light/60 transition-all outline-none" placeholder="••••••••" required="" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-text-sec-light hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility_off</span>
+</button>
+</div>
+<p class="text-xs text-text-sec-light dark:text-text-sec-dark pl-1">密碼長度須至少 8 碼，包含英文與數字。</p>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-bold text-text-main-light dark:text-text-main-dark">確認密碼 <span class="text-red-500">*</span></label>
+<input class="w-full h-12 px-4 rounded-xl bg-background-light dark:bg-background-dark border-2 border-transparent focus:border-primary focus:bg-surface-light dark:focus:bg-surface-dark focus:ring-0 text-text-main-light dark:text-text-main-dark placeholder:text-text-sec-light/60 transition-all outline-none" placeholder="請再次輸入密碼" required="" type="password"/>
+</div>
+</div>
+</div>
+<hr class="border-gray-100 dark:border-gray-800"/>
+<div class="flex flex-col gap-6">
+<h3 class="text-lg font-bold text-text-main-light dark:text-text-main-dark flex items-center gap-2">
+<span class="w-1 h-5 rounded-full bg-primary"></span>
+                            權限與方案
+                        </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex flex-col gap-2">
+<label class="text-sm font-bold text-text-main-light dark:text-text-main-dark">維護費方案 <span class="text-red-500">*</span></label>
+<div class="relative">
+<select class="w-full h-12 px-4 pr-10 appearance-none rounded-xl bg-background-light dark:bg-background-dark border-2 border-transparent focus:border-primary focus:bg-surface-light dark:focus:bg-surface-dark focus:ring-0 text-text-main-light dark:text-text-main-dark cursor-pointer outline-none transition-all">
+<option value="basic">基礎版 (Basic)</option>
+<option selected="" value="pro">專業版 (Pro)</option>
+<option value="enterprise">企業版 (Enterprise)</option>
+</select>
+<span class="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-text-sec-light pointer-events-none text-sm">expand_more</span>
+</div>
+<p class="text-xs text-text-sec-light dark:text-text-sec-dark pl-1">不同方案將影響教師可開設的課程數量上限。</p>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-bold text-text-main-light dark:text-text-main-dark">初始狀態</label>
+<div class="flex items-center gap-4 h-12 bg-background-light dark:bg-background-dark rounded-xl px-4 border-2 border-transparent">
+<label class="flex items-center gap-2 cursor-pointer group">
+<input checked="" class="size-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 bg-surface-light dark:bg-surface-dark" name="status" type="radio" value="active"/>
+<span class="text-sm font-bold text-text-main-light dark:text-text-main-dark group-hover:text-primary transition-colors">啟用帳號</span>
+</label>
+<div class="w-px h-4 bg-gray-300 dark:bg-gray-700"></div>
+<label class="flex items-center gap-2 cursor-pointer group">
+<input class="size-4 text-gray-400 focus:ring-gray-400 border-gray-300 dark:border-gray-600 bg-surface-light dark:bg-surface-dark" name="status" type="radio" value="disabled"/>
+<span class="text-sm font-medium text-text-sec-light dark:text-text-sec-dark group-hover:text-text-main-light transition-colors">暫時禁用</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-end gap-4 mt-4 pt-6 border-t border-gray-100 dark:border-gray-800">
+<button class="h-12 px-6 rounded-xl border border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-text-sec-light dark:text-text-sec-dark font-bold transition-colors" type="button">
+                            取消
+                        </button>
+<button class="h-12 px-8 rounded-xl bg-primary hover:bg-sky-400 text-white font-bold shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2" type="submit">
+<span class="material-symbols-outlined text-[20px]">check</span>
+<span>確認新增</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

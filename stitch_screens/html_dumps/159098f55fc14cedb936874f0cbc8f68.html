@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-Hant"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>預約失敗 - 牙雕家教管理系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;family=Noto+Sans+TC:wght@400..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0ea5e9", // Sky 500 - fresher blue
+                        "primary-dark": "#0284c7",
+                        "background-light": "#f8fafc", // Slate 50
+                        "background-dark": "#0f172a", // Slate 900
+                        "card-light": "#ffffff",
+                        "card-dark": "#1e293b",
+                        "text-main-light": "#0f172a",
+                        "text-main-dark": "#f1f5f9",
+                        "text-sec-light": "#64748b",
+                        "text-sec-dark": "#94a3b8",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "Noto Sans TC", "sans-serif"],
+                        "body": ["Noto Sans TC", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(14, 165, 233, 0.3)',
+                        'glow-red': '0 0 20px rgba(239, 68, 68, 0.2)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #475569;
+        }.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-body text-text-main-light dark:text-text-main-dark antialiased transition-colors duration-300 selection:bg-primary/20 selection:text-primary">
+<div class="relative flex min-h-screen w-full flex-col">
+<header class="sticky top-0 z-40 w-full border-b border-gray-100/50 dark:border-gray-800/50 bg-white/80 dark:bg-card-dark/80 backdrop-blur-md transition-all">
+<div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+<div class="flex items-center gap-3">
+<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-dark text-white shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[24px]">dentistry</span>
+</div>
+<div>
+<h2 class="font-display text-lg font-bold tracking-tight text-slate-800 dark:text-white">牙雕家教系統</h2>
+<p class="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">Student Portal</p>
+</div>
+</div>
+<div class="hidden flex-1 justify-end gap-6 md:flex">
+<nav class="flex items-center gap-1 rounded-full bg-slate-100/50 dark:bg-slate-800/50 p-1">
+<a class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-all" href="#">首頁</a>
+<a class="rounded-full bg-white dark:bg-slate-700 shadow-sm px-4 py-1.5 text-sm font-medium text-primary dark:text-white" href="#">預約課程</a>
+<a class="rounded-full px-4 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm transition-all" href="#">我的紀錄</a>
+</nav>
+<div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+<button class="group flex items-center gap-2 pr-2 transition-colors">
+<div class="h-9 w-9 overflow-hidden rounded-full ring-2 ring-white dark:ring-slate-800 shadow-sm transition-transform group-hover:scale-105">
+<div class="h-full w-full bg-slate-200 bg-center bg-cover" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD5sj1FKCOQcRg6r4FRY8a1H4DsqixKL1HsO0ykQ1m4KKmwL7ozZT71hIGrpYLKH6QgmVpQrScZAbCGewPV8IHVGA3fGonzEcW1wcaxs1kyhXVQkp7CHi9dnm35kuBbiMHGbqSZlpEl0qA6u8yvAc-aanNeXd3LsusS3Z6bktoGCQeERhK6Z5pZQrJais_TniUbVA7bl85usjGVJuRg4YpQvqYmkVHVQNhKWBTOdqsq7oEKCeW3z8cQP_IDM3zebVitO1kSsZpB_js");'></div>
+</div>
+<div class="hidden flex-col items-start lg:flex">
+<span class="text-sm font-bold text-slate-700 dark:text-slate-200">李小華</span>
+<span class="text-[10px] text-slate-500">一般學員</span>
+</div>
+</button>
+</div>
+</div>
+<button class="block rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 md:hidden">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</header>
+<main class="flex flex-1 flex-col items-center justify-center px-4 py-12 md:px-6 lg:py-20">
+<div class="relative w-full max-w-lg">
+<div class="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-red-500/5 blur-3xl dark:bg-red-500/10"></div>
+<div class="absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-primary/5 blur-3xl dark:bg-primary/10"></div>
+<div class="relative overflow-hidden rounded-3xl bg-white p-8 text-center shadow-soft dark:bg-card-dark border border-slate-100 dark:border-slate-800 md:p-12">
+<div class="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/10 ring-8 ring-red-50/50 dark:ring-red-900/20 shadow-glow-red">
+<span class="material-symbols-outlined text-[48px] text-red-500 dark:text-red-400">error_outline</span>
+<div class="absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-white dark:bg-card-dark shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-red-500">close</span>
+</div>
+</div>
+<h1 class="mb-4 font-display text-3xl font-bold text-slate-900 dark:text-white">
+                        預約失敗
+                    </h1>
+<div class="mb-8 space-y-5">
+<p class="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                        很抱歉，您的預約請求未能成功處理。<br class="hidden sm:block"/>
+                        這通常是因為所選時段已額滿或網路問題。
+                    </p>
+<div class="mx-auto max-w-sm rounded-2xl bg-slate-50 border border-slate-100 p-5 text-left dark:bg-slate-800/50 dark:border-slate-700/50">
+<div class="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-[16px]">info</span>
+                            可能的原因
+                        </div>
+<ul class="space-y-2.5 text-sm text-slate-600 dark:text-slate-300">
+<li class="flex items-start gap-3">
+<span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400 dark:bg-slate-500"></span>
+<span class="flex-1">您選擇的時段剛剛已被其他同學預約</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400 dark:bg-slate-500"></span>
+<span class="flex-1">網路連線不穩定或請求逾時</span>
+</li>
+</ul>
+</div>
+</div>
+<div class="flex flex-col gap-3 sm:flex-row sm:justify-center mb-8">
+<button class="group relative flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 font-bold text-white shadow-lg shadow-primary/30 transition-all hover:-translate-y-0.5 hover:bg-primary-dark active:translate-y-0 sm:w-auto">
+<span class="material-symbols-outlined text-[20px] transition-transform group-hover:rotate-180">refresh</span>
+<span>重試預約</span>
+</button>
+<button class="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3.5 font-bold text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:w-auto">
+                        返回課程列表
+                    </button>
+</div>
+<div class="border-t border-slate-100 pt-6 dark:border-slate-800">
+<p class="text-sm text-slate-400 dark:text-slate-500">
+                        如果問題持續發生，請隨時
+                        <a class="group inline-flex items-center gap-0.5 font-medium text-primary hover:text-primary-dark hover:underline" href="#">
+                            聯絡客服
+                            <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</a>
+                        尋求協助。
+                    </p>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

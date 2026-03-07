@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-TW"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>學生儀表板 - 牙體雕刻課程</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;family=Noto+Sans+TC:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2dd4bf","primary-dark": "#14b8a6",
+                        "secondary": "#f472b6","background-light": "#f8fafc","background-dark": "#0f172a","surface-light": "#ffffff",
+                        "surface-dark": "#1e293b","text-main": "#334155","text-light": "#64748b",},
+                    fontFamily: {
+                        "display": ["Lexend", "Noto Sans TC", "sans-serif"],
+                        "body": ["Noto Sans TC", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem", 
+                        "lg": "1rem", 
+                        "xl": "1.25rem", 
+                        "2xl": "1.5rem", 
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(45, 212, 191, 0.3)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Lexend', 'Noto Sans TC', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        .trans-all { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main dark:text-slate-100 transition-colors duration-200 antialiased selection:bg-primary/20 selection:text-primary-dark">
+<div class="flex h-screen w-full overflow-hidden">
+<aside class="w-72 flex-shrink-0 flex flex-col bg-surface-light dark:bg-surface-dark border-r border-slate-200 dark:border-slate-800 transition-colors duration-200 hidden md:flex z-30 shadow-sm">
+<div class="p-6 flex flex-col h-full">
+<div class="flex items-center gap-3 mb-10 text-primary-dark dark:text-primary">
+<div class="p-2 bg-primary/10 rounded-xl">
+<span class="material-symbols-outlined text-[28px]">dentistry</span>
+</div>
+<span class="font-display font-bold text-xl tracking-tight text-slate-800 dark:text-white">牙雕家教</span>
+</div>
+<nav class="flex flex-col gap-2 flex-1">
+<div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-4">主選單</div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 text-primary-dark dark:text-primary transition-colors group relative overflow-hidden" href="#">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"></div>
+<span class="material-symbols-outlined text-[22px]">dashboard</span>
+<span class="text-sm font-bold">儀表板</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-light dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 trans-all group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:scale-110 trans-all">menu_book</span>
+<span class="text-sm font-medium">課程方案</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-light dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 trans-all group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:scale-110 trans-all">calendar_month</span>
+<span class="text-sm font-medium">預約記錄</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-light dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 trans-all group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:scale-110 trans-all">trending_up</span>
+<span class="text-sm font-medium">學習進度</span>
+</a>
+<div class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-6 mb-2 px-4">帳戶管理</div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-light dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 trans-all group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:scale-110 trans-all">settings</span>
+<span class="text-sm font-medium">個人設定</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-light dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200 trans-all group" href="#">
+<span class="material-symbols-outlined text-[22px] group-hover:scale-110 trans-all">help</span>
+<span class="text-sm font-medium">支援中心</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer trans-all">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 shadow-sm relative ring-2 ring-white dark:ring-slate-700" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBHpcmx5FN0ieyK-KUTHlzpCr7Aj8wyk3XwCcfO9sBG40Fan-DY44DtRxhLT6rnswES6q6B0xREgxnk1ImkFwzDG1AjLCEp0il-_ttTxQZAjLL4AmXamRYBu2Zh6v2QyEZ0GyVpujs4Zkwv3aEJLnYJezfNy4L9DxmcDC3Z5QoMc3eQbRTwtSxoYieRI_nfI5E5ysjpEjZueHWnjExK4sfPdXovbW73WmDh1wuhV8s2zmYq5qKDODTOCJw_efYco-8WOO4DyDdedxA");'>
+<div class="absolute bottom-0 right-0 size-2.5 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
+</div>
+<div class="flex flex-col overflow-hidden">
+<h1 class="text-slate-800 dark:text-white text-sm font-bold truncate">陳小美</h1>
+<p class="text-slate-500 dark:text-slate-400 text-xs truncate">進階學員</p>
+</div>
+<span class="material-symbols-outlined text-slate-400 ml-auto">logout</span>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 overflow-y-auto relative h-full bg-background-light dark:bg-background-dark">
+<div class="md:hidden flex items-center justify-between p-4 bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40">
+<div class="flex items-center gap-3">
+<div class="bg-primary/10 p-1.5 rounded-lg text-primary-dark">
+<span class="material-symbols-outlined text-[20px]">dentistry</span>
+</div>
+<span class="font-bold text-slate-800 dark:text-white">牙雕家教</span>
+</div>
+<button class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+<div class="container mx-auto max-w-[1280px] p-6 md:p-10 flex flex-col gap-8 pb-24">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<h1 class="text-slate-900 dark:text-white text-3xl md:text-4xl font-display font-black leading-tight tracking-tight mb-2">
+                        早安，小美 <span class="inline-block animate-wave origin-bottom-right">👋</span>
+</h1>
+<div class="flex items-center gap-3 text-slate-500 dark:text-slate-400 text-sm md:text-base">
+<span class="flex h-2.5 w-2.5 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
+</span>
+<span>距離 <span class="font-bold text-slate-700 dark:text-slate-200">牙體形態學概論</span> 還有 <span class="text-primary-dark dark:text-primary font-bold">2 天</span></span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 shadow-sm">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="hidden sm:inline">個人設定</span>
+</button>
+<button class="bg-slate-900 hover:bg-slate-800 dark:bg-primary dark:hover:bg-primary-dark dark:text-slate-900 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-slate-200 dark:shadow-none transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+                        預約新課程
+                    </button>
+</div>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-4 gap-6 md:gap-8">
+<div class="xl:col-span-3 flex flex-col gap-8">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+<div class="group bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-soft hover:shadow-lg trans-all flex flex-col justify-between h-32 relative overflow-hidden">
+<div class="absolute right-[-20px] top-[-20px] opacity-5 transform group-hover:scale-110 trans-all">
+<span class="material-symbols-outlined text-[120px]">check_circle</span>
+</div>
+<div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wider">
+<span class="material-symbols-outlined text-[18px] text-green-500">check_circle</span>
+                                已完成課程
+                            </div>
+<div class="flex items-baseline gap-1">
+<span class="text-4xl font-black text-slate-800 dark:text-white tracking-tight">3</span>
+<span class="text-sm font-medium text-slate-400">堂</span>
+</div>
+</div>
+<div class="group bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-soft hover:shadow-lg trans-all flex flex-col justify-between h-32 relative overflow-hidden">
+<div class="absolute right-[-20px] top-[-20px] opacity-5 transform group-hover:scale-110 trans-all">
+<span class="material-symbols-outlined text-[120px]">hourglass_top</span>
+</div>
+<div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wider">
+<span class="material-symbols-outlined text-[18px] text-primary">hourglass_top</span>
+                                剩餘點數
+                            </div>
+<div class="flex items-baseline gap-1">
+<span class="text-4xl font-black text-slate-800 dark:text-white tracking-tight">7</span>
+<span class="text-sm font-medium text-slate-400">堂</span>
+</div>
+</div>
+<div class="group bg-surface-light dark:bg-surface-dark p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-soft hover:shadow-lg trans-all flex flex-col justify-between h-32 relative overflow-hidden">
+<div class="absolute right-[-20px] top-[-20px] opacity-5 transform group-hover:scale-110 trans-all">
+<span class="material-symbols-outlined text-[120px]">timer</span>
+</div>
+<div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wider">
+<span class="material-symbols-outlined text-[18px] text-orange-400">timer</span>
+                                本月練習時數
+                            </div>
+<div class="flex items-baseline gap-1">
+<span class="text-4xl font-black text-slate-800 dark:text-white tracking-tight">12</span>
+<span class="text-sm font-medium text-slate-400">小時</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-700 shadow-soft p-6 md:p-8">
+<div class="flex items-center justify-between mb-6">
+<div>
+<h2 class="text-slate-800 dark:text-white text-lg font-bold">學習路徑：全口假牙專修</h2>
+<p class="text-slate-500 dark:text-slate-400 text-sm">按部就班，從基礎到精通</p>
+</div>
+<span class="text-primary font-bold text-lg">30%</span>
+</div>
+<div class="relative pt-4 pb-2 overflow-x-auto">
+<div class="min-w-[600px] flex items-center justify-between relative z-0">
+<div class="absolute top-5 left-0 w-full h-1 bg-slate-100 dark:bg-slate-800 -z-10 rounded-full"></div>
+<div class="absolute top-5 left-0 w-[35%] h-1 bg-gradient-to-r from-primary to-primary-dark -z-10 rounded-full"></div>
+<div class="flex flex-col items-center gap-3 w-32 group cursor-pointer">
+<div class="size-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/30 ring-4 ring-white dark:ring-surface-dark group-hover:scale-110 trans-all">
+<span class="material-symbols-outlined text-[20px]">check</span>
+</div>
+<div class="text-center group-hover:-translate-y-1 trans-all">
+<p class="font-bold text-slate-800 dark:text-white text-sm">基礎蠟型</p>
+<p class="text-xs text-green-500 font-medium">已完成</p>
+</div>
+</div>
+<div class="flex flex-col items-center gap-3 w-32 group cursor-pointer">
+<div class="size-10 rounded-full bg-white dark:bg-surface-dark border-2 border-primary text-primary flex items-center justify-center ring-4 ring-white dark:ring-surface-dark shadow-glow relative">
+<span class="absolute inline-flex h-full w-full rounded-full bg-primary opacity-20 animate-ping"></span>
+<span class="material-symbols-outlined text-[20px]">edit_square</span>
+</div>
+<div class="text-center">
+<p class="font-bold text-primary dark:text-primary text-sm">單齒形態</p>
+<p class="text-xs text-primary font-medium bg-primary/10 px-2 py-0.5 rounded-full inline-block mt-1">進行中</p>
+</div>
+</div>
+<div class="flex flex-col items-center gap-3 w-32 opacity-60">
+<div class="size-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center ring-4 ring-white dark:ring-surface-dark">
+<span class="font-bold text-sm">3</span>
+</div>
+<div class="text-center">
+<p class="font-bold text-slate-500 dark:text-slate-400 text-sm">咬合調整</p>
+<p class="text-xs text-slate-400">待解鎖</p>
+</div>
+</div>
+<div class="flex flex-col items-center gap-3 w-32 opacity-60">
+<div class="size-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center ring-4 ring-white dark:ring-surface-dark">
+<span class="font-bold text-sm">4</span>
+</div>
+<div class="text-center">
+<p class="font-bold text-slate-500 dark:text-slate-400 text-sm">最終拋光</p>
+<p class="text-xs text-slate-400">待解鎖</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-700 shadow-soft flex flex-col">
+<div class="p-6 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<h2 class="text-slate-800 dark:text-white text-xl font-bold flex items-center gap-2">
+                                預約記錄
+                                <span class="bg-primary/10 text-primary-dark text-xs px-2.5 py-1 rounded-full ml-1">3</span>
+</h2>
+<div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl self-start sm:self-auto">
+<button class="px-4 py-1.5 bg-white dark:bg-slate-700 rounded-lg shadow-sm text-slate-800 dark:text-white text-sm font-bold transition-all border border-slate-100 dark:border-slate-600">即將到來</button>
+<button class="px-4 py-1.5 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 text-sm font-medium transition-colors">歷史記錄</button>
+</div>
+</div>
+<div class="flex flex-col">
+<div class="p-5 flex flex-col sm:flex-row gap-5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-50 dark:border-slate-800 last:border-0 relative group cursor-default">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-transparent group-hover:bg-primary transition-colors rounded-l-2xl"></div>
+<div class="flex-shrink-0 flex flex-col items-center justify-center bg-white dark:bg-slate-800 rounded-2xl w-16 h-16 border border-slate-200 dark:border-slate-700 shadow-sm group-hover:border-primary/30 group-hover:shadow-md transition-all">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">10月</span>
+<span class="text-2xl font-black text-slate-800 dark:text-white leading-none font-display">26</span>
+</div>
+<div class="flex-1 flex flex-col justify-center gap-1.5">
+<div class="flex items-center flex-wrap gap-2 text-xs">
+<span class="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 px-2.5 py-1 rounded-md font-bold">一對一指導</span>
+<span class="text-slate-400 flex items-center gap-1 font-medium bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+                                            14:00 - 16:00
+                                        </span>
+</div>
+<h3 class="font-bold text-slate-800 dark:text-white text-lg leading-tight group-hover:text-primary transition-colors">上顎中門齒形態雕刻</h3>
+<div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                                            教室 A03
+                                        </span>
+<span class="text-slate-300">•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">person</span>
+                                            林醫師
+                                        </span>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end gap-4 mt-2 sm:mt-0 w-full sm:w-auto min-w-[140px]">
+<div class="flex flex-col items-end gap-1">
+<div class="flex items-center gap-1.5 bg-green-50 dark:bg-green-900/10 text-green-600 dark:text-green-400 px-3 py-1.5 rounded-full text-xs font-bold border border-green-100 dark:border-green-900/20">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+                                            已確認
+                                        </div>
+</div>
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all" title="查看詳情">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<div class="p-5 flex flex-col sm:flex-row gap-5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-50 dark:border-slate-800 last:border-0 relative group cursor-default">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-transparent group-hover:bg-orange-400 transition-colors rounded-l-2xl"></div>
+<div class="flex-shrink-0 flex flex-col items-center justify-center bg-white dark:bg-slate-800 rounded-2xl w-16 h-16 border border-slate-200 dark:border-slate-700 shadow-sm group-hover:border-orange-200 group-hover:shadow-md transition-all">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">11月</span>
+<span class="text-2xl font-black text-slate-800 dark:text-white leading-none font-display">02</span>
+</div>
+<div class="flex-1 flex flex-col justify-center gap-1.5">
+<div class="flex items-center flex-wrap gap-2 text-xs">
+<span class="bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-300 px-2.5 py-1 rounded-md font-bold">團體實作課</span>
+<span class="text-slate-400 flex items-center gap-1 font-medium bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+                                            10:00 - 12:00
+                                        </span>
+</div>
+<h3 class="font-bold text-slate-800 dark:text-white text-lg leading-tight group-hover:text-orange-500 transition-colors">臼齒蠟型堆塑基礎</h3>
+<div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                                            教室 B01
+                                        </span>
+<span class="text-slate-300">•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">person</span>
+                                            張技師
+                                        </span>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end gap-4 mt-2 sm:mt-0 w-full sm:w-auto min-w-[140px]">
+<div class="flex flex-col items-end gap-1">
+<div class="flex items-center gap-1.5 bg-orange-50 dark:bg-orange-900/10 text-orange-500 dark:text-orange-400 px-3 py-1.5 rounded-full text-xs font-bold border border-orange-100 dark:border-orange-900/20">
+<span class="material-symbols-outlined text-[16px] animate-pulse">pending</span>
+                                            待確認
+                                        </div>
+</div>
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all" title="查看詳情">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<div class="p-5 flex flex-col sm:flex-row gap-5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-50 dark:border-slate-800 last:border-0 relative group cursor-default">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-transparent group-hover:bg-primary transition-colors rounded-l-2xl"></div>
+<div class="flex-shrink-0 flex flex-col items-center justify-center bg-white dark:bg-slate-800 rounded-2xl w-16 h-16 border border-slate-200 dark:border-slate-700 shadow-sm group-hover:border-primary/30 group-hover:shadow-md transition-all">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">11月</span>
+<span class="text-2xl font-black text-slate-800 dark:text-white leading-none font-display">09</span>
+</div>
+<div class="flex-1 flex flex-col justify-center gap-1.5">
+<div class="flex items-center flex-wrap gap-2 text-xs">
+<span class="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 px-2.5 py-1 rounded-md font-bold">一對一指導</span>
+<span class="text-slate-400 flex items-center gap-1 font-medium bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+                                            14:00 - 16:00
+                                        </span>
+</div>
+<h3 class="font-bold text-slate-800 dark:text-white text-lg leading-tight group-hover:text-primary transition-colors">犬齒特徵與應用</h3>
+<div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                                            教室 A03
+                                        </span>
+<span class="text-slate-300">•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">person</span>
+                                            林醫師
+                                        </span>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end gap-4 mt-2 sm:mt-0 w-full sm:w-auto min-w-[140px]">
+<div class="flex flex-col items-end gap-1">
+<div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-full text-xs font-bold border border-slate-200 dark:border-slate-600">
+<span class="material-symbols-outlined text-[16px]">calendar_clock</span>
+                                            已預約
+                                        </div>
+</div>
+<button class="p-2 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all" title="查看詳情">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+<button class="w-full py-4 border-t border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all text-sm font-bold flex items-center justify-center gap-1 rounded-b-2xl group">
+                            查看全部預約
+                            <span class="material-symbols-outlined text-[18px] group-hover:translate-y-0.5 transition-transform">expand_more</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-6">
+<div class="flex flex-col h-full gap-4">
+<div class="flex items-center justify-between">
+<h2 class="text-slate-800 dark:text-white text-xl font-bold">當前方案</h2>
+<button class="text-primary hover:text-primary-dark text-sm font-medium">變更</button>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded-2xl border border-slate-100 dark:border-slate-700 shadow-soft overflow-hidden flex flex-col h-full group">
+<div class="h-40 bg-cover bg-center relative" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCE1Uly6fLjErrYruwnkcru69vTGC1e31xMZOnDuAA81DdY-_uZY9cZnK9-g9UA8Y5mb2g7v_qn7Wz3Hu60VMnNiByPR96fnNueHmxL4b9ohccDKabBJVSlDAsAo1mzvoMH-oVZD95XRhvE4MWDe7sATkVXXF2_Ip5LVOrfvTrFIJtkJSncFEoOCbX-xTdMzjyT5ooeOn6wGFV9tPAcfyLMy5nNyZyEwzUM276O5qZi3XUF1_DGU3e4IfgFUWp9xfBzfiMqCVuGwQo");'>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+<div class="absolute top-4 right-4">
+<span class="bg-white/20 backdrop-blur-md border border-white/30 text-white text-xs font-bold px-2 py-1 rounded-lg">進階班</span>
+</div>
+<div class="absolute bottom-4 left-4 right-4">
+<h3 class="text-white text-lg font-bold leading-tight shadow-black drop-shadow-md">牙體雕刻工作坊</h3>
+<p class="text-slate-200 text-xs mt-1 font-medium">含 10 堂實作課 + 教材包</p>
+</div>
+</div>
+<div class="p-5 flex flex-col gap-4 flex-1">
+<div class="space-y-3">
+<div class="flex justify-between items-center text-sm">
+<span class="text-slate-500">訂閱狀態</span>
+<span class="flex items-center gap-1.5 text-green-600 font-bold bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded text-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> 啟用中
+                                        </span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-slate-500">有效期限</span>
+<span class="font-medium text-slate-700 dark:text-slate-300">2024/12/31</span>
+</div>
+<div class="pt-2 border-t border-slate-50 dark:border-slate-800">
+<div class="flex justify-between text-xs mb-1.5">
+<span class="text-slate-500 font-medium">總進度</span>
+<span class="text-primary font-bold">30%</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2">
+<div class="bg-gradient-to-r from-primary to-primary-dark h-2 rounded-full shadow-lg shadow-primary/30" style="width: 30%"></div>
+</div>
+</div>
+</div>
+<button class="w-full mt-auto py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 trans-all">
+                                    查看方案詳情
+                                </button>
+</div>
+</div>
+</div>
+<div class="bg-gradient-to-br from-slate-800 to-slate-900 dark:from-slate-800 dark:to-black rounded-2xl p-5 text-white shadow-lg relative overflow-hidden">
+<div class="absolute right-0 top-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+<h3 class="font-bold text-lg mb-1 relative z-10">個人設定</h3>
+<p class="text-slate-400 text-sm mb-4 relative z-10">管理您的帳戶、密碼與通知偏好。</p>
+<div class="space-y-2 relative z-10">
+<a class="flex items-center justify-between p-3 rounded-lg bg-white/10 hover:bg-white/20 trans-all cursor-pointer border border-white/5" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px] text-primary">person</span>
+<span class="text-sm font-medium">編輯個人資料</span>
+</div>
+<span class="material-symbols-outlined text-[16px] text-slate-400">chevron_right</span>
+</a>
+<a class="flex items-center justify-between p-3 rounded-lg bg-white/10 hover:bg-white/20 trans-all cursor-pointer border border-white/5" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px] text-primary">notifications</span>
+<span class="text-sm font-medium">通知設定</span>
+</div>
+<span class="material-symbols-outlined text-[16px] text-slate-400">chevron_right</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>
