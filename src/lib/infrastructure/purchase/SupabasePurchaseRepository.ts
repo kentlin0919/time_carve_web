@@ -18,7 +18,7 @@ export class SupabasePurchaseRepository implements PurchaseRepository {
                 total_hours: purchase.totalHours,
                 remaining_hours: purchase.remainingHours,
                 price_paid: purchase.pricePaid,
-                status: 'pending_payment'
+                status: 'active'
             })
             .select()
             .single();
