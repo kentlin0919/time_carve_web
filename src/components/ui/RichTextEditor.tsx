@@ -6,7 +6,7 @@ import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import Youtube from "@tiptap/extension-youtube";
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, useState } from "react";
 
 interface RichTextEditorProps {
   content: string;
@@ -15,7 +15,7 @@ interface RichTextEditorProps {
   onImageUpload?: (file: File) => Promise<string>;
 }
 
-const MenuBar = ({ editor, onImageUpload }: { editor: any; onImageUpload?: (file: File) => Promise<string> }) => {
+const MenuBar = ({ editor, onImageUpload, isUploading }: { editor: any; onImageUpload?: (file: File) => Promise<string>, isUploading?: boolean }) => {
   if (!editor) {
     return null;
   }
@@ -31,7 +31,7 @@ const MenuBar = ({ editor, onImageUpload }: { editor: any; onImageUpload?: (file
       className={`p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors ${isActive
         ? "bg-primary/10 text-primary"
         : "text-slate-600 dark:text-slate-300"
-        } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+        } ${disabled || isUploading ? "opacity-50 cursor-not-allowed" : ""}`}
     >
       {children}
     </button>
@@ -137,10 +137,10 @@ const MenuBar = ({ editor, onImageUpload }: { editor: any; onImageUpload?: (file
         </span>
       </Button>
       <div className="w-px h-6 bg-slate-300 dark:bg-slate-600 mx-1 self-center" />
-      <Button onClick={addImage} title="Image">
+      <Button onClick={addImage} title="Image" disabled={isUploading}>
         <span className="material-symbols-outlined text-[20px]">image</span>
       </Button>
-      <Button onClick={addYoutube} title="Video">
+      <Button onClick={addYoutube} title="Video" disabled={isUploading}>
         <span className="material-symbols-outlined text-[20px]">
           smart_display
         </span>
@@ -155,9 +155,21 @@ export default function RichTextEditor({
   editable = true,
   onImageUpload,
 }: RichTextEditorProps) {
+  const [isUploading, setIsUploading] = useState(false);
+
+  const wrappedUpload = async (file: File) => {
+    if (!onImageUpload) throw new Error("No upload handler");
+    setIsUploading(true);
+    try {
+      return await onImageUpload(file);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   // Use ref to store upload handler for access in editorProps
-  const uploadHandlerRef = useRef<((file: File) => Promise<string>) | undefined>(onImageUpload);
-  uploadHandlerRef.current = onImageUpload;
+  const uploadHandlerRef = useRef<((file: File) => Promise<string>) | undefined>(onImageUpload ? wrappedUpload : undefined);
+  uploadHandlerRef.current = onImageUpload ? wrappedUpload : undefined;
 
   // Use ref to store editor instance for external handlers
   const editorRef = useRef<any>(null);
@@ -248,26 +260,35 @@ export default function RichTextEditor({
     e.preventDefault();
     e.stopPropagation();
 
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0 && onImageUpload && editor) {
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0 && uploadHandlerRef.current && editor) {
       const file = e.dataTransfer.files[0];
       if (file.type.startsWith('image/')) {
-        onImageUpload(file).then((url) => {
+        uploadHandlerRef.current(file).then((url) => {
           editor.chain().focus().setImage({ src: url }).run();
         }).catch((error) => {
           console.error('Image upload failed:', error);
         });
       }
     }
-  }, [onImageUpload, editor]);
+  }, [editor]);
 
   return (
     <div
-      className="border border-border-light dark:border-border-dark rounded-xl overflow-hidden bg-white dark:bg-surface-dark shadow-sm"
+      className="border border-border-light dark:border-border-dark rounded-xl overflow-hidden bg-white dark:bg-surface-dark shadow-sm relative"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
-      {editable && <MenuBar editor={editor} onImageUpload={onImageUpload} />}
+      {editable && <MenuBar editor={editor} onImageUpload={onImageUpload ? wrappedUpload : undefined} isUploading={isUploading} />}
       <EditorContent editor={editor} />
+      
+      {isUploading && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-3 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700">
+            <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+            <span className="text-sm font-bold text-slate-700 dark:text-slate-300">圖片上傳中...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -314,9 +314,18 @@ export default function PortfolioEditForm({
               </label>
 
               {!formData.cover_image_url ? (
-                <label className="flex flex-col items-center justify-center w-full aspect-video rounded-xl border-2 border-dashed border-border-light dark:border-border-dark hover:border-primary/50 bg-slate-50 dark:bg-slate-800/50 cursor-pointer transition-colors group">
-                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors text-3xl mb-2">add_photo_alternate</span>
-                  <span className="text-sm text-slate-500 group-hover:text-primary transition-colors">點擊上傳封面</span>
+                <label className="relative flex flex-col items-center justify-center w-full aspect-video rounded-xl border-2 border-dashed border-border-light dark:border-border-dark hover:border-primary/50 bg-slate-50 dark:bg-slate-800/50 cursor-pointer transition-colors group overflow-hidden">
+                  {loading ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm z-10 w-full h-full">
+                      <span className="material-symbols-outlined animate-spin text-primary text-4xl mb-2">progress_activity</span>
+                      <span className="text-sm font-bold text-slate-500">上傳中...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors text-3xl mb-2">add_photo_alternate</span>
+                      <span className="text-sm text-slate-500 group-hover:text-primary transition-colors">點擊上傳封面</span>
+                    </>
+                  )}
                   <input
                     type="file"
                     accept="image/*"
@@ -332,6 +341,12 @@ export default function PortfolioEditForm({
                     alt="Cover"
                     className="w-full h-full object-cover"
                   />
+                  {loading && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm z-10">
+                      <span className="material-symbols-outlined animate-spin text-white text-4xl mb-2">progress_activity</span>
+                      <span className="text-sm font-bold text-white">上傳中...</span>
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                     <label className="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white cursor-pointer backdrop-blur-sm transition-colors">
                       <span className="material-symbols-outlined text-xl">edit</span>
@@ -347,6 +362,7 @@ export default function PortfolioEditForm({
                       type="button"
                       onClick={() => setFormData({ ...formData, cover_image_url: null })}
                       className="p-2 bg-white/20 hover:bg-red-500/80 rounded-full text-white backdrop-blur-sm transition-colors"
+                      disabled={loading}
                     >
                       <span className="material-symbols-outlined text-xl">delete</span>
                     </button>
