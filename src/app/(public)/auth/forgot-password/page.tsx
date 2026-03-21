@@ -5,6 +5,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { buildPasswordRecoveryRedirect } from "@/lib/supabase/authRedirect";
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "發送失敗，請稍後再試。";
+}
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -20,15 +29,19 @@ export default function ForgotPasswordPage() {
     setMessage(null);
 
     try {
+      const redirectTo = buildPasswordRecoveryRedirect(window.location.origin);
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=/auth/reset-password`,
+        redirectTo,
       });
 
       if (error) throw error;
 
       router.push('/');
-    } catch (err: any) {
-      setError(err.message || "發送失敗，請稍後再試。");
+    } catch (err: unknown) {
+      console.error("Password recovery request failed", {
+        error: err,
+      });
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

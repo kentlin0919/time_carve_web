@@ -4,6 +4,15 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { buildPasswordRecoveryRedirect } from '@/lib/supabase/authRedirect';
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return fallback;
+}
 
 function VerifyContent() {
   const router = useRouter();
@@ -106,8 +115,8 @@ function VerifyContent() {
       } else {
         router.push('/student/courses');
       }
-    } catch (err: any) {
-      setError(err.message || '驗證失敗，請檢查驗證碼是否正確');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, '驗證失敗，請檢查驗證碼是否正確'));
     } finally {
       setLoading(false);
     }
@@ -120,7 +129,10 @@ function VerifyContent() {
       setLoading(true);
       
       if (type === 'recovery') {
-        const { error } = await supabase.auth.resetPasswordForEmail(email);
+        const redirectTo = buildPasswordRecoveryRedirect(window.location.origin);
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo,
+        });
         if (error) throw error;
       } else {
         const { error } = await supabase.auth.resend({
@@ -135,8 +147,11 @@ function VerifyContent() {
       setOtp(['', '', '', '', '', '']);
       setError(null);
       // Optional: Show success toast
-    } catch (err: any) {
-      setError(err.message || '發送失敗');
+    } catch (err: unknown) {
+      console.error('Verification resend failed', {
+        error: err,
+      });
+      setError(getErrorMessage(err, '發送失敗'));
     } finally {
       setLoading(false);
     }
