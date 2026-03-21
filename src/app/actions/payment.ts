@@ -47,13 +47,15 @@ export async function getTeacherPayments(
   const startStr = startDate.toISOString().split("T")[0]; // YYYY-MM-DD
   const endStr = endDate.toISOString().split("T")[0];
 
-  let query = supabase
+  const query = supabase
     .from("bookings")
     .select(`
       id,
       booking_date,
       start_time,
       end_time,
+      price,
+      paid_at,
       booking_statuses(status_key),
       course:courses(title, price),
       student:student_info(
@@ -74,7 +76,7 @@ export async function getTeacherPayments(
   const now = new Date();
   
   const records: PaymentRecord[] = [];
-  let summary: PaymentSummary = {
+  const summary: PaymentSummary = {
     total_projected: 0,
     total_received: 0,
     pending_count: 0,
@@ -83,12 +85,13 @@ export async function getTeacherPayments(
   };
 
   for (const booking of bookings || []) {
-    // @ts-ignore
     const course = booking.course as { title: string; price: number } | null;
-    // @ts-ignore
     const studentUser = booking.student?.user as { name: string; email: string; avatar_url: string | null } | null;
-    // @ts-ignore
     const statusKey = booking.booking_statuses?.status_key as string || 'pending';
+
+    if (statusKey === "cancelled" || statusKey === "rejected") {
+      continue;
+    }
     
     // Filter by search query if present
     if (searchQuery) {
@@ -134,14 +137,25 @@ export async function getTeacherPayments(
     
     if (isNaN(hours) || hours < 0) hours = 0;
     
-    // Total price = unit price * hours
-    const price = unitPrice * hours;
+    const persistedPrice =
+      typeof booking.price === "number"
+        ? booking.price
+        : booking.price != null
+          ? Number(booking.price)
+          : null;
+
+    // Prefer persisted booking price; fallback to course price * hours for older data.
+    const price = persistedPrice ?? unitPrice * hours;
 
     // Map status_key to our frontend status (assuming they match roughly or we map them)
     // Common keys: 'pending', 'confirmed', 'completed', 'cancelled'
     const status = statusKey;
 
-    const isPaid = status === 'completed' || status === 'confirmed';
+    const isPaid =
+      Boolean(booking.paid_at) ||
+      status === 'completed' ||
+      status === 'confirmed' ||
+      status === 'paid';
     const isPending = status === 'pending';
     
     const isOverdue = isPending && bookingEndDate < now;
