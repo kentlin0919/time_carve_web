@@ -40,6 +40,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "baseline-browser-mapping": "^2.10.9",
     "dotenv": "^17.2.3",
     "encoding": "^0.1.13",
     "eslint": "^9",

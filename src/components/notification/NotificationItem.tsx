@@ -8,7 +8,7 @@ import { Bell, Calendar, Info } from "lucide-react";
 
 interface NotificationItemProps {
   notification: NotificationDisplay;
-  onClick: (id: string) => void;
+  onClick: (notification: NotificationDisplay) => void;
 }
 
 export function NotificationItem({
@@ -24,7 +24,7 @@ export function NotificationItem({
 
   return (
     <div
-      onClick={() => onClick(notification.id)}
+      onClick={() => onClick(notification)}
       className={cn(
         "flex items-start gap-3 p-3 cursor-pointer hover:bg-zinc-100 transition-colors border-b last:border-b-0",
         !notification.isRead && "bg-blue-50 hover:bg-blue-100"

@@ -43,6 +43,14 @@ const toDateKey = (date: Date) => {
   )}-${String(date.getDate()).padStart(2, "0")}`;
 };
 
+const isPastOrCurrentTaipeiSlot = (date: string, startTime: string) => {
+  const now = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Taipei" })
+  );
+  const slotStart = new Date(`${date}T${startTime}:00+08:00`);
+  return slotStart.getTime() <= now.getTime();
+};
+
 const normalizeDateInput = (value: string) => {
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     return value;
@@ -519,6 +527,10 @@ export default function StudentBookingCreatePage() {
                     requiredDurationMinutes={hours * 60}
                     onBeforeAdd={async (range) => {
                       if (!context?.teacherId || !selectedDateKey) return null;
+
+                      if (isPastOrCurrentTaipeiSlot(selectedDateKey, range.start)) {
+                        return "此申請時段已經過去或太接近目前時間，請改選之後的時間。";
+                      }
 
                       const result = await checkBookingConflict(
                         context.teacherId,

@@ -7,6 +7,53 @@ import { SupabaseNotificationRepository } from "@/lib/infrastructure/notificatio
 import { SupabaseBookingRepository } from "@/lib/infrastructure/booking/SupabaseBookingRepository";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 
+function getTaipeiNow() {
+  return new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Taipei" })
+  );
+}
+
+function isPastOrCurrentSlot(bookingDate: string, startTime: string) {
+  const slotStart = new Date(`${bookingDate}T${startTime}:00+08:00`);
+  return slotStart.getTime() <= getTaipeiNow().getTime();
+}
+
+async function validateTeacherSlotSelection(
+  bookingRepo: SupabaseBookingRepository,
+  teacherId: string,
+  bookingDate: string,
+  startTime: string,
+  endTime: string
+) {
+  if (isPastOrCurrentSlot(bookingDate, startTime)) {
+    throw new Error("此時段已經過去或太接近目前時間，請選擇之後的時段。");
+  }
+
+  const teacherBookings = await bookingRepo.getBookings(
+    teacherId,
+    bookingDate,
+    bookingDate
+  );
+
+  const toMinutes = (time: string) => {
+    const match = time.match(/(\d{2}):(\d{2})/);
+    if (!match) return 0;
+    return Number(match[1]) * 60 + Number(match[2]);
+  };
+
+  const requestedStart = toMinutes(startTime);
+  const requestedEnd = toMinutes(endTime);
+  const hasConflict = teacherBookings.some((booking) => {
+    const existingStart = toMinutes(booking.startTime);
+    const existingEnd = toMinutes(booking.endTime);
+    return requestedStart < existingEnd && requestedEnd > existingStart;
+  });
+
+  if (hasConflict) {
+    throw new Error("老師在這個時段已有預約，請改選其他時間。");
+  }
+}
+
 export async function getAvailableSlots(
   teacherId: string,
   startDate: string, // Changed to string YYYY-MM-DD
@@ -14,15 +61,59 @@ export async function getAvailableSlots(
   durationMinutes: number
 ) {
   const supabase = await createClient();
-  const availRepo = new SupabaseAvailabilityRepository(supabase);
-  const bookingRepo = new SupabaseBookingRepository(supabase);
-  const useCase = new GetAvailableSlotsUseCase(availRepo, bookingRepo);
+  const adminSupabase = createAdminClient();
+  const availRepo = new SupabaseAvailabilityRepository(adminSupabase);
+  const teacherBookingRepo = new SupabaseBookingRepository(adminSupabase);
+  const slotRequestRepo = new SupabaseSlotRequestRepository(adminSupabase);
+  const useCase = new GetAvailableSlotsUseCase(
+    availRepo,
+    teacherBookingRepo,
+    slotRequestRepo
+  );
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // Parse strings to Date objects (UTC midnight)
   const start = new Date(startDate);
   const end = new Date(endDate);
 
-  return await useCase.execute(teacherId, start, end, durationMinutes);
+  const slots = await useCase.execute(teacherId, start, end, durationMinutes);
+
+  if (!user) {
+    return slots;
+  }
+
+  const studentBookingRepo = new SupabaseBookingRepository(supabase);
+  const studentBookings = await studentBookingRepo.getStudentBookings(user.id);
+  const activeBookings = studentBookings.filter((booking) => {
+    if (booking.bookingDate < startDate || booking.bookingDate > endDate) {
+      return false;
+    }
+
+    return !["cancelled", "rejected", "completed"].includes(booking.status);
+  });
+
+  const toMinutes = (time: string) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+
+  return slots.filter((slot) => {
+    const slotStart = toMinutes(slot.startTime);
+    const slotEnd = toMinutes(slot.endTime);
+
+    return !activeBookings.some((booking) => {
+      if (booking.bookingDate !== slot.date) {
+        return false;
+      }
+
+      const bookingStart = toMinutes(booking.startTime);
+      const bookingEnd = toMinutes(booking.endTime);
+
+      return slotStart < bookingEnd && slotEnd > bookingStart;
+    });
+  });
 }
 
 export async function checkBookingConflict(
@@ -31,7 +122,7 @@ export async function checkBookingConflict(
   startTime: string,
   endTime: string
 ) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from("bookings")
@@ -149,6 +240,15 @@ export async function approveSlotRequest(
       startTime = selection.startTime;
       endTime = selection.endTime;
     }
+
+    const bookingRepo = new SupabaseBookingRepository(supabase);
+    await validateTeacherSlotSelection(
+      bookingRepo,
+      request.teacherId,
+      bookingDate,
+      startTime,
+      endTime
+    );
 
     const result = await createBooking(
       {

@@ -20,7 +20,7 @@ const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
 export default function BookingPage() {
   const { bookings, slotRequests, loading, error } = useStudentBookings();
   const [activeTab, setActiveTab] = useState<
-    "requesting" | "reviewing" | "upcoming" | "history"
+    "requesting" | "requestResults" | "reviewing" | "upcoming" | "history"
   >(
     "requesting"
   );
@@ -72,6 +72,9 @@ export default function BookingPage() {
   }
 
   const pendingSlotRequests = slotRequests.filter((request) => request.status === "pending");
+  const resolvedSlotRequests = slotRequests.filter(
+    (request) => request.status === "approved" || request.status === "rejected"
+  );
   const reviewingBookings = bookings.filter((b) => b.status === "pending");
   const upcomingBookings = bookings.filter(
     (b) => b.status === "confirmed" || b.status === "paid"
@@ -106,6 +109,16 @@ export default function BookingPage() {
           onClick={() => setActiveTab("requesting")}
         >
           申請中
+        </button>
+        <button
+          className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${
+            activeTab === "requestResults"
+              ? "border-primary text-primary"
+              : "border-transparent text-text-sub hover:text-slate-800"
+          }`}
+          onClick={() => setActiveTab("requestResults")}
+        >
+          申請結果
         </button>
         <button
           className={`px-6 py-3 font-medium text-sm transition-colors border-b-2 ${
@@ -210,6 +223,94 @@ export default function BookingPage() {
                     備註：{request.notes}
                   </div>
                 ) : null}
+              </div>
+            ))
+          )
+        ) : activeTab === "requestResults" ? (
+          resolvedSlotRequests.length === 0 ? (
+            <div className="text-center py-12 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+              <p className="text-text-sub">目前沒有可查看的申請結果</p>
+            </div>
+          ) : (
+            resolvedSlotRequests.map((request) => (
+              <div
+                key={request.id}
+                className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-border-light dark:border-border-dark shadow-sm"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <span
+                    className={`px-2 py-0.5 rounded text-xs font-bold ${
+                      request.status === "approved"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-rose-100 text-rose-700"
+                    }`}
+                  >
+                    {request.status === "approved" ? "已核准" : "已婉拒"}
+                  </span>
+                  <span className="text-sm text-text-sub">
+                    {request.courseTitle || "課程時段申請"}
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2">
+                  {request.status === "approved"
+                    ? "老師已確認您的時段申請"
+                    : "老師未採用這次時段申請"}
+                </h3>
+                <div className="flex items-center gap-4 text-sm text-text-sub mb-4">
+                  <span className="flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[16px]">
+                      person
+                    </span>
+                    {request.teacherName || "講師"}
+                  </span>
+                </div>
+                <div className="grid gap-2">
+                  {[
+                    {
+                      label: "順位 1",
+                      date: request.preference1Date,
+                      start: request.preference1Start,
+                      end: request.preference1End,
+                    },
+                    {
+                      label: "順位 2",
+                      date: request.preference2Date,
+                      start: request.preference2Start,
+                      end: request.preference2End,
+                    },
+                    {
+                      label: "順位 3",
+                      date: request.preference3Date,
+                      start: request.preference3Start,
+                      end: request.preference3End,
+                    },
+                  ].map((preference) => (
+                    <div
+                      key={`${request.id}-${preference.label}`}
+                      className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 px-4 py-3 text-sm"
+                    >
+                      <span className="font-bold text-slate-700 dark:text-slate-200">
+                        {preference.label}
+                      </span>
+                      <span className="text-text-sub">
+                        {preference.date} {preference.start} - {preference.end}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                {request.status === "approved" ? (
+                  <div className="mt-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">
+                    您的申請已成立正式預約，可至「即將到來」或「歷史紀錄」查看。
+                  </div>
+                ) : request.rejectReason ? (
+                  <div className="mt-4 rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-950/30 dark:text-rose-300">
+                    老師回覆：{request.rejectReason}
+                  </div>
+                ) : (
+                  <div className="mt-4 rounded-lg bg-slate-50 dark:bg-slate-900/40 px-4 py-3 text-sm text-text-sub">
+                    此次申請未被採用，您可以重新提出新的時段申請。
+                  </div>
+                )}
               </div>
             ))
           )

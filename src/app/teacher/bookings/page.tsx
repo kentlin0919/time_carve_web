@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
+import { NotificationBell } from "@/components/notification/NotificationBell";
 import {
   approveSlotRequest,
   getTeacherBookings,
-  getTeacherPendingBookings,
   getTeacherSlotRequests,
   rejectSlotRequest,
   updateBookingFeedback,
@@ -40,10 +40,10 @@ const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
 });
 
 export default function TeacherBookingsPage() {
+  const customDateInputRef = useRef<HTMLInputElement | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [pendingBookings, setPendingBookings] = useState<Booking[]>([]); // New State
   const [slotRequests, setSlotRequests] = useState<SlotRequest[]>([]);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<TeacherProfile | null>(null);
@@ -60,6 +60,17 @@ export default function TeacherBookingsPage() {
   const [slotInboxTab, setSlotInboxTab] = useState<"pending" | "resolved">(
     "pending"
   );
+
+  const openNativeDatePicker = () => {
+    const input = customDateInputRef.current;
+    if (!input) return;
+
+    input.focus();
+
+    if ("showPicker" in input) {
+      input.showPicker();
+    }
+  };
   const [workbenchTab, setWorkbenchTab] = useState<"inbox" | "schedule">(
     "inbox"
   );
@@ -143,14 +154,12 @@ export default function TeacherBookingsPage() {
   async function refreshBookings(startDate: Date, endDate: Date) {
     setLoading(true);
     try {
-      const [data, pendingData, slotRequestData] = await Promise.all([
+      const [data, slotRequestData] = await Promise.all([
         getTeacherBookings(startDate, endDate),
-        getTeacherPendingBookings(),
         getTeacherSlotRequests(),
       ]);
 
       setBookings(data);
-      setPendingBookings(pendingData);
       setSlotRequests(slotRequestData);
     } catch (error) {
       console.error("Failed to fetch bookings:", error);
@@ -227,6 +236,7 @@ export default function TeacherBookingsPage() {
 
       grouped[day].push({
         time: booking.startTime.substring(0, 5), // HH:mm
+        endTime: booking.endTime.substring(0, 5), // HH:mm
         name: booking.studentName || "Unknown",
         color: color,
         status: booking.status,
@@ -583,10 +593,9 @@ export default function TeacherBookingsPage() {
             </p>
           </div>
           <div className="flex items-center gap-3 self-end sm:self-auto">
-            <button className="p-2.5 rounded-full text-text-sub dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-slate-700 relative transition-colors flex-shrink-0">
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-surface-dark"></span>
-            </button>
+            <div className="flex-shrink-0">
+              <NotificationBell />
+            </div>
             <div className="h-8 w-px bg-border-light dark:bg-border-dark mx-1"></div>
             <div className="flex items-center gap-3 px-2 flex-shrink-0">
               <span className="text-sm font-medium text-slate-700 dark:text-slate-200 whitespace-nowrap">
@@ -611,37 +620,6 @@ export default function TeacherBookingsPage() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col xl:overflow-hidden">
-        {/* Pending Banner */}
-        {pendingBookings.length > 0 && (
-          <div className="bg-orange-50 border-b border-orange-100">
-            <div className="mx-auto flex w-full max-w-[1680px] items-center justify-between gap-4 px-4 py-3 md:px-8 2xl:px-10">
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-orange-600">
-                  pending_actions
-                </span>
-                <div>
-                  <p className="text-sm font-bold text-orange-800">
-                    您有 {pendingBookings.length} 筆待確認的預約
-                  </p>
-                  <p className="text-xs text-orange-600">
-                    這些預約可能在其他月份，請盡快審核。
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  if (pendingBookings[0]) {
-                    setEditingBooking(pendingBookings[0]);
-                  }
-                }}
-                className="px-4 py-2 bg-white border border-orange-200 text-orange-700 text-xs font-bold rounded-lg hover:bg-orange-50 transition-colors shadow-sm"
-              >
-                立即審核 ({pendingBookings.length})
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Toolbar */}
         <div className="mx-auto w-full max-w-[1680px] px-4 py-6 pb-2 md:px-8 2xl:px-10">
           <div className="flex flex-col 2xl:flex-row justify-between gap-4 2xl:gap-6">
@@ -739,8 +717,8 @@ export default function TeacherBookingsPage() {
           {/* Calendar Grid */}
           {viewMode === "month" ? (
             <div className="order-2 xl:order-1 flex-1 min-h-[420px] xl:min-h-0 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col overflow-hidden min-w-0">
-              <div className="flex items-center justify-between px-6 py-4 border-b border-border-light dark:border-border-dark">
-                <div className="flex items-center gap-4">
+              <div className="flex flex-col gap-3 border-b border-border-light px-4 py-4 dark:border-border-dark sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div className="flex items-center justify-between gap-3 sm:justify-start sm:gap-4">
                   <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
                     {year}年 {month + 1}月
                     <span className="text-xs font-normal text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 ml-2">
@@ -768,32 +746,39 @@ export default function TeacherBookingsPage() {
                 </div>
                 <button
                   onClick={handleToday}
-                  className="px-3 py-1.5 rounded-lg border border-border-light dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors"
+                  className="w-full rounded-lg border border-border-light px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 dark:border-border-dark dark:text-slate-300 dark:hover:bg-slate-800 sm:w-auto"
                 >
                   回到今天
                 </button>
               </div>
 
               {/* Weekday Header */}
-              <div className="overflow-x-auto border-b border-border-light dark:border-border-dark">
-                <div className="grid grid-cols-7 min-w-[720px] md:min-w-0 bg-slate-50/50 dark:bg-slate-800/50">
-                  {["週日", "週一", "週二", "週三", "週四", "週五", "週六"].map(
-                    (d) => (
+              <div className="border-b border-border-light dark:border-border-dark">
+                <div className="grid grid-cols-7 bg-slate-50/50 dark:bg-slate-800/50">
+                  {[
+                    { full: "週日", short: "日" },
+                    { full: "週一", short: "一" },
+                    { full: "週二", short: "二" },
+                    { full: "週三", short: "三" },
+                    { full: "週四", short: "四" },
+                    { full: "週五", short: "五" },
+                    { full: "週六", short: "六" },
+                  ].map((d) => (
                       <div
-                        key={d}
-                        className="py-3 text-center text-xs font-bold text-text-sub uppercase tracking-wider"
+                        key={d.full}
+                        className="py-2 text-center text-[11px] font-bold uppercase tracking-wider text-text-sub sm:py-3 sm:text-xs"
                       >
-                        {d}
+                        <span className="sm:hidden">{d.short}</span>
+                        <span className="hidden sm:inline">{d.full}</span>
                       </div>
-                    )
-                  )}
+                    ))}
                 </div>
               </div>
 
               {/* Days */}
-              <div className="flex-1 min-h-0 overflow-x-auto">
-                <div className="min-w-[720px] md:min-w-0 h-full">
-                  <div className="grid grid-cols-7 grid-rows-5 h-full overflow-y-auto bg-slate-50/20 dark:bg-slate-900/20">
+              <div className="flex-1 min-h-0">
+                <div className="h-full">
+                  <div className="grid h-full grid-cols-7 grid-rows-5 overflow-y-auto bg-slate-50/20 dark:bg-slate-900/20">
                     {loading ? (
                       <div className="col-span-7 row-span-5 flex items-center justify-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -804,7 +789,7 @@ export default function TeacherBookingsPage() {
                       return (
                         <div
                           key={index}
-                          className="border-b border-r border-border-light dark:border-border-dark p-2 min-h-[100px] bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors cursor-pointer group"
+                          className="min-h-[88px] overflow-hidden cursor-pointer border-b border-r border-border-light bg-slate-50/50 p-1 transition-colors group hover:bg-slate-50 dark:border-border-dark dark:bg-slate-800/50 dark:hover:bg-slate-800/80 sm:min-h-[100px] sm:p-2"
                         ></div>
                       );
                     }
@@ -822,8 +807,8 @@ export default function TeacherBookingsPage() {
                           setSelectedDate(d.date);
                         }}
                         className={`
-                                    border-b border-r border-border-light dark:border-border-dark p-2 min-h-[100px] 
-                                    transition-colors cursor-pointer group relative
+                                    min-h-[88px] border-b border-r border-border-light p-1 dark:border-border-dark sm:min-h-[100px] sm:p-2
+                                    overflow-hidden transition-colors cursor-pointer group relative
                                     ${isSelected
                             ? "bg-blue-50/40 dark:bg-primary/5 hover:bg-blue-50/60 dark:hover:bg-primary/10 ring-1 ring-inset ring-primary/30 z-10"
                             : "bg-white dark:bg-surface-dark hover:bg-slate-50 dark:hover:bg-slate-800/30"
@@ -832,7 +817,7 @@ export default function TeacherBookingsPage() {
                       >
                         <span
                           className={`
-                                    flex items-center justify-center w-7 h-7 rounded-full text-sm font-bold 
+                                    flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold sm:h-7 sm:w-7 sm:text-sm
                                     ${isSelected
                               ? "bg-primary text-white shadow-sm"
                               : "text-slate-700 dark:text-slate-300"
@@ -841,12 +826,13 @@ export default function TeacherBookingsPage() {
                         >
                           {d.day}
                         </span>
-                        <div className="mt-2 flex flex-col gap-1">
-                          {dayEvents.map((ev: any, evIdx: number) => (
+                        <div className="mt-1 flex flex-col gap-1 sm:mt-2">
+                          {dayEvents.slice(0, 2).map((ev: any, evIdx: number) => (
                             <div
                               key={evIdx}
                               className={`
-                                            px-2 py-1 rounded text-[11px] font-medium truncate shadow-sm
+                                            rounded px-1.5 py-1 text-[10px] font-medium truncate shadow-sm sm:px-2 sm:text-[11px]
+                                            ${evIdx === 1 ? "hidden sm:block" : ""}
                                             ${ev.color === "red"
                                   ? "bg-red-100 text-red-700 border border-red-200 opacity-70"
                                   : ev.color === "orange"
@@ -857,9 +843,19 @@ export default function TeacherBookingsPage() {
                                 }
                                         `}
                             >
-                              {ev.time} {ev.name}
+                              {ev.time}{ev.endTime ? `–${ev.endTime}` : ""} {ev.name}
                             </div>
                           ))}
+                          {dayEvents.length > 1 ? (
+                            <div className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400 sm:hidden">
+                              +{dayEvents.length - 1}
+                            </div>
+                          ) : null}
+                          {dayEvents.length > 2 ? (
+                            <div className="hidden rounded bg-slate-100 px-2 py-1 text-[11px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400 sm:block">
+                              +{dayEvents.length - 2} 筆
+                            </div>
+                          ) : null}
                         </div>
                       </div>
                     );
@@ -1149,7 +1145,7 @@ export default function TeacherBookingsPage() {
                       : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                   }`}
                 >
-                  今日行程
+                  行程
                 </button>
               </div>
             </div>
@@ -1359,7 +1355,7 @@ export default function TeacherBookingsPage() {
                         </div>
                       ) : selectedSlotRequest.status === "approved" ? (
                         <div className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-                          這筆申請已轉成正式預約，可到今日行程或月曆查看。
+                          這筆申請已轉成正式預約，可到行程或月曆查看。
                         </div>
                       ) : (
                         <div className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
@@ -1414,7 +1410,7 @@ export default function TeacherBookingsPage() {
                                 schedule
                               </span>
                               <span className="text-xs font-bold tracking-wide">
-                                {ev.time}
+                              {ev.time}{ev.endTime ? ` – ${ev.endTime}` : ""}
                               </span>
                             </div>
                             <span
@@ -1701,12 +1697,26 @@ export default function TeacherBookingsPage() {
               <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
                 日期
               </label>
-              <input
-                type="date"
-                value={customBookingDate}
-                onChange={(e) => setCustomBookingDate(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm"
-              />
+              <div className="relative">
+                <input
+                  ref={customDateInputRef}
+                  type="date"
+                  value={customBookingDate}
+                  onChange={(e) => setCustomBookingDate(e.target.value)}
+                  onClick={openNativeDatePicker}
+                  className="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 pr-11 text-sm dark:border-slate-700 dark:bg-slate-950"
+                />
+                <button
+                  type="button"
+                  onClick={openNativeDatePicker}
+                  className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                  aria-label="開啟日期選擇器"
+                >
+                  <span className="material-symbols-outlined text-[20px]">
+                    calendar_month
+                  </span>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

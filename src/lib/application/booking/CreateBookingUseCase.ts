@@ -1,6 +1,10 @@
 import { Booking } from "@/lib/domain/booking/entity";
 import { BookingRepository } from "@/lib/domain/booking/repository";
-import { AvailabilityRepository } from "@/lib/domain/teacher/AvailabilityRepository";
+import {
+  AvailabilityRepository,
+  TeacherAvailabilityOverride,
+  TeacherAvailabilityWeekly,
+} from "@/lib/domain/teacher/AvailabilityRepository";
 import { NotificationRepository } from "@/lib/domain/notification/repository";
 import { CourseRepository } from "@/lib/domain/course/repository";
 import { ProgressRepository } from "@/lib/domain/progress/types";
@@ -24,10 +28,15 @@ export class CreateBookingUseCase {
     },
     options: { buyNewPack?: boolean; skipAvailabilityValidation?: boolean } = {}
   ): Promise<Booking> {
-    
+    const requestedSlots = booking.requestedSlots;
+
     // 0. 特殊處理：如果有 requestedSlots，代表這是一個 時段申請 (Slot Request)
-    if (booking.requestedSlots && booking.requestedSlots.length === 3 && this.slotRequestRepository) {
-      const slots = booking.requestedSlots;
+    if (requestedSlots && requestedSlots.length === 3 && this.slotRequestRepository) {
+      for (const slot of requestedSlots) {
+        await this.validateSingleSlot(booking.teacherId, slot.date, slot.startTime, slot.endTime);
+      }
+
+      const slots = requestedSlots;
       const request = await this.slotRequestRepository.createSlotRequest({
         studentId: booking.studentId,
         teacherId: booking.teacherId,
@@ -137,6 +146,7 @@ export class CreateBookingUseCase {
 
     // 3. Validate Availability
     if (!options.skipAvailabilityValidation) {
+      this.ensureSlotIsInFuture(booking.bookingDate, booking.startTime);
       await this.validateAvailability(booking);
     }
 
@@ -174,9 +184,11 @@ export class CreateBookingUseCase {
     ]);
 
     // Check Overrides first
-    const dayOverride = overrides.find((o: any) => o.date === bookingDate);
+    const dayOverride = overrides.find(
+      (o: TeacherAvailabilityOverride) => o.date === bookingDate
+    );
 
-    let allowedRanges: { start: string, end: string }[] = [];
+    const allowedRanges: { start: string, end: string }[] = [];
 
     if (dayOverride) {
       if (dayOverride.isUnavailable) {
@@ -190,8 +202,10 @@ export class CreateBookingUseCase {
       const dateObj = new Date(bookingDate);
       const dayOfWeek = dateObj.getDay(); // 0=Sun, 1=Mon...
 
-      const weeklyRules = weekly.filter((w: any) => w.dayOfWeek === dayOfWeek);
-      weeklyRules.forEach((w: any) => {
+      const weeklyRules = weekly.filter(
+        (w: TeacherAvailabilityWeekly) => w.dayOfWeek === dayOfWeek
+      );
+      weeklyRules.forEach((w: TeacherAvailabilityWeekly) => {
         allowedRanges.push({ start: w.startTime, end: w.endTime });
       });
     }
@@ -219,5 +233,68 @@ export class CreateBookingUseCase {
     if (!isWithinRange) {
       throw new Error("Selected time is not within the teacher's available hours.");
     }
+
+    await this.ensureNoTeacherBookingConflict(teacherId, bookingDate, startTime, endTime);
+  }
+
+  private async validateSingleSlot(
+    teacherId: string,
+    bookingDate: string,
+    startTime: string,
+    endTime: string
+  ) {
+    this.ensureSlotIsInFuture(bookingDate, startTime);
+
+    await this.validateAvailability({
+      teacherId,
+      bookingDate,
+      startTime,
+      endTime,
+      studentId: "",
+      courseId: "",
+    });
+  }
+
+  private async ensureNoTeacherBookingConflict(
+    teacherId: string,
+    bookingDate: string,
+    startTime: string,
+    endTime: string
+  ) {
+    const bookings = await this.bookingRepository.getBookings(
+      teacherId,
+      bookingDate,
+      bookingDate
+    );
+
+    const requestedStart = this.toMinutes(startTime);
+    const requestedEnd = this.toMinutes(endTime);
+
+    const hasConflict = bookings.some((booking) => {
+      const existingStart = this.toMinutes(booking.startTime);
+      const existingEnd = this.toMinutes(booking.endTime);
+      return requestedStart < existingEnd && requestedEnd > existingStart;
+    });
+
+    if (hasConflict) {
+      throw new Error("此時段與老師既有預約衝突，請改選其他時間。");
+    }
+  }
+
+  private ensureSlotIsInFuture(bookingDate: string, startTime: string) {
+    const now = new Date();
+    const nowInTaipei = new Date(
+      now.toLocaleString("en-US", { timeZone: "Asia/Taipei" })
+    );
+    const startAt = new Date(`${bookingDate}T${startTime}:00+08:00`);
+
+    if (startAt.getTime() <= nowInTaipei.getTime()) {
+      throw new Error("此時段已經過去或太接近目前時間，請選擇之後的時段。");
+    }
+  }
+
+  private toMinutes(time: string): number {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 60 + minutes;
   }
 }

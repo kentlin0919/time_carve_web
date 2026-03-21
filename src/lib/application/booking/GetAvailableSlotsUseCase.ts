@@ -1,5 +1,7 @@
 import { AvailabilityRepository } from "@/lib/domain/teacher/AvailabilityRepository";
 import { BookingRepository, Booking } from "@/lib/domain/booking/repository";
+import { SlotRequestRepository } from "@/lib/domain/slot-request/repository";
+import { SlotRequest } from "@/lib/domain/slot-request/entity";
 
 export interface TimeSlot {
   date: string; // YYYY-MM-DD
@@ -12,10 +14,18 @@ interface TimeRange {
   end: number; // minutes from midnight
 }
 
+// A lightweight representation of a blocked time slot (from slot_requests)
+interface BlockedSlot {
+  date: string;
+  startTime: string; // HH:mm
+  endTime: string;   // HH:mm
+}
+
 export class GetAvailableSlotsUseCase {
   constructor(
     private availabilityRepository: AvailabilityRepository,
-    private bookingRepository: BookingRepository
+    private bookingRepository: BookingRepository,
+    private slotRequestRepository: SlotRequestRepository
   ) {}
 
   async execute(
@@ -27,13 +37,26 @@ export class GetAvailableSlotsUseCase {
     const startStr = startDate.toISOString().split("T")[0];
     const endStr = endDate.toISOString().split("T")[0];
 
-    const [weeklyAvailability, overrides, bookings] = await Promise.all([
+    const [weeklyAvailability, overrides, bookings, pendingSlotRequests] = await Promise.all([
       this.availabilityRepository.getWeeklyAvailability(teacherId),
       this.availabilityRepository.getOverrides(teacherId, startStr, endStr),
       this.bookingRepository.getBookings(teacherId, startStr, endStr),
+      this.slotRequestRepository.getPendingSlotRequestsByTeacherIdAndDateRange(teacherId, startStr, endStr),
     ]);
 
+    // Flatten all three preference slots from each pending slot request into blocked slots
+    const blockedBySlotRequests: BlockedSlot[] = pendingSlotRequests.flatMap(
+      (req: SlotRequest) => [
+        { date: req.preference1Date, startTime: this.extractTime(req.preference1Start), endTime: this.extractTime(req.preference1End) },
+        { date: req.preference2Date, startTime: this.extractTime(req.preference2Start), endTime: this.extractTime(req.preference2End) },
+        { date: req.preference3Date, startTime: this.extractTime(req.preference3Start), endTime: this.extractTime(req.preference3End) },
+      ]
+    );
+
     const availableSlots: TimeSlot[] = [];
+    const taipeiNow = new Date(
+      new Date().toLocaleString("en-US", { timeZone: "Asia/Taipei" })
+    );
     const current = new Date(startDate);
     
     while (current <= endDate) {
@@ -72,13 +95,20 @@ export class GetAvailableSlotsUseCase {
       for (const range of mergedRanges) {
         const slots = this.generateSlots(dateStr, range.start, range.end, durationMinutes);
         
-        // 4. Filter overlapping bookings (with Buffer logic)
+        // 4. Filter overlapping bookings (with Buffer logic) AND pending slot requests
         const dayBookings = bookings.filter((b) => b.bookingDate === dateStr);
+        const dayBlockedSlots = blockedBySlotRequests.filter((s) => s.date === dateStr);
         
         for (const slot of slots) {
-          if (!this.isOverlapping(slot, dayBookings)) {
-            availableSlots.push(slot);
+          if (
+            this.isPastOrCurrentSlot(slot, taipeiNow) ||
+            this.isOverlapping(slot, dayBookings) ||
+            this.isBlockedBySlotRequest(slot, dayBlockedSlots)
+          ) {
+            continue;
           }
+
+          availableSlots.push(slot);
         }
       }
 
@@ -90,6 +120,18 @@ export class GetAvailableSlotsUseCase {
   }
 
   // --- Helpers ---
+
+  /** Extracts "HH:mm" from a time string that could be "HH:mm", "HH:mm:ss", or a full ISO timestamp */
+  private extractTime(timeVal: string): string {
+    if (!timeVal) return "00:00";
+    // Full ISO timestamp (contains T)
+    if (timeVal.includes("T")) {
+      const d = new Date(timeVal);
+      return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Taipei" });
+    }
+    // "HH:mm:ss" or "HH:mm"
+    return timeVal.substring(0, 5);
+  }
 
   private toMinutes(time: string): number {
     const [h, m] = time.split(":").map(Number);
@@ -172,5 +214,23 @@ export class GetAvailableSlotsUseCase {
       // Overlap logic: (StartA < EndB) and (EndA > StartB)
       return slotStart < bEnd && slotEnd > bStart;
     });
+  }
+
+  /** Check if a slot overlaps with any blocked slot from pending slot_requests */
+  private isBlockedBySlotRequest(slot: TimeSlot, blockedSlots: BlockedSlot[]): boolean {
+    const slotStart = this.toMinutes(slot.startTime);
+    const slotEnd = this.toMinutes(slot.endTime);
+
+    return blockedSlots.some((blocked) => {
+      const bStart = this.toMinutes(blocked.startTime);
+      const bEnd = this.toMinutes(blocked.endTime);
+      // Overlap logic: (StartA < EndB) and (EndA > StartB)
+      return slotStart < bEnd && slotEnd > bStart;
+    });
+  }
+
+  private isPastOrCurrentSlot(slot: TimeSlot, now: Date): boolean {
+    const slotStart = new Date(`${slot.date}T${slot.startTime}:00+08:00`);
+    return slotStart.getTime() <= now.getTime();
   }
 }

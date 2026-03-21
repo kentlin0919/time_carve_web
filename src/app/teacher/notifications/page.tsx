@@ -1,7 +1,10 @@
+import { NotificationCenterContent } from "@/components/notification/NotificationCenterContent";
+
 export default function TeacherNotificationsPage() {
   return (
-    <div>
-      <h1 className="text-3xl font-bold">通知中心 (教師)</h1>
-    </div>
+    <NotificationCenterContent
+      title="通知中心"
+      description="點擊任一通知即可開啟對應畫面。"
+    />
   );
 }

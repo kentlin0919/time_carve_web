@@ -17,7 +17,7 @@ import {
   getWeeklySettings,
   saveWeeklyAvailability,
 } from "./actions";
-import { getTeacherProfile } from "@/app/actions/teacher";
+import { DateAvailability } from "@/lib/application/teacher/GetTeacherAvailabilityUseCase";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { TeacherProfile } from "@/lib/domain/teacher/entity";
+import { TeacherAvailabilityWeekly } from "@/lib/domain/teacher/AvailabilityRepository";
 import {
   AvailabilityIntervalList,
   TimeRange,
@@ -36,14 +36,19 @@ import {
 import { cn } from "@/lib/utils";
 import Link from "next/link"; // Added Link import
 
+type EditableDayOverride = {
+  date: string;
+  isUnavailable: boolean;
+  slots: TimeRange[];
+};
+
 export default function AvailabilityPage() {
   const { showModal } = useModal();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [availability, setAvailability] = useState<any[]>([]);
+  const [availability, setAvailability] = useState<DateAvailability[]>([]);
   const [loading, setLoading] = useState(false);
   const [teacherId, setTeacherId] = useState<string | null>(null);
-  const [profile, setProfile] = useState<TeacherProfile | null>(null);
 
   // Weekly Settings State
   const [weeklySettingsOpen, setWeeklySettingsOpen] = useState(false);
@@ -57,14 +62,14 @@ export default function AvailabilityPage() {
 
   // Override State
   // For the new UI, we treat the standard "Save" flow as saving overrides for the selected day.
-  const [selectedDayOverride, setSelectedDayOverride] = useState<{
-    date: string;
-    isUnavailable: boolean;
-    slots: TimeRange[];
-  } | null>(null);
+  const [selectedDayOverride, setSelectedDayOverride] =
+    useState<EditableDayOverride | null>(null);
+  const [pendingOverrides, setPendingOverrides] = useState<
+    Record<string, EditableDayOverride>
+  >({});
 
   useEffect(() => {
-    const fetchUserAndProfile = async () => {
+    const fetchUser = async () => {
       const supabase = createClient();
       const {
         data: { user },
@@ -76,16 +81,9 @@ export default function AvailabilityPage() {
           .eq("id", user.id)
           .single();
         if (teacher) setTeacherId(teacher.id);
-
-        try {
-          const profileData = await getTeacherProfile();
-          setProfile(profileData);
-        } catch (error) {
-          console.error("Failed to fetch profile", error);
-        }
       }
     };
-    fetchUserAndProfile();
+    fetchUser();
   }, []);
 
   useEffect(() => {
@@ -102,16 +100,29 @@ export default function AvailabilityPage() {
   }, [teacherId, currentDate]); // Remove overly frequent deps
 
   const handleDayClick = (day: Date) => {
+    if (selectedDayOverride) {
+      setPendingOverrides((prev) => ({
+        ...prev,
+        [selectedDayOverride.date]: selectedDayOverride,
+      }));
+    }
+
     setSelectedDate(day);
     const dateStr = format(day, "yyyy-MM-dd");
+    const pending = pendingOverrides[dateStr];
     const existing = availability.find((a) => a.date === dateStr);
 
     // Set state for the "Step 2" section
     setSelectedDayOverride({
       date: dateStr,
-      isUnavailable: existing ? existing.isUnavailable : false,
+      isUnavailable: pending
+        ? pending.isUnavailable
+        : existing
+          ? existing.isUnavailable
+          : false,
       slots:
-        existing?.slots?.map((s: any) => ({ start: s.start, end: s.end })) ||
+        pending?.slots ||
+        existing?.slots.map((s) => ({ start: s.start, end: s.end })) ||
         [],
     });
   };
@@ -161,6 +172,12 @@ export default function AvailabilityPage() {
 
     showModal({ type: "success", title: "設定已儲存", description: "預約時段設定已成功更新", confirmText: "確定" });
 
+    setPendingOverrides((prev) => {
+      const next = { ...prev };
+      delete next[selectedDayOverride.date];
+      return next;
+    });
+
     // Refresh
     const start = format(startOfMonth(currentDate), "yyyy-MM-dd");
     const end = format(endOfMonth(currentDate), "yyyy-MM-dd");
@@ -178,7 +195,7 @@ export default function AvailabilityPage() {
       newSlots[i] = [];
       newEnabled[i] = false;
     }
-    data.forEach((item: any) => {
+    data.forEach((item: TeacherAvailabilityWeekly) => {
       const d = item.dayOfWeek;
       newEnabled[d] = true;
       newSlots[d].push({ start: item.startTime, end: item.endTime });
@@ -190,7 +207,7 @@ export default function AvailabilityPage() {
 
   const handleSaveWeekly = async () => {
     if (!teacherId) return;
-    const toSave: any[] = [];
+    const toSave: Omit<TeacherAvailabilityWeekly, "id">[] = [];
     Object.keys(weeklyEnabled).forEach((key) => {
       const day = Number(key);
       if (weeklyEnabled[day]) {
@@ -252,11 +269,53 @@ export default function AvailabilityPage() {
 
   const getDayStatus = (day: Date) => {
     const dateStr = format(day, "yyyy-MM-dd");
+    const pending = pendingOverrides[dateStr];
+    if (pending) {
+      return pending;
+    }
     const status = availability.find((a) => a.date === dateStr);
     return status;
   };
 
   const DAYS = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+
+  const previewEntries = useMemo(() => {
+    const monthStart = startOfMonth(currentDate);
+    const monthEnd = endOfMonth(currentDate);
+    const entryMap = new Map<string, EditableDayOverride>();
+
+    availability.forEach((item) => {
+      const date = new Date(item.date);
+      if (date < monthStart || date > monthEnd) return;
+      if (!item.isUnavailable && item.slots.length === 0) return;
+
+      entryMap.set(item.date, {
+        date: item.date,
+        isUnavailable: item.isUnavailable,
+        slots: item.slots.map((slot) => ({ start: slot.start, end: slot.end })),
+      });
+    });
+
+    Object.values(pendingOverrides).forEach((item) => {
+      const date = new Date(item.date);
+      if (date < monthStart || date > monthEnd) return;
+      if (!item.isUnavailable && item.slots.length === 0) return;
+      entryMap.set(item.date, item);
+    });
+
+    if (selectedDayOverride) {
+      const date = new Date(selectedDayOverride.date);
+      if (
+        date >= monthStart &&
+        date <= monthEnd &&
+        (selectedDayOverride.isUnavailable || selectedDayOverride.slots.length > 0)
+      ) {
+        entryMap.set(selectedDayOverride.date, selectedDayOverride);
+      }
+    }
+
+    return Array.from(entryMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+  }, [availability, currentDate, pendingOverrides, selectedDayOverride]);
 
   return (
     <div className="min-h-screen w-full bg-background-light dark:bg-background-dark px-4 py-6 md:p-10 pb-24 font-body text-text-main dark:text-slate-100">
@@ -454,18 +513,30 @@ export default function AvailabilityPage() {
               </h2>
             </div>
             <div className="p-6 relative z-10 bg-surface-light dark:bg-surface-dark">
-              {selectedDayOverride ? (
-                <div className="space-y-6">
-                  <div className="flex items-center space-x-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-border-light dark:border-border-dark">
-                    <Checkbox
-                      id="unavailable"
-                      checked={selectedDayOverride.isUnavailable}
-                      onCheckedChange={(checked) =>
-                        setSelectedDayOverride((prev) =>
-                          prev
-                            ? { ...prev, isUnavailable: checked === true }
-                            : null
-                        )
+                {selectedDayOverride ? (
+                  <div className="space-y-6">
+                    {pendingOverrides[selectedDayOverride.date] && (
+                      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-300">
+                        此日期有尚未儲存的變更，切換到其他日期後也會先保留。
+                      </div>
+                    )}
+                    <div className="flex items-center space-x-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-border-light dark:border-border-dark">
+                      <Checkbox
+                        id="unavailable"
+                        checked={selectedDayOverride.isUnavailable}
+                        onCheckedChange={(checked) =>
+                          setSelectedDayOverride((prev) => {
+                            if (!prev) return null;
+                            const next = {
+                              ...prev,
+                              isUnavailable: checked === true,
+                            };
+                            setPendingOverrides((pending) => ({
+                              ...pending,
+                              [next.date]: next,
+                            }));
+                            return next;
+                          })
                       }
                       className="border-slate-400 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                     />
@@ -481,9 +552,15 @@ export default function AvailabilityPage() {
                     <AvailabilityIntervalList
                       value={selectedDayOverride.slots}
                       onChange={(slots) =>
-                        setSelectedDayOverride((prev) =>
-                          prev ? { ...prev, slots } : null
-                        )
+                        setSelectedDayOverride((prev) => {
+                          if (!prev) return null;
+                          const next = { ...prev, slots };
+                          setPendingOverrides((pending) => ({
+                            ...pending,
+                            [next.date]: next,
+                          }));
+                          return next;
+                        })
                       }
                     />
                   )}
@@ -512,7 +589,7 @@ export default function AvailabilityPage() {
                   </span>
                 </div>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  確認您對該日期的更改。
+                  確認目前選擇日期，並查看本月完整設定列表。
                 </p>
               </div>
 
@@ -530,13 +607,20 @@ export default function AvailabilityPage() {
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
                             日期 Date
                           </p>
-                          <p className="text-slate-800 dark:text-white font-bold text-base">
-                            {format(
-                              new Date(selectedDayOverride.date),
-                              "yyyy年 M月 d日 (EEEE)",
-                              { locale: zhTW }
+                          <div className="flex items-center gap-2">
+                            <p className="text-slate-800 dark:text-white font-bold text-base">
+                              {format(
+                                new Date(selectedDayOverride.date),
+                                "yyyy年 M月 d日 (EEEE)",
+                                { locale: zhTW }
+                              )}
+                            </p>
+                            {pendingOverrides[selectedDayOverride.date] && (
+                              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+                                未儲存
+                              </span>
                             )}
-                          </p>
+                          </div>
                         </div>
                       </div>
 
@@ -575,6 +659,74 @@ export default function AvailabilityPage() {
                     </div>
 
                     <div className="pt-2 flex flex-col gap-3">
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/20">
+                        <div className="mb-3 flex items-center justify-between gap-3">
+                          <div>
+                            <h3 className="text-sm font-bold text-slate-800 dark:text-white">
+                              本月完整設定列表
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              列出本月已設定為開放或不可預約的日期與時段。
+                            </p>
+                          </div>
+                          <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                            {previewEntries.length} 筆
+                          </span>
+                        </div>
+
+                        {previewEntries.length === 0 ? (
+                          <div className="rounded-xl border border-dashed border-slate-200 px-4 py-3 text-sm text-slate-400 dark:border-slate-700">
+                            這個月份目前還沒有任何已設定的日期。
+                          </div>
+                        ) : (
+                          <div className="max-h-[320px] space-y-3 overflow-y-auto pr-1">
+                            {previewEntries.map((entry) => (
+                              <div
+                                key={entry.date}
+                                className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900/40"
+                              >
+                                <div className="mb-2 flex items-center justify-between gap-2">
+                                  <p className="text-sm font-bold text-slate-800 dark:text-white">
+                                    {format(new Date(entry.date), "M月 d日 (EEEE)", {
+                                      locale: zhTW,
+                                    })}
+                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    {entry.date === selectedDayOverride.date ? (
+                                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
+                                        目前選取
+                                      </span>
+                                    ) : null}
+                                    {pendingOverrides[entry.date] ? (
+                                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+                                        未儲存
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                </div>
+
+                                {entry.isUnavailable ? (
+                                  <span className="inline-block rounded bg-red-100 px-2 py-1 text-sm font-bold text-red-600 dark:bg-red-950/40 dark:text-red-300">
+                                    不可預約
+                                  </span>
+                                ) : (
+                                  <div className="flex flex-wrap gap-2">
+                                    {entry.slots.map((slot, index) => (
+                                      <span
+                                        key={`${entry.date}-${slot.start}-${slot.end}-${index}`}
+                                        className="inline-block rounded bg-primary/10 px-2 py-1 text-xs font-medium text-primary-dark dark:text-primary"
+                                      >
+                                        {slot.start}-{slot.end}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
                       <button
                         onClick={handleSaveCurrentDay}
                         className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-primary dark:hover:bg-primary-dark text-white dark:text-slate-900 font-bold py-3.5 rounded-xl shadow-lg shadow-slate-300/50 dark:shadow-glow transition-all flex items-center justify-center gap-2 group transform active:scale-[0.98]"

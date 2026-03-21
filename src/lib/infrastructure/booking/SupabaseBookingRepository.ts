@@ -10,6 +10,50 @@ export class SupabaseBookingRepository implements BookingRepository {
     this.client = client || defaultClient;
   }
 
+  private async getBookingStatusId(statusKey: string): Promise<number | null> {
+    const { data, error } = await this.client
+      .from("booking_statuses")
+      .select("id")
+      .eq("status_key", statusKey)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(`Failed to look up booking status '${statusKey}': ${error.message}`);
+    }
+
+    return data?.id ?? null;
+  }
+
+  private async requireBookingStatusId(statusKey: string): Promise<number> {
+    const statusId = await this.getBookingStatusId(statusKey);
+
+    if (statusId !== null) {
+      return statusId;
+    }
+
+    const { data: statuses, error } = await this.client
+      .from("booking_statuses")
+      .select("status_key")
+      .order("id", { ascending: true });
+
+    if (error) {
+      throw new Error(
+        `Could not find '${statusKey}' booking status, and failed to inspect available statuses: ${error.message}`
+      );
+    }
+
+    const availableStatuses = (statuses ?? [])
+      .map((status) => status.status_key)
+      .filter(Boolean)
+      .join(", ");
+
+    throw new Error(
+      availableStatuses
+        ? `Could not find '${statusKey}' booking status. Available statuses: ${availableStatuses}`
+        : `Could not find '${statusKey}' booking status. The booking_statuses table is empty.`
+    );
+  }
+
   async getStudentBookings(studentId: string): Promise<Booking[]> {
     const { data, error } = await this.client
       .from("bookings")
@@ -70,10 +114,12 @@ export class SupabaseBookingRepository implements BookingRepository {
         )
       `)
       .eq("teacher_id", teacherId)
-      .neq("booking_status.status_key", "cancelled")
-      .neq("booking_status.status_key", "rejected")
+      // Block slots for any active booking: paid(1), pending(2), confirmed(3), in_progress(6)
+      // This directly filters on bookings.status_id, avoiding Supabase joined-field filter edge cases
+      .in("status_id", [1, 2, 3, 6])
       .gte("booking_date", startDate)
       .lte("booking_date", endDate);
+
 
     if (error) {
       console.error("Error fetching bookings:", error);
@@ -85,16 +131,7 @@ export class SupabaseBookingRepository implements BookingRepository {
   }
 
   async createBooking(booking: Omit<Booking, "id" | "status" | "studentName" | "studentEmail" | "courseTitle">): Promise<Booking> {
-    // 1. Get status ID for 'pending'
-    const { data: statusData, error: statusError } = await this.client
-      .from("booking_statuses")
-      .select("id")
-      .eq("status_key", "pending")
-      .single();
-
-    if (statusError || !statusData) {
-      throw new Error("Could not find 'pending' booking status");
-    }
+    const pendingStatusId = await this.requireBookingStatusId("pending");
 
     const parseDateTime = (dateStr: string, timeStr: string) => {
       let t = timeStr;
@@ -123,7 +160,7 @@ export class SupabaseBookingRepository implements BookingRepository {
         booking_date: booking.bookingDate,
         start_time: startTimestamp,
         end_time: endTimestamp,
-        status_id: statusData.id,
+        status_id: pendingStatusId,
         notes: booking.notes,
         purchase_id: booking.purchaseId,
         price: booking.price,
@@ -146,14 +183,19 @@ export class SupabaseBookingRepository implements BookingRepository {
   }
 
   private mapRowToBooking(data: any): Booking {
+    const timeFormatter = new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Taipei",
+    });
+
     // Helper to extract HH:mm from timestamp or time string
     const formatTime = (timeVal: string) => {
       // If it's a full timestamp (contains T or space and date parts)
       if (timeVal && (timeVal.includes("T") || timeVal.includes("-"))) {
         const date = new Date(timeVal);
-        const hours = date.getUTCHours().toString().padStart(2, "0");
-        const minutes = date.getUTCMinutes().toString().padStart(2, "0");
-        return `${hours}:${minutes}`;
+        return timeFormatter.format(date);
       }
       // If it's already HH:mm or HH:mm:ss
       if (timeVal && timeVal.includes(":")) {
@@ -284,14 +326,9 @@ export class SupabaseBookingRepository implements BookingRepository {
   }
 
   async getPendingBookingsCount(teacherId: string): Promise<number> {
-    // 1. Get status ID for 'pending'
-    const { data: statusData, error: statusError } = await this.client
-      .from("booking_statuses")
-      .select("id")
-      .eq("status_key", "pending")
-      .single();
+    const pendingStatusId = await this.getBookingStatusId("pending");
 
-    if (statusError || !statusData) {
+    if (pendingStatusId === null) {
       console.error("Could not find 'pending' booking status for count");
       return 0;
     }
@@ -301,7 +338,7 @@ export class SupabaseBookingRepository implements BookingRepository {
       .from("bookings")
       .select("*", { count: "exact", head: true })
       .eq("teacher_id", teacherId)
-      .eq("status_id", statusData.id);
+      .eq("status_id", pendingStatusId);
 
     if (error) {
       console.error("Error fetching pending booking count:", error);
@@ -312,14 +349,9 @@ export class SupabaseBookingRepository implements BookingRepository {
   }
 
   async getPendingBookings(teacherId: string): Promise<Booking[]> {
-    // 1. Get status ID for 'pending'
-    const { data: statusData, error: statusError } = await this.client
-      .from("booking_statuses")
-      .select("id")
-      .eq("status_key", "pending")
-      .single();
+    const pendingStatusId = await this.getBookingStatusId("pending");
 
-    if (statusError || !statusData) {
+    if (pendingStatusId === null) {
       console.error("Could not find 'pending' booking status for list");
       return [];
     }
@@ -347,7 +379,7 @@ export class SupabaseBookingRepository implements BookingRepository {
         )
       `)
       .eq("teacher_id", teacherId)
-      .eq("status_id", statusData.id)
+      .eq("status_id", pendingStatusId)
       .order("booking_date", { ascending: true });
 
     if (error) {

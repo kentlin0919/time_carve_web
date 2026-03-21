@@ -159,6 +159,32 @@ export class SupabaseSlotRequestRepository implements SlotRequestRepository {
     return data.map(this.mapToEntity);
   }
 
+  async getPendingSlotRequestsByTeacherIdAndDateRange(
+    teacherId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<SlotRequest[]> {
+    const { data, error } = await this.supabase
+      .from("slot_requests")
+      .select("*")
+      .eq("teacher_id", teacherId)
+      .eq("status", "pending")
+      // We check all three preference dates; filter server-side for simplicity
+      // and refine client-side if needed. Fetching pending requests in a broad range.
+      .or(
+        `preference_1_date.gte.${startDate},preference_2_date.gte.${startDate},preference_3_date.gte.${startDate}`
+      )
+      .or(
+        `preference_1_date.lte.${endDate},preference_2_date.lte.${endDate},preference_3_date.lte.${endDate}`
+      );
+
+    if (error) {
+      throw new Error(`Failed to get pending slot requests: ${error.message}`);
+    }
+
+    return (data ?? []).map((r: any) => this.mapToEntity(r));
+  }
+
   async updateSlotRequestStatus(id: string, updates: { 
     status: 'approved' | 'rejected', 
     selectedRank?: number, 

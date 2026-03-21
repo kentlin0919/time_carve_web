@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
 import {
   Popover,
@@ -15,8 +16,23 @@ import {
   markNotificationAsRead,
 } from "@/app/actions/notification";
 import { supabase } from "@/lib/supabase";
+import { resolveNotificationHref } from "./navigation";
+import { Database } from "@/types/database.types";
+import { NotificationType } from "@/lib/domain/notification/entity";
+
+function normalizeNotificationData(
+  data: Database["public"]["Tables"]["notifications"]["Row"]["data"]
+): Record<string, any> | null {
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    return null;
+  }
+
+  return data as Record<string, any>;
+}
 
 export function NotificationBell() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [notifications, setNotifications] = useState<NotificationDisplay[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -61,15 +77,16 @@ export function NotificationBell() {
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          const newNotification = payload.new as any;
+          const newNotification =
+            payload.new as Database["public"]["Tables"]["notifications"]["Row"];
           // Optimistic update
           const displayNotification: NotificationDisplay = {
             id: newNotification.id,
             userId: newNotification.user_id,
-            type: newNotification.type,
+            type: newNotification.type as NotificationType,
             title: newNotification.title,
             content: newNotification.content,
-            data: newNotification.data,
+            data: normalizeNotificationData(newNotification.data),
             isRead: newNotification.is_read,
             createdAt: newNotification.created_at, // Payload has string date
           };
@@ -87,7 +104,9 @@ export function NotificationBell() {
     };
   }, [userId]);
 
-  const handleMarkRead = async (id: string) => {
+  const handleNotificationClick = async (notification: NotificationDisplay) => {
+    const id = notification.id;
+
     // Optimistic update
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
@@ -104,6 +123,9 @@ export function NotificationBell() {
       console.error("Failed to mark as read:", error);
       // Revert if failed (optional, but good UX)
     }
+
+    setIsOpen(false);
+    router.push(resolveNotificationHref(pathname, notification));
   };
 
   const handleOpenChange = (open: boolean) => {
@@ -130,7 +152,7 @@ export function NotificationBell() {
         </div>
         <NotificationList
           notifications={notifications}
-          onMarkRead={handleMarkRead}
+          onNotificationClick={handleNotificationClick}
           isLoading={isLoading}
         />
       </PopoverContent>

@@ -6,13 +6,13 @@ import { BellOff } from "lucide-react";
 
 interface NotificationListProps {
   notifications: NotificationDisplay[];
-  onMarkRead: (id: string) => void;
+  onNotificationClick: (notification: NotificationDisplay) => void;
   isLoading: boolean;
 }
 
 export function NotificationList({
   notifications,
-  onMarkRead,
+  onNotificationClick,
   isLoading,
 }: NotificationListProps) {
   if (isLoading) {
@@ -36,7 +36,7 @@ export function NotificationList({
         <NotificationItem
           key={notification.id}
           notification={notification}
-          onClick={onMarkRead}
+          onClick={onNotificationClick}
         />
       ))}
     </div>
