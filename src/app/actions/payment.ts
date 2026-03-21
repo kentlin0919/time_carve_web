@@ -98,7 +98,45 @@ export async function getTeacherPayments(
       if (!matchName && !matchCourse) continue;
     }
 
-    const price = course?.price || 0;
+    const unitPrice = course?.price || 0;
+    
+    let hours = 0;
+    let finalStartTimeStr = booking.start_time || '';
+    let finalEndTimeStr = booking.end_time || '';
+    let finalBookingDate = booking.booking_date || '';
+    if (finalBookingDate.includes('T')) {
+      finalBookingDate = finalBookingDate.split('T')[0];
+    }
+    
+    let bookingEndDate: Date;
+
+    if (finalStartTimeStr.includes('T') || finalEndTimeStr.includes('T')) {
+      const dStart = new Date(finalStartTimeStr);
+      const dEnd = new Date(finalEndTimeStr);
+      hours = (dEnd.getTime() - dStart.getTime()) / (1000 * 60 * 60);
+      
+      finalStartTimeStr = dStart.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Taipei' });
+      finalEndTimeStr = dEnd.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Taipei' });
+      bookingEndDate = dEnd;
+    } else {
+      finalStartTimeStr = finalStartTimeStr.slice(0, 5);
+      finalEndTimeStr = finalEndTimeStr.slice(0, 5);
+      
+      const [startH, startM] = finalStartTimeStr.split(':').map(Number);
+      const [endH, endM] = finalEndTimeStr.split(':').map(Number);
+      const startMinutes = (startH || 0) * 60 + (startM || 0);
+      let endMinutes = (endH || 0) * 60 + (endM || 0);
+      if (endMinutes < startMinutes) endMinutes += 24 * 60; // cross-day
+      hours = (endMinutes - startMinutes) / 60;
+      
+      bookingEndDate = new Date(`${finalBookingDate}T${finalEndTimeStr}`);
+    }
+    
+    if (isNaN(hours) || hours < 0) hours = 0;
+    
+    // Total price = unit price * hours
+    const price = unitPrice * hours;
+
     // Map status_key to our frontend status (assuming they match roughly or we map them)
     // Common keys: 'pending', 'confirmed', 'completed', 'cancelled'
     const status = statusKey;
@@ -106,17 +144,13 @@ export async function getTeacherPayments(
     const isPaid = status === 'completed' || status === 'confirmed';
     const isPending = status === 'pending';
     
-    // Calculate Overdue
-    const bookingEndDateTimeStr = `${booking.booking_date}T${booking.end_time}`;
-    const bookingEndDate = new Date(bookingEndDateTimeStr);
-    
     const isOverdue = isPending && bookingEndDate < now;
 
     records.push({
       id: booking.id,
-      booking_date: booking.booking_date,
-      start_time: booking.start_time,
-      end_time: booking.end_time,
+      booking_date: finalBookingDate,
+      start_time: finalStartTimeStr,
+      end_time: finalEndTimeStr,
       status: status,
       price,
       student_name: studentUser?.name || "Unknown",

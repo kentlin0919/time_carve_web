@@ -8,9 +8,6 @@ import { useStudentCourses } from "./useStudentCourses";
 export default function StudentCoursesPage() {
   const router = useRouter();
   const { courses, loading, error } = useStudentCourses();
-  const [selectedHours, setSelectedHours] = useState<{ [key: string]: number }>(
-    {}
-  );
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [filters, setFilters] = useState({
@@ -102,14 +99,6 @@ export default function StudentCoursesPage() {
     });
     return list;
   }, [filteredCourses, sortBy]);
-
-  const handleHourChange = (courseId: string, delta: number) => {
-    setSelectedHours((prev) => {
-      const current = prev[courseId] || 1; // Default 1 hour
-      const next = Math.max(1, current + delta);
-      return { ...prev, [courseId]: next };
-    });
-  };
 
   if (loading) {
     return (
@@ -503,9 +492,6 @@ export default function StudentCoursesPage() {
         {/* Course Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
           {sortedCourses.map((course, index) => {
-            const currentHours = selectedHours[course.id] || 1;
-            const totalPrice = (course.price || 0) * currentHours;
-
             const bgImage = course.imageUrl?.trim() || "";
 
             return (
@@ -567,48 +553,17 @@ export default function StudentCoursesPage() {
                         ))}
                       </div>
                     )}
-
-                    {/* Hour Selection */}
-                    <div className="pt-2">
-                      <label className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 block">
-                        選擇預約時數
-                      </label>
-                      <div className="flex items-center gap-3 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
-                        <button
-                          onClick={() => handleHourChange(course.id, -1)}
-                          className="w-10 h-10 flex items-center justify-center rounded-lg bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 shadow-sm hover:text-primary active:scale-95 transition-all"
-                        >
-                          <span className="material-symbols-outlined">
-                            remove
-                          </span>
-                        </button>
-                        <div className="flex-1 text-center">
-                          <span className="text-lg font-black text-slate-800 dark:text-white">
-                            {currentHours}
-                          </span>
-                          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-1">
-                            小時
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => handleHourChange(course.id, 1)}
-                          className="w-10 h-10 flex items-center justify-center rounded-lg bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 shadow-sm hover:text-primary active:scale-95 transition-all"
-                        >
-                          <span className="material-symbols-outlined">add</span>
-                        </button>
-                      </div>
-                    </div>
                   </div>
 
                   <div className="mt-auto pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                     <div className="flex flex-col">
                       <span className="text-xs text-slate-400 font-bold uppercase">
-                        預估費用
+                        費用
                       </span>
                       <div className="flex items-baseline gap-1">
                         <span className="text-2xl font-black text-primary-dark dark:text-primary">
                           {course.price
-                            ? `NT$ ${totalPrice.toLocaleString()}`
+                            ? `NT$ ${(course.price).toLocaleString()} /小時`
                             : "洽詢"}
                         </span>
                       </div>
@@ -631,25 +586,6 @@ export default function StudentCoursesPage() {
           })}
         </div>
 
-        {/* Call to Action - Keep this generic */}
-        <div className="mt-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden shadow-xl">
-          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-black/10 rounded-full blur-3xl"></div>
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="max-w-2xl">
-              <h2 className="text-3xl font-display font-bold mb-4">
-                需要客製化課程？
-              </h2>
-              <p className="text-indigo-100 text-lg">
-                如果您有特殊的學習需求，歡迎直接與老師聯繫討論。
-              </p>
-            </div>
-            <button className="bg-white text-indigo-600 hover:bg-indigo-50 px-8 py-4 rounded-xl font-bold text-lg shadow-lg transition-all transform hover:scale-105 flex items-center gap-2 flex-shrink-0">
-              <span className="material-symbols-outlined">chat</span>
-              聯繫老師
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );

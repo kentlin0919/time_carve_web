@@ -28,8 +28,6 @@ type CourseContext = {
 type StudentCourseDetailViewProps = {
   course: Course;
   context?: CourseContext | null;
-  selectedHours: number;
-  onHoursChange: (next: number) => void;
   onBooking?: () => void;
   backHref: string;
   backLabel: string;
@@ -40,8 +38,6 @@ type StudentCourseDetailViewProps = {
 export default function StudentCourseDetailView({
   course,
   context,
-  selectedHours,
-  onHoursChange,
   onBooking,
   backHref,
   backLabel,
@@ -49,16 +45,6 @@ export default function StudentCourseDetailView({
   pendingHours = 0,
 }: StudentCourseDetailViewProps) {
   const heroImage = useMemo(() => getHeroImage(course.id), [course.id]);
-
-  const totalPrice = useMemo(() => {
-    if (!course.price) return 0;
-    return course.price * selectedHours;
-  }, [course.price, selectedHours]);
-
-  const listPrice = useMemo(() => {
-    if (!totalPrice) return 0;
-    return Math.round(totalPrice * 1.1);
-  }, [totalPrice]);
 
   const outcomes = useMemo(() => {
     if (
@@ -286,7 +272,7 @@ export default function StudentCourseDetailView({
               <div className="bg-surface-light dark:bg-surface-dark rounded-3xl p-6 shadow-card border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-sm font-bold text-slate-500 dark:text-slate-400">
-                    課程總費用
+                    課程費用
                   </span>
                   <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded text-xs font-bold">
                     名額開放中
@@ -294,51 +280,16 @@ export default function StudentCourseDetailView({
                 </div>
                 <div className="flex items-baseline gap-2 mb-6">
                   <span className="text-4xl font-black text-slate-900 dark:text-white">
-                    NT$ {totalPrice.toLocaleString()}
+                    {course.price ? `NT$ ${course.price.toLocaleString()} /小時` : "洽詢"}
                   </span>
-                  {listPrice > totalPrice && (
-                    <span className="text-sm text-slate-400 font-medium line-through">
-                      NT$ {listPrice.toLocaleString()}
-                    </span>
-                  )}
                 </div>
                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 mb-6 border border-slate-100 dark:border-slate-800">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-3 block">
-                    選擇上課時數方案
-                  </label>
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <button
-                      className="size-8 rounded-lg bg-white dark:bg-slate-700 shadow-sm border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-500 hover:text-secondary transition-colors"
-                      onClick={() =>
-                        onHoursChange(Math.max(1, selectedHours - 1))
-                      }
-                      type="button"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">
-                        remove
-                      </span>
-                    </button>
-                    <div className="flex-1 text-center bg-white dark:bg-slate-700 border border-secondary dark:border-secondary/50 rounded-lg py-1.5 shadow-sm relative overflow-hidden">
-                      <div className="absolute inset-0 bg-secondary/5"></div>
-                      <span className="text-lg font-black text-slate-900 dark:text-white">
-                        {selectedHours} 小時
-                      </span>
-                    </div>
-                    <button
-                      className="size-8 rounded-lg bg-white dark:bg-slate-700 shadow-sm border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-500 hover:text-secondary transition-colors"
-                      onClick={() =>
-                        onHoursChange(Math.min(40, selectedHours + 1))
-                      }
-                      type="button"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">
-                        add
-                      </span>
-                    </button>
-                  </div>
-                  <p className="text-center text-xs text-slate-400 mt-2">
+                  <p className="text-center text-xs text-slate-500 mb-1">
+                    預約時數可依您的需求彈性選擇
+                  </p>
+                  <p className="text-center text-xs text-slate-400">
                     {course.price
-                      ? `包含材料費與講義 • 每小時 NT$ ${course.price.toLocaleString()}`
+                      ? "可與老師討論適合的時數與頻率"
                       : "課程費用將於確認後提供"}
                   </p>
                 </div>
@@ -350,7 +301,7 @@ export default function StudentCourseDetailView({
                     </div>
                   ) : (
                     <button
-                      className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-secondary dark:hover:bg-secondary/90 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-secondary/20 transition-all transform active:scale-95 flex items-center justify-center gap-2 mb-4"
+                      className="w-full bg-primary hover:bg-primary-dark text-white py-3.5 rounded-xl font-bold shadow-lg shadow-primary/25 transition-all transform active:scale-95 flex items-center justify-center gap-2 mb-4"
                       onClick={onBooking}
                       type="button"
                     >
@@ -477,13 +428,13 @@ export default function StudentCourseDetailView({
       {!hideActions && pendingHours === 0 && (
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-surface-dark border-t border-slate-200 dark:border-slate-800 p-4 pb-6 z-50 flex items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
           <div className="flex flex-col">
-            <span className="text-xs text-slate-500">總費用</span>
+            <span className="text-xs text-slate-500">課程費用</span>
             <span className="text-xl font-black text-slate-900 dark:text-white">
-              NT$ {totalPrice.toLocaleString()}
+              {course.price ? `NT$ ${course.price.toLocaleString()} /小時` : "洽詢"}
             </span>
           </div>
           <button
-            className="bg-slate-900 dark:bg-secondary text-white px-8 py-3 rounded-xl font-bold shadow-lg"
+            className="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-primary/25 transition-colors"
             onClick={onBooking}
             type="button"
           >

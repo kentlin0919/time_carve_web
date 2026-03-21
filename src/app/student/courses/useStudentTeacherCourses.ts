@@ -29,21 +29,28 @@ const loadStudentTeacherContext = async (): Promise<StudentTeacherContext | null
 
   if (studentError || !studentInfo?.teacher_code) return null;
 
+  const { data: publicProfileData } = await supabase.rpc(
+    "get_public_teacher_profile",
+    { code: studentInfo.teacher_code }
+  );
+
   const { data: teacherInfo, error: teacherError } = await supabase
     .from("teacher_info")
-    .select("id, teacher_code, title, user_info(name, avatar_url)")
+    .select("id, teacher_code")
     .eq("teacher_code", studentInfo.teacher_code)
     .maybeSingle();
 
   if (teacherError || !teacherInfo?.id) return null;
 
+  const profile = Array.isArray(publicProfileData) ? publicProfileData[0] : publicProfileData;
+
   return {
     studentId: user.id,
     teacherId: teacherInfo.id,
     teacherCode: teacherInfo.teacher_code,
-    teacherName: teacherInfo.user_info?.name || null,
-    teacherTitle: teacherInfo.title || null,
-    teacherAvatarUrl: teacherInfo.user_info?.avatar_url || null,
+    teacherName: profile?.name || null,
+    teacherTitle: profile?.title || null,
+    teacherAvatarUrl: profile?.avatar_url || null,
   };
 };
 

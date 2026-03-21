@@ -5,20 +5,16 @@ import { getMyCoursesWithProgress } from '@/app/actions/progress';
 import { StudentCourseProgress } from '@/lib/domain/progress/types';
 import { Course } from '@/lib/domain/course/entity';
 import Link from 'next/link';
+import { checkUnpaidBookings } from '@/app/actions/booking';
 
 type ProgressWithCourse = StudentCourseProgress & {
   course: Course;
-  purchase: {
-    totalHours: number;
-    remainingHours: number;
-    pendingHours: number;
-    id: string;
-  } | null;
 };
 
 export default function StudentProgressPage() {
   const [loading, setLoading] = useState(true);
   const [progressList, setProgressList] = useState<ProgressWithCourse[]>([]);
+  const [hasUnpaidBookings, setHasUnpaidBookings] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -26,8 +22,15 @@ export default function StudentProgressPage() {
 
   const fetchData = async () => {
     try {
-      const data = await getMyCoursesWithProgress();
-      setProgressList(data);
+      const [data] = await Promise.all([
+        getMyCoursesWithProgress(),
+      ]);
+      // Note: we fetch unpaid check separately if we need studentId context,
+      // but student UI can get its own user in server actions
+      const unpaidRes = await checkUnpaidBookings("").catch(() => ({ hasUnpaid: false, count: 0 }));
+      
+      setProgressList(data as any[]); // Temporary cast until we fully remove purchase from the actions
+      setHasUnpaidBookings(unpaidRes.count > 0);
     } catch (error) {
       console.error(error);
     } finally {
@@ -74,7 +77,7 @@ export default function StudentProgressPage() {
               我的學習概覽
             </h1>
             <p className="text-slate-500 dark:text-slate-400">
-              追蹤各項課程的學習進度與剩餘可用時數。
+              追蹤各項課程的學習進度與教案完成狀況。
             </p>
           </div>
         </div>
@@ -107,28 +110,14 @@ export default function StudentProgressPage() {
                 您的學習旅程正在穩步推進中，請記得定期預約課程以保持手感。
               </p>
               <div className="flex flex-wrap justify-center sm:justify-start gap-4">
-                <div className="px-4 py-2 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700 flex flex-col text-center min-w-[80px]">
-                  <span className="text-xs text-slate-400 font-bold mb-0.5">總方案數</span>
-                  <span className="text-lg font-black text-slate-700 dark:text-slate-200">{totalCourses}</span>
+                <div className="px-5 py-3 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-700 flex flex-col text-center min-w-[100px]">
+                  <span className="text-xs text-slate-400 font-bold mb-1">參與課程總數</span>
+                  <span className="text-2xl font-black text-slate-700 dark:text-slate-200">{totalCourses}</span>
                 </div>
-                <div className="px-4 py-2 bg-teal-500/5 dark:bg-teal-500/10 rounded-xl border border-teal-500/10 flex flex-col text-center min-w-[80px]">
-                  <span className="text-xs text-teal-600 dark:text-teal-400 font-bold mb-0.5">進行中</span>
-                  <span className="text-lg font-black text-teal-600 dark:text-teal-400">{inProgressCount}</span>
+                <div className="px-5 py-3 bg-teal-500/5 dark:bg-teal-500/10 rounded-2xl border border-teal-500/10 flex flex-col text-center min-w-[100px]">
+                  <span className="text-xs text-teal-600 dark:text-teal-400 font-bold mb-1">進行中</span>
+                  <span className="text-2xl font-black text-teal-600 dark:text-teal-400">{inProgressCount}</span>
                 </div>
-                <div className="px-4 py-2 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-700 flex flex-col text-center min-w-[80px]">
-                  <span className="text-xs text-slate-400 font-bold mb-0.5">剩餘總時數</span>
-                  <span className="text-lg font-black text-slate-700 dark:text-slate-200">
-                    {progressList.reduce((acc, curr) => acc + (curr.purchase?.remainingHours || 0), 0)} hr
-                  </span>
-                </div>
-                {progressList.reduce((acc, curr) => acc + (curr.purchase?.pendingHours || 0), 0) > 0 && (
-                  <div className="px-4 py-2 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/30 flex flex-col text-center min-w-[80px]">
-                    <span className="text-xs text-amber-600 dark:text-amber-400 font-bold mb-0.5">待付款時數</span>
-                    <span className="text-lg font-black text-amber-600 dark:text-amber-400">
-                      {progressList.reduce((acc, curr) => acc + (curr.purchase?.pendingHours || 0), 0)} hr
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -149,14 +138,26 @@ export default function StudentProgressPage() {
           </div>
         </div>
 
+        {/* Global Unpaid Warning (If applicable) */}
+        {hasUnpaidBookings && (
+          <div className="bg-rose-50 dark:bg-rose-900/10 border border-rose-200 dark:border-rose-900/50 rounded-2xl p-4 flex items-start gap-4 shadow-sm">
+            <span className="material-symbols-outlined text-rose-500 mt-0.5">warning</span>
+            <div>
+              <h3 className="text-rose-800 dark:text-rose-400 font-bold">您有尚未結清的預約款項</h3>
+              <p className="text-rose-600 dark:text-rose-500/80 text-sm mt-1">目前有已完成但尚未標記為已收款的預約。在結清前，您將無法建立新的預約。</p>
+              <Link href="/student/bookings" className="text-xs font-bold text-rose-700 dark:text-rose-400 underline mt-2 inline-block">前往查看預約紀錄</Link>
+            </div>
+          </div>
+        )}
+
         {/* Course Cards Grid */}
         <div className="flex flex-col gap-6">
           <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
             <span className="material-symbols-outlined text-teal-500">my_location</span>
-            我的課程方案
+            我的課程清單
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {progressList.length === 0 && (
               <div className="col-span-full py-20 text-center bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
                 <p className="text-slate-400">目前沒有進行中的課程進度。</p>
@@ -166,94 +167,76 @@ export default function StudentProgressPage() {
 
             {progressList.map(item => {
               const isCompleted = item.progress_percentage === 100 || item.status === 'completed';
-              const remaining = item.purchase?.remainingHours || 0;
-              const pending = item.purchase?.pendingHours || 0; // New field
-              const total = item.purchase?.totalHours || 0;     // Fallback to 0 if null
 
               return (
                 <div key={item.id} className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 overflow-hidden shadow-soft group hover:shadow-lg transition-all duration-300 flex flex-col">
                   {/* Top: Course Info */}
                   <div className="p-6 pb-4">
                     <div className="flex justify-between items-start mb-4">
-                      <div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-1 w-2/3">
                         <span className={`w-fit text-[10px] font-bold px-2 py-0.5 rounded-full ${isCompleted ? 'bg-green-100 text-green-700' : 'bg-teal-100 text-teal-700'
                           }`}>
                           {item.course.courseType === 'online' ? '線上' : '實體'} · {isCompleted ? '已完成' : '學習中'}
                         </span>
-                        <h3 className="text-xl font-black text-slate-800 dark:text-white group-hover:text-primary transition-colors">{item.course.title}</h3>
+                        <h3 className="font-bold text-slate-800 dark:text-white group-hover:text-primary transition-colors leading-tight line-clamp-2 mt-1">{item.course.title}</h3>
                       </div>
-                      <div className="text-right">
-                        <span className="text-2xl font-black text-slate-800 dark:text-white">{item.progress_percentage}%</span>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">教案進度</p>
+                      <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-3 flex flex-col items-center justify-center min-w-[70px] border border-slate-100 dark:border-slate-800 shadow-sm">
+                        <span className="text-2xl font-black text-slate-800 dark:text-white leading-none">{item.progress_percentage}%</span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase mt-1 tracking-wider">進度</span>
                       </div>
                     </div>
 
                     {/* Progress Bar (Course Completion) */}
-                    <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 mb-6">
+                    <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2 mb-2">
                       <div
                         className={`h-full rounded-full transition-all duration-1000 ${isCompleted ? 'bg-green-500' : 'bg-teal-500 shadow-[0_0_10px_rgba(20,184,166,0.4)]'}`}
                         style={{ width: `${item.progress_percentage}%` }}
                       ></div>
                     </div>
-
-                    {/* Middle: Hours Info */}
-                    <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800">
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase mb-1">購買總時數</span>
-                        <span className="text-lg font-black text-slate-700 dark:text-slate-200">{total} <span className="text-xs font-normal">hr</span></span>
-                      </div>
-                      <div className="flex flex-col border-l border-slate-200 dark:border-slate-700 pl-4">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase mb-1">剩餘時數</span>
-                        <div className="flex items-baseline gap-1">
-                          <span className={`text-lg font-black ${remaining > 0 ? 'text-teal-500' : 'text-rose-500'}`}>{remaining} <span className="text-xs font-normal">hr</span></span>
-                        </div>
-                        {pending > 0 && (
-                          <div className="mt-1 inline-flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 px-2 py-0.5 rounded-md w-fit">
-                            <span className="material-symbols-outlined text-[14px] text-amber-600 dark:text-amber-400">pending</span>
-                            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">待付款: {pending} hr</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
                   </div>
 
                   {/* Section Checklist (Compact) */}
-                  <div className="px-6 py-4 flex-1">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-3">單元進度回顧</p>
-                    <div className="space-y-2">
-                      {(item.course.sections as any[] || []).slice(0, 3).map((section: any) => {
+                  <div className="px-6 py-4 flex-1 bg-slate-50/50 dark:bg-slate-900/20 border-t border-b border-slate-50 dark:border-slate-800/50">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-3 tracking-wider flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">checklist</span> 單元回顧
+                    </p>
+                    <div className="space-y-2.5">
+                      {(item.course.sections as any[] || []).slice(0, 4).map((section: any) => {
                         const secCompleted = (item.completed_section_ids || []).includes(section.id);
                         return (
-                          <div key={section.id} className="flex items-center gap-2 text-xs text-slate-500">
-                            <span className={`material-symbols-outlined text-[16px] ${secCompleted ? 'text-green-500' : 'text-slate-300'}`}>
+                          <div key={section.id} className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-400">
+                            <span className={`material-symbols-outlined text-[16px] mt-px shrink-0 ${secCompleted ? 'text-green-500' : 'text-slate-300 dark:text-slate-600'}`}>
                               {secCompleted ? 'check_circle' : 'radio_button_unchecked'}
                             </span>
-                            <span className="truncate">{section.title}</span>
+                            <span className={`line-clamp-2 ${secCompleted ? 'line-through opacity-70' : ''}`}>{section.title}</span>
                           </div>
                         )
                       })}
-                      {(item.course.sections as any[] || []).length > 3 && (
-                        <p className="text-[10px] text-slate-400 pl-6">... 以及其他 {(item.course.sections as any[]).length - 3} 個單元</p>
+                      {(item.course.sections as any[] || []).length > 4 && (
+                        <p className="text-[10px] text-slate-400 font-medium pl-6 pt-1">... 以及其他 {(item.course.sections as any[]).length - 4} 個單元</p>
+                      )}
+                      {(item.course.sections as any[] || []).length === 0 && (
+                        <p className="text-xs text-slate-400 italic pl-1">尚無單元資料</p>
                       )}
                     </div>
                   </div>
 
                   {/* Bottom Actions */}
-                  <div className="p-6 pt-0 mt-auto">
-                    {pending > 0 ? (
-                      <div className="w-full py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 font-bold text-sm flex items-center justify-center gap-2">
-                        <span className="material-symbols-outlined text-[18px]">warning</span>
-                        尚未付款 ({pending} hr)
-                      </div>
-                    ) : (
-                      <Link
+                  <div className="p-6">
+                     <Link
                         href={`/student/booking/create?courseId=${item.course.id}`}
-                        className="w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:scale-[1.02] shadow-lg"
+                        onClick={(e) => {
+                          if (hasUnpaidBookings) e.preventDefault();
+                        }}
+                        className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+                          hasUnpaidBookings 
+                            ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200" 
+                            : "bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:scale-[1.02] shadow-lg shadow-slate-900/10"
+                        }`}
                       >
                         <span className="material-symbols-outlined text-[18px]">calendar_month</span>
-                        預約時段
+                        {hasUnpaidBookings ? "預約功能已鎖定" : "預約時段"}
                       </Link>
-                    )}
                   </div>
                 </div>
               );
@@ -261,8 +244,6 @@ export default function StudentProgressPage() {
           </div>
         </div>
       </div>
-
-      {/* Removed Custom Purchase Modal */}
     </div>
   );
 }

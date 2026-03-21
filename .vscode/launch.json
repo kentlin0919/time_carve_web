@@ -2,22 +2,41 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Next.js: Debug Client",
+      "name": "Next.js Dev (with pnpm)",
+      "type": "node",
       "request": "launch",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "env": {
+        "NODE_OPTIONS": "--inspect=9230"
+      }
+    },
+    {
+      "name": "Chrome",
       "type": "chrome",
+      "request": "launch",
       "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Attach to Supabase Functions",
+      "name": "Attach Supabase",
       "type": "node",
       "request": "attach",
       "port": 9229,
-      "address": "127.0.0.1",
       "localRoot": "${workspaceFolder}/supabase/functions",
-      "remoteRoot": "/home/deno/functions",
-      "restart": true,
-      "sourceMaps": true
+      "remoteRoot": "/home/deno/functions"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "🔥 Full Dev Environment",
+      "configurations": [
+        "Next.js Dev (with pnpm)",
+        "Chrome",
+        "Attach Supabase"
+      ]
     }
   ]
 }

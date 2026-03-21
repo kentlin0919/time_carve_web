@@ -336,7 +336,7 @@ export default function PaymentManagementPage() {
                         課程內容與時間
                       </th>
                       <th className="px-6 py-4 font-semibold">
-                        應收 / 實收金額
+                        金額
                       </th>
                       <th className="px-6 py-4 font-semibold">付款狀態</th>
                       <th className="px-6 py-4 font-semibold text-right">
@@ -397,32 +397,8 @@ export default function PaymentManagementPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex flex-col">
-                            <span
-                              className={`text-sm font-bold ${record.status === "completed"
-                                  ? "text-text-sub line-through"
-                                  : "text-slate-800 dark:text-white"
-                                }`}
-                            >
+                            <span className="text-sm font-bold text-slate-800 dark:text-white">
                               {formatCurrency(record.price)}
-                            </span>
-                            <span
-                              className={`text-xs ${record.status === "completed"
-                                  ? "font-bold text-emerald-600 dark:text-emerald-400"
-                                  : "text-text-sub"
-                                }`}
-                            >
-                              實收:{" "}
-                              <span
-                                className={
-                                  record.status === "completed"
-                                    ? ""
-                                    : "text-slate-400"
-                                }
-                              >
-                                {record.status === "completed"
-                                  ? formatCurrency(record.price)
-                                  : "NT$ 0"}
-                              </span>
                             </span>
                           </div>
                         </td>

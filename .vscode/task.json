@@ -1,0 +1,37 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "supabase start",
+      "type": "shell",
+      "command": "supabase start",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "pnpm dev",
+      "type": "shell",
+      "command": "pnpm run dev",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": [
+          {
+            "regexp": ".",
+            "file": 1,
+            "location": 2,
+            "message": 3
+          }
+        ],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": "ready - started server on"
+        }
+      }
+    },
+    {
+      "label": "dev all",
+      "dependsOn": ["supabase start", "pnpm dev"]
+    }
+  ]
+}

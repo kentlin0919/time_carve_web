@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Select from "@/components/ui/Select"; // Use the existing custom Select
 import { Label } from "@/components/ui/label";
@@ -15,6 +14,8 @@ interface AvailabilityIntervalListProps {
   value: TimeRange[];
   onChange: (value: TimeRange[]) => void;
   disabled?: boolean;
+  requiredDurationMinutes?: number;
+  onBeforeAdd?: (range: TimeRange) => Promise<string | null> | string | null;
 }
 
 // Generate 30-min slots from 06:00 to 23:30
@@ -46,12 +47,39 @@ export function AvailabilityIntervalList({
   value,
   onChange,
   disabled,
+  requiredDurationMinutes,
+  onBeforeAdd,
 }: AvailabilityIntervalListProps) {
   const [newStart, setNewStart] = React.useState<string>("");
   const [newEnd, setNewEnd] = React.useState<string>("");
   const [error, setError] = React.useState<string | null>(null);
 
-  const handleAdd = () => {
+  React.useEffect(() => {
+    if (!requiredDurationMinutes) {
+      return;
+    }
+
+    if (!newStart) {
+      setNewEnd("");
+      return;
+    }
+
+    const computedEnd = parseTime(newStart) + requiredDurationMinutes;
+    if (computedEnd > 24 * 60) {
+      setNewEnd("");
+      return;
+    }
+
+    setNewEnd(
+      `${Math.floor(computedEnd / 60)
+        .toString()
+        .padStart(2, "0")}:${(computedEnd % 60)
+        .toString()
+        .padStart(2, "0")}`
+    );
+  }, [newStart, requiredDurationMinutes]);
+
+  const handleAdd = async () => {
     setError(null);
     if (!newStart || !newEnd) {
       setError("請選擇開始與結束時間");
@@ -66,6 +94,14 @@ export function AvailabilityIntervalList({
       return;
     }
 
+    if (
+      requiredDurationMinutes &&
+      endMins - startMins !== requiredDurationMinutes
+    ) {
+      setError(`時段長度需剛好為 ${(requiredDurationMinutes / 60).toFixed(0)} 小時`);
+      return;
+    }
+
     // Check overlap
     const hasOverlap = value.some((range) => {
       const rStart = parseTime(range.start);
@@ -77,6 +113,17 @@ export function AvailabilityIntervalList({
     if (hasOverlap) {
       setError("此時段與現有時段重疊，請檢查");
       return;
+    }
+
+    if (onBeforeAdd) {
+      const validationError = await onBeforeAdd({
+        start: newStart,
+        end: newEnd,
+      });
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
     }
 
     const newRanges = [...value, { start: newStart, end: newEnd }];
@@ -95,16 +142,26 @@ export function AvailabilityIntervalList({
   };
 
   // Convert string array to options array for the Select component
-  const startOptions = TIME_OPTIONS.slice(0, -1).map((t) => ({
-    value: t,
-    label: t,
-  }));
-  const endOptions = TIME_OPTIONS.map((t) => ({
-    value: t,
-    label: t,
-    // Note: The custom Select component might not support individual option disabling easily based on its interface
-    // relying on validation for now.
-  }));
+  const startOptions = TIME_OPTIONS.slice(0, -1)
+    .filter((t) => {
+      if (!requiredDurationMinutes) return true;
+      return parseTime(t) + requiredDurationMinutes <= 24 * 60;
+    })
+    .map((t) => ({
+      value: t,
+      label: t,
+    }));
+  const endOptions = requiredDurationMinutes
+    ? newEnd
+      ? [{ value: newEnd, label: newEnd }]
+      : [{ value: "", label: "請先選擇開始時間" }]
+    : [
+        { value: "", label: "選擇結束時間" },
+        ...TIME_OPTIONS.map((t) => ({
+          value: t,
+          label: t,
+        })),
+      ];
 
   return (
     <div className="space-y-6">
@@ -164,6 +221,11 @@ export function AvailabilityIntervalList({
           </span>
           新增可用時段
         </Label>
+        {requiredDurationMinutes ? (
+          <p className="text-xs text-slate-500">
+            每個申請時段需固定為 {requiredDurationMinutes / 60} 小時。
+          </p>
+        ) : null}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
@@ -177,11 +239,11 @@ export function AvailabilityIntervalList({
           </div>
           <div className="space-y-1.5">
             <Select
-              label="結束時間 End"
+              label={requiredDurationMinutes ? "結束時間（依時數自動帶入）" : "結束時間 End"}
               value={newEnd}
               onChange={(e) => setNewEnd(e.target.value)}
-              disabled={disabled}
-              options={[{ value: "", label: "選擇結束時間" }, ...endOptions]}
+              disabled={disabled || Boolean(requiredDurationMinutes)}
+              options={endOptions}
             />
           </div>
         </div>

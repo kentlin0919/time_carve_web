@@ -32,7 +32,7 @@ import { TeacherProfile } from "@/lib/domain/teacher/entity";
 import {
   AvailabilityIntervalList,
   TimeRange,
-} from "@/components/teacher/availability/AvailabilityIntervalList";
+} from "@/components/shared/AvailabilityIntervalList";
 import { cn } from "@/lib/utils";
 import Link from "next/link"; // Added Link import
 

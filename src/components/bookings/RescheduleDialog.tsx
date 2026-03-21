@@ -16,6 +16,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { requestReschedule } from "@/app/actions/reschedule";
 import { useRouter } from "next/navigation";
 import { useModal } from "@/components/providers/ModalContext";
+import Select from "@/components/ui/Select";
+
+const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
+  const h = Math.floor(i / 2);
+  const m = i % 2 === 0 ? "00" : "30";
+  const ampm = h < 12 ? "上午" : "下午";
+  const displayH = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  const value = `${h.toString().padStart(2, "0")}:${m}`;
+  const label = `${ampm} ${displayH.toString().padStart(2, "0")}:${m}`;
+  return { value, label };
+});
 
 interface RescheduleDialogProps {
     bookingId: string;
@@ -90,12 +101,12 @@ export function RescheduleDialog({
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="time">時間</Label>
-                        <Input
+                        <Select
                             id="time"
-                            type="time"
                             value={newTime}
                             onChange={(e) => setNewTime(e.target.value)}
-                            className="dark:bg-slate-950"
+                            options={TIME_OPTIONS}
+                            icon="schedule"
                         />
                     </div>
                     <div className="grid gap-2">

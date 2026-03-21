@@ -50,4 +50,38 @@ export async function sendNotification(
   const useCase = new SendNotificationUseCase(repo);
   
   await useCase.execute(targetUserId, type, title, content, data);
+
+  // Trigger the generic edge function to send an email asynchronously
+  try {
+    const { data: userData } = await adminSupabase
+      .from('user_info')
+      .select('email, name')
+      .eq('id', targetUserId)
+      .single();
+
+    if (userData?.email) {
+      const htmlContent = `
+        <div style="font-family: sans-serif; padding: 20px;">
+          <h2>${title}</h2>
+          <p>您好${userData.name ? ' ' + userData.name : ''}，</p>
+          <p>${content}</p>
+          <hr />
+          <p style="font-size: 12px; color: #666;">TimeCarve 刻時家教平台</p>
+        </div>
+      `;
+
+      // invoke edge function without awaiting to allow background processing
+      adminSupabase.functions.invoke('send-email', {
+        body: {
+          to: userData.email,
+          subject: `[系統通知] ${title}`,
+          html: htmlContent
+        }
+      }).then(({ error }) => {
+        if (error) console.error("Failed to invoke send-email edge function:", error);
+      });
+    }
+  } catch (error) {
+    console.error("Error triggering email notification:", error);
+  }
 }

@@ -5,9 +5,13 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useModal } from "@/components/providers/ModalContext";
 import { useStudentCourseDetail } from "../../courses/useStudentTeacherCourses";
-import { getAvailableSlots, createBooking } from "@/app/actions/booking";
-import { getStudentPurchases, purchaseCourse } from "@/app/actions/purchase";
-import { Purchase } from "@/lib/domain/purchase/entity";
+import {
+  checkBookingConflict,
+  createBooking,
+  getAvailableSlots,
+} from "@/app/actions/booking";
+import { AvailabilityIntervalList } from "@/components/shared/AvailabilityIntervalList";
+import Select from "@/components/ui/Select";
 
 // Helper to get days in month
 const getDaysInMonth = (year: number, month: number) => {
@@ -32,20 +36,55 @@ const toTimeStr = (mins: number) => {
   return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
 };
 
+const toDateKey = (date: Date) => {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+    2,
+    "0"
+  )}-${String(date.getDate()).padStart(2, "0")}`;
+};
+
+const normalizeDateInput = (value: string) => {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+
+  const match = value.match(/^(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日/);
+  if (!match) {
+    return value;
+  }
+
+  const [, year, month, day] = match;
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+};
+
+type ContiguousBlock = {
+  startTime: string;
+  endTime: string;
+};
+
+const MAX_BOOKING_HOURS = 4;
+
+const clampBookingHours = (value: number) => {
+  if (!Number.isFinite(value)) {
+    return 1;
+  }
+
+  return Math.min(MAX_BOOKING_HOURS, Math.max(1, Math.floor(value)));
+};
+
+const BOOKING_HOUR_OPTIONS = Array.from({ length: MAX_BOOKING_HOURS }, (_, index) => {
+  const value = index + 1;
+  return { value, label: `${value} 小時` };
+});
+
 export default function StudentBookingCreatePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { showModal } = useModal();
   const courseId = searchParams.get("courseId") || "";
-  const hoursParam = Number(searchParams.get("hours")) || 1;
-  const [hours, setHours] = useState(Math.max(1, hoursParam));
-  const [notes, setNotes] = useState("");
+  const hoursParam = clampBookingHours(Number(searchParams.get("hours")));
+  const [hours, setHours] = useState(hoursParam);
   const [submitting, setSubmitting] = useState(false);
-  const [buyNewPack, setBuyNewPack] = useState(false);
-
-  // Purchase State
-  const [purchases, setPurchases] = useState<Purchase[]>([]);
-  const [selectedPurchaseId, setSelectedPurchaseId] = useState<string | null>(null);
 
   // Calendar State
   const today = new Date();
@@ -53,71 +92,46 @@ export default function StudentBookingCreatePage() {
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-  // Split Booking State
+  // Booking State
   const [availableSlots, setAvailableSlots] = useState<
     { startTime: string; endTime: string }[]
   >([]);
-  const [selectedSlots, setSelectedSlots] = useState<string[]>([]); // Array of startTimes in 30-min chunks
+  const [selectedBlock, setSelectedBlock] = useState<ContiguousBlock | null>(null);
   const [isFetchingSlots, setIsFetchingSlots] = useState(false);
-  const [isSplitMode, setIsSplitMode] = useState(false);
+
+  // Slot Request Mode States
+  const [isRequestMode, setIsRequestMode] = useState(false);
+  const [slotPreferences, setSlotPreferences] = useState<{date: string, start: string, end: string}[]>([]);
+  const [requestError, setRequestError] = useState<string | null>(null);
+
+  // Common Submission State
+  const [notes, setNotes] = useState("");
 
   const { course, context, loading, error } = useStudentCourseDetail(courseId);
 
-  // Fetch Purchases
   useEffect(() => {
-    async function fetchPurchases() {
-      try {
-        const myPurchases = await getStudentPurchases();
-        setPurchases(myPurchases);
-      } catch (e) {
-        console.error("Failed to fetch purchases", e);
-      }
-    }
-    fetchPurchases();
-  }, []);
-
-  // Determine applicable purchase for this course
-  const applicablePurchase = useMemo(() => {
-    return purchases.find(p => p.courseId === courseId && p.status === 'active');
-  }, [purchases, courseId]);
-
-  // Auto-select or set default buy mode
-  useEffect(() => {
-    if (applicablePurchase) {
-      if (applicablePurchase.remainingHours >= hours) {
-        setSelectedPurchaseId(applicablePurchase.id);
-        setBuyNewPack(false);
-      } else {
-        setSelectedPurchaseId(null);
-        setBuyNewPack(true); // Default to buy new if existing is insufficient
-      }
-    } else {
-      setSelectedPurchaseId(null);
-      setBuyNewPack(true); // Default to buy new if no pack exists
-    }
-  }, [applicablePurchase, hours]);
-
-  useEffect(() => {
-    setHours(Math.max(1, hoursParam));
+    setHours(hoursParam);
   }, [hoursParam]);
+
+  useEffect(() => {
+    setSelectedBlock(null);
+    setSlotPreferences([]);
+    setRequestError(null);
+  }, [hours]);
 
   useEffect(() => {
     async function fetchSlots() {
       if (selectedDate && context?.teacherId) {
         setIsFetchingSlots(true);
-        setSelectedSlots([]);
+        setSelectedBlock(null);
         try {
-          // Format date as YYYY-MM-DD (local)
-          const dateStr = `${selectedDate.getFullYear()}-${String(
-            selectedDate.getMonth() + 1
-          ).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+          const dateStr = toDateKey(selectedDate);
 
-          // Always fetch 30-minute slots to support split booking
           const slots = await getAvailableSlots(
             context.teacherId,
             dateStr,
             dateStr,
-            30 // Duration fixed to 30 mins
+            30
           );
           setAvailableSlots(slots);
         } catch (error) {
@@ -137,19 +151,16 @@ export default function StudentBookingCreatePage() {
   const contiguousBlocks = useMemo(() => {
     if (!availableSlots.length || !hours) return [];
 
-    // Sort slots just in case
     const sorted = [...availableSlots].sort(
       (a, b) => toMinutes(a.startTime) - toMinutes(b.startTime)
     );
     const blocks: { startTime: string; endTime: string }[] = [];
     const requiredDuration = hours * 60;
 
-    // Naive Check: For each slot, check if subsequent slots exist to form the block
     for (const slot of sorted) {
       const startMins = toMinutes(slot.startTime);
       const targetEndMins = startMins + requiredDuration;
 
-      // Check if we have slots covering [startMins, targetEndMins)
       let hasAll = true;
       for (let t = startMins; t < targetEndMins; t += 30) {
         if (!sorted.some((s) => toMinutes(s.startTime) === t)) {
@@ -167,15 +178,6 @@ export default function StudentBookingCreatePage() {
     }
     return blocks;
   }, [availableSlots, hours]);
-
-  // Effect to toggle split mode if no contiguous blocks found (and we have availability)
-  useEffect(() => {
-    if (availableSlots.length > 0 && contiguousBlocks.length === 0) {
-      setIsSplitMode(true);
-    } else if (contiguousBlocks.length > 0) {
-      setIsSplitMode(false);
-    }
-  }, [availableSlots, contiguousBlocks.length]);
 
   // Calendar calculations
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
@@ -221,14 +223,6 @@ export default function StudentBookingCreatePage() {
     }
   };
 
-  const isToday = (day: number) => {
-    return (
-      day === today.getDate() &&
-      currentMonth === today.getMonth() &&
-      currentYear === today.getFullYear()
-    );
-  };
-
   const isPast = (day: number) => {
     const checkDate = new Date(currentYear, currentMonth, day);
     const todayStart = new Date(
@@ -248,173 +242,100 @@ export default function StudentBookingCreatePage() {
     );
   };
 
-  // Interactions
   const handleDayClick = (day: number) => {
     if (isPast(day)) return;
     setSelectedDate(new Date(currentYear, currentMonth, day));
-    setSelectedSlots([]); // Reset selection
+    setSelectedBlock(null);
+    setRequestError(null); // Clear request error when changing date
   };
-
-  // Standard Mode: Select a block
-  const handleBlockClick = (startTime: string) => {
-    // Generate all 30-min slots for this block
-    const newSlots: string[] = [];
-    const startMins = toMinutes(startTime);
-    const count = hours * 2; // e.g. 1 hour = 2 slots
-    for (let i = 0; i < count; i++) {
-      newSlots.push(toTimeStr(startMins + i * 30));
-    }
-    setSelectedSlots(newSlots);
-  };
-
-  // Split Mode: Toggle 30-min slot
-  const handleSlotToggle = (startTime: string) => {
-    setSelectedSlots((prev) => {
-      if (prev.includes(startTime)) {
-        return prev.filter((s) => s !== startTime);
-      } else {
-        if (prev.length >= hours * 2) {
-          return [...prev, startTime];
-        }
-        return [...prev, startTime];
-      }
-    });
-  };
-
-  /*
-  const packHours = useMemo(() => {
-    if (!course?.durationMinutes) return 0;
-    return course.durationMinutes / 60;
-  }, [course]);
-  */
-
-  const totalPrice = useMemo(() => {
-    if (selectedPurchaseId) return 0;
-    if (buyNewPack) {
-      // If buying new pack, price is based on selected hours * hourly rate
-      // Assuming course.price is hourly rate if not specified otherwise, 
-      // OR if course.price is per session (usually 1 hour), then price * hours.
-      // Let's assume price is per hour for now based on context of incorrect 1 hour result.
-      return (course?.price || 0) * hours;
-    }
-    return 0; // Should not happen if logic is correct
-  }, [course?.price, hours, selectedPurchaseId, buyNewPack]);
-
-  const remainingAfterBooking = useMemo(() => {
-    if (selectedPurchaseId && applicablePurchase) {
-      return applicablePurchase.remainingHours - hours;
-    }
-    if (buyNewPack) {
-      // If buying specifically for this booking, we consume all
-      // But if user bought MORE (e.g. package), then remaining > 0
-      // Here we assume "Pay as you go" mostly, so remaining is 0.
-      // BUT, if the system supports buying 10 hours for a 1 hour booking, that's different.
-      // In this specific UI, "hours" seems to be "Booking Duration", not "Purchase Quantity" distinct from booking.
-      // However, the "Buy New Pack" section implies buying exactly what is needed OR a preset pack.
-      // The current UI binds "hours" to "Booking Duration".
-
-      // If we are just "topping up", we buy exactly 'hours'.
-      return 0;
-    }
-    return 0;
-  }, [selectedPurchaseId, applicablePurchase, buyNewPack, hours]);
 
   const formattedSelectedDate = selectedDate
-    ? `${selectedDate.getFullYear()}年 ${selectedDate.getMonth() + 1
-    }月 ${selectedDate.getDate()}日 (${weekDays[selectedDate.getDay()]})`
+    ? `${selectedDate.getFullYear()}年 ${
+        selectedDate.getMonth() + 1
+      }月 ${selectedDate.getDate()}日 (${weekDays[selectedDate.getDay()]})`
     : null;
-
-  // Selected Count Check
-  const selectedCount = selectedSlots.length;
-  const requiredCount = hours * 2;
-  const isComplete = selectedCount === requiredCount;
-  const isPurchaseOnly = selectedDate && availableSlots.length === 0 && buyNewPack;
+  const selectedDateKey = selectedDate ? toDateKey(selectedDate) : null;
 
   const handleConfirm = async () => {
-    if (!course || !context || !selectedDate) return;
-    if (!isComplete && !isPurchaseOnly) return;
+    if (!course || !context) return;
+    if ((!selectedBlock && !isRequestMode) || submitting) return;
+    if (isRequestMode && slotPreferences.length !== 3) {
+      setRequestError("請提供三個您方便的上課時段。");
+      return;
+    }
+    if (
+      isRequestMode &&
+      slotPreferences.some(
+        (pref) => toMinutes(pref.end) - toMinutes(pref.start) !== hours * 60
+      )
+    ) {
+      setRequestError(`每個申請時段都必須剛好為 ${hours} 小時。`);
+      return;
+    }
 
-    if (submitting) return;
     setSubmitting(true);
 
     try {
-      if (isPurchaseOnly) {
-        // Just buy the pack (hours) and init progress
-        const purchaseResult = await purchaseCourse(course.id, hours, totalPrice);
-        if (!purchaseResult.success) {
-          throw new Error(purchaseResult.error || "方案購買失敗");
+      if (isRequestMode) {
+        const formattedPrefs = slotPreferences.map(pref => ({
+          date: normalizeDateInput(pref.date),
+          startTime: pref.start,
+          endTime: pref.end,
+        }));
+
+        // Call the createBooking action with request mode specific data
+        const result = await createBooking(
+          {
+            studentId: context.studentId,
+            courseId: course.id,
+            teacherId: context.teacherId,
+            bookingDate: formattedPrefs[0]?.date || "", // Dummy value for type compliance
+            startTime: formattedPrefs[0]?.startTime || "",
+            endTime: formattedPrefs[0]?.endTime || "",
+            notes: notes.trim() || null,
+            requestedSlots: formattedPrefs,
+          },
+          { buyNewPack: false } // Assuming request mode doesn't involve immediate purchase
+        );
+
+        if (!result.success) {
+          throw new Error(result.error || "時段申請失敗");
         }
 
         showModal({
-          title: "方案購買成功",
-          description: `您已成功購買 ${course.title} 方案 (${hours} 小時)。老師目前尚未設定預約時段，時數已存入您的帳戶，待老師設定後即可預約。`,
-          confirmText: "查看進度",
-          onConfirm: () => router.push("/student/progress"),
+          title: "申請已送出",
+          description: `已成功送出 ${course.title} 的時段申請，請等待老師確認。`,
+          confirmText: "查看預約",
+          onConfirm: () => router.push("/student/bookings"),
         });
         return;
       }
 
-      const dateStr = `${selectedDate.getFullYear()}-${String(
-        selectedDate.getMonth() + 1
-      ).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+      if (!selectedDate || !selectedBlock) return;
 
-      // 1. Group selectedSlots into contiguous chunks
-      const sorted = [...selectedSlots].sort(
-        (a, b) => toMinutes(a) - toMinutes(b)
-      );
-      const chunks: { start: string; end: string }[] = [];
+      const dateStr = toDateKey(selectedDate);
 
-      let currentStart = sorted[0];
-      let currentEndMins = toMinutes(sorted[0]) + 30;
-
-      for (let i = 1; i < sorted.length; i++) {
-        const nextStartMins = toMinutes(sorted[i]);
-        if (nextStartMins === currentEndMins) {
-          // Contiguous
-          currentEndMins += 30;
-        } else {
-          // Break
-          chunks.push({ start: currentStart, end: toTimeStr(currentEndMins) });
-          currentStart = sorted[i];
-          currentEndMins = toMinutes(sorted[i]) + 30;
-        }
-      }
-      chunks.push({ start: currentStart, end: toTimeStr(currentEndMins) });
-
-      // 2. Submit bookings sequentially
-      let activePurchaseId = selectedPurchaseId;
-      let isFirstCall = true;
-
-      for (const chunk of chunks) {
-        const result = await createBooking({
+      // Call the existing createBooking action (purchase logic will be ignored/bypassed)
+      const result = await createBooking(
+        {
           studentId: context.studentId,
           courseId: course.id,
           teacherId: context.teacherId,
           bookingDate: dateStr,
-          startTime: chunk.start,
-          endTime: chunk.end,
+          startTime: selectedBlock.startTime,
+          endTime: selectedBlock.endTime,
           notes: notes.trim() || null,
-          purchaseId: activePurchaseId
-        }, {
-          buyNewPack: isFirstCall ? buyNewPack : false // Only buy on first call
-        });
+        },
+        { buyNewPack: false }
+      );
 
-        if (!result.success) {
-          throw new Error(result.error || "預約建立失敗");
-        }
-
-        // Capture newly created purchaseId for subsequent chunks
-        if (isFirstCall && buyNewPack && result.data?.purchaseId) {
-          activePurchaseId = result.data.purchaseId;
-        }
-        isFirstCall = false;
+      if (!result.success) {
+        throw new Error(result.error || "預約建立失敗");
       }
 
       showModal({
         title: "預約已送出",
-        description: buyNewPack
-          ? `已成功購買方案並預約 ${course.title}，剩餘時數已存入您的帳戶。`
-          : `已成功預約 ${course.title}，共 ${chunks.length} 個時段。`,
+        description: `已成功預約 ${course.title}，請等待老師確認收款。`,
         confirmText: "查看預約",
         onConfirm: () => router.push("/student/bookings"),
       });
@@ -422,7 +343,8 @@ export default function StudentBookingCreatePage() {
       console.error("Error creating booking:", err);
       showModal({
         title: "送出失敗",
-        description: err instanceof Error ? err.message : "預約送出失敗，請稍後再試。",
+        description:
+          err instanceof Error ? err.message : "預約送出失敗，請稍後再試。",
         confirmText: "確定",
       });
     } finally {
@@ -446,16 +368,35 @@ export default function StudentBookingCreatePage() {
             返回列表
           </Link>
           <h1 className="text-3xl font-black mt-2">預約課程：{course.title}</h1>
-          <p className="text-slate-500 mt-1">請選擇預約時段</p>
+          <p className="text-slate-500 mt-1">請選擇預約時段或提出申請</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 flex flex-col gap-6">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="font-bold text-lg">1. 選擇預約時數</h2>
+                <p className="text-sm text-slate-500 mt-1">
+                  後續顯示與申請的時段，會依這個時數自動限制。
+                </p>
+              </div>
+              <div className="w-full sm:w-48">
+                <Select
+                  label="預約時數"
+                  value={hours}
+                  onChange={(e) => setHours(Number(e.target.value))}
+                  options={BOOKING_HOUR_OPTIONS}
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Calendar Step */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="font-bold text-lg">1. 選擇日期</h2>
+              <h2 className="font-bold text-lg">2. 選擇日期</h2>
               <div className="flex items-center gap-4">
                 <button
                   onClick={prevMonth}
@@ -489,12 +430,13 @@ export default function StudentBookingCreatePage() {
                     key={idx}
                     disabled={past}
                     onClick={() => handleDayClick(day)}
-                    className={`p-2 rounded-lg transition-colors ${selected
-                      ? "bg-primary text-white"
-                      : past
+                    className={`p-2 rounded-lg transition-colors ${
+                      selected
+                        ? "bg-primary text-white"
+                        : past
                         ? "text-slate-300"
                         : "hover:bg-slate-100"
-                      }`}
+                    }`}
                   >
                     {day}
                   </button>
@@ -506,20 +448,12 @@ export default function StudentBookingCreatePage() {
           {/* Time Slot Step */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="font-bold text-lg">
-                2. 選擇時段 {isSplitMode ? "(拆分模式)" : ""}
-              </h2>
-              {availableSlots.length > 0 && (
-                <button
-                  onClick={() => {
-                    setIsSplitMode(!isSplitMode);
-                    setSelectedSlots([]); // Reset on mode switch
-                  }}
-                  className="text-xs text-primary font-bold hover:underline"
-                >
-                  {isSplitMode ? "切換至標準模式" : "切換至自訂拆分模式"}
-                </button>
-              )}
+              <div>
+                <h2 className="font-bold text-lg">3. 選擇時段</h2>
+                <p className="text-sm text-slate-500 mt-1">
+                  目前只會顯示連續 {hours} 小時的可預約時段。
+                </p>
+              </div>
             </div>
 
             {isFetchingSlots ? (
@@ -528,81 +462,135 @@ export default function StudentBookingCreatePage() {
               <div className="text-center py-10 text-slate-400">
                 請先選擇日期
               </div>
-            ) : availableSlots.length === 0 ? (
-              <div className="text-center py-10">
-                <p className="text-slate-500 mb-4">老師目前尚未設定可預約時段。</p>
-                {buyNewPack && (
-                  <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 text-sm text-primary">
-                    您可以先完成方案購買，系統將為您建立學習進度，待老師開放時段後即可進行預約。
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {/* Mode Logic */}
-                {!isSplitMode ? (
-                  contiguousBlocks.length === 0 ? (
-                    <div className="text-center py-6">
-                      <p className="text-slate-500 mb-2">
-                        無符合 {hours} 小時的連續時段。
-                      </p>
-                      <button
-                        onClick={() => setIsSplitMode(true)}
-                        className="text-primary font-bold underline"
-                      >
-                        嘗試拆分預約
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {contiguousBlocks.map((block) => (
-                        <button
-                          key={block.startTime}
-                          onClick={() => handleBlockClick(block.startTime)}
-                          className={`p-3 rounded-xl border text-sm font-bold transition-all ${selectedSlots[0] === block.startTime // Simple check
-                            ? "bg-primary text-white border-primary shadow-lg"
-                            : "border-slate-200 hover:border-primary hover:text-primary"
-                            }`}
-                        >
-                          {block.startTime} - {block.endTime}
-                        </button>
+            ) : isRequestMode ? (
+              <div className="py-4">
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                    提出三個您方便的上課時段：
+                    <span className="text-xs font-normal text-slate-500 ml-2">
+                      ({slotPreferences.length}/3)
+                    </span>
+                  </p>
+                  <button
+                    onClick={() => setIsRequestMode(false)}
+                    className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline"
+                  >
+                    返回查看老師開放時段
+                  </button>
+                </div>
+
+                {slotPreferences.length > 0 && (
+                  <div className="mb-6 bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                    <h4 className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">
+                      已選擇的偏好時段
+                    </h4>
+                    <div className="space-y-2">
+                      {slotPreferences.map((pref, i) => (
+                        <div key={i} className="flex justify-between items-center bg-white dark:bg-slate-700 p-2 rounded-lg text-sm border border-slate-100 dark:border-slate-600">
+                          <span className="font-semibold text-slate-700 dark:text-slate-200">
+                            順位 {i + 1}
+                          </span>
+                          <span className="text-slate-600 dark:text-slate-300 text-xs font-bold bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded">
+                            {pref.date} {pref.start}-{pref.end}
+                          </span>
+                          <button
+                            onClick={() => {
+                              const newPrefs = [...slotPreferences];
+                              newPrefs.splice(i, 1);
+                              setSlotPreferences(newPrefs);
+                              setRequestError(null);
+                            }}
+                            className="text-slate-400 hover:text-red-500 transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">close</span>
+                          </button>
+                        </div>
                       ))}
                     </div>
-                  )
-                ) : (
-                  <div>
-                    <p className="text-sm text-slate-500 mb-4">
-                      請選擇 {requiredCount} 個 30 分鐘時段 (已選:{" "}
-                      <span
-                        className={
-                          selectedCount === requiredCount
-                            ? "text-green-500 font-bold"
-                            : "text-red-500 font-bold"
-                        }
-                      >
-                        {selectedCount}
-                      </span>{" "}
-                      / {requiredCount})
-                    </p>
-                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                      {availableSlots.map((slot) => {
-                        const isActive = selectedSlots.includes(slot.startTime);
-                        return (
-                          <button
-                            key={slot.startTime}
-                            onClick={() => handleSlotToggle(slot.startTime)}
-                            className={`p-2 rounded-lg border text-xs font-bold ${isActive
-                              ? "bg-primary text-white border-primary"
-                              : "border-slate-200 hover:bg-slate-50"
-                              }`}
-                          >
-                            {slot.startTime}
-                          </button>
-                        );
-                      })}
-                    </div>
                   </div>
                 )}
+
+                <div className="border-t border-slate-100 dark:border-slate-700 pt-6">
+                  <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2">
+                    選擇 <span className="text-primary bg-primary/10 px-2 py-0.5 rounded-md">{formattedSelectedDate}</span> 的時段：
+                  </h4>
+
+                  <AvailabilityIntervalList
+                    requiredDurationMinutes={hours * 60}
+                    onBeforeAdd={async (range) => {
+                      if (!context?.teacherId || !selectedDateKey) return null;
+
+                      const result = await checkBookingConflict(
+                        context.teacherId,
+                        selectedDateKey,
+                        range.start,
+                        range.end
+                      );
+
+                      if (result.hasConflict) {
+                        return "此申請時段與老師既有預約衝突，請改選其他時間。";
+                      }
+
+                      return null;
+                    }}
+                    value={slotPreferences
+                      .filter((p) => p.date === selectedDateKey)
+                      .map((p) => ({ start: p.start, end: p.end }))}
+                    onChange={(newSlots) => {
+                      if (!selectedDateKey) return;
+                      const otherDaysPrefs = slotPreferences.filter(
+                        (p) => p.date !== selectedDateKey
+                      );
+                      if (otherDaysPrefs.length + newSlots.length > 3) {
+                        setRequestError("總計最多只能提出三個偏好時段");
+                        return;
+                      }
+                      setRequestError(null);
+                      setSlotPreferences([
+                        ...otherDaysPrefs,
+                        ...newSlots.map((s) => ({ ...s, date: selectedDateKey })),
+                      ]);
+                    }}
+                  />
+                  {requestError && (
+                    <p className="mt-4 text-sm text-red-500 flex items-center gap-1 font-bold">
+                      <span className="material-symbols-outlined text-[16px]">error</span>
+                      {requestError}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ) : availableSlots.length === 0 || contiguousBlocks.length === 0 ? (
+              <div className="text-center py-10">
+                <p className="text-slate-500 mb-4">
+                  老師在您選擇的日期尚未開放足夠的 {hours} 小時連續時段。
+                </p>
+                <button
+                  onClick={() => setIsRequestMode(true)}
+                  className="px-6 py-2 bg-primary/10 text-primary font-bold rounded-xl hover:bg-primary/20 transition-colors"
+                >
+                  提出上課時間申請
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {contiguousBlocks.map((block) => {
+                  const isActive =
+                    selectedBlock?.startTime === block.startTime;
+                  return (
+                    <button
+                      key={block.startTime}
+                      onClick={() => setSelectedBlock(block)}
+                      className={`p-3 rounded-xl border text-sm font-bold transition-all ${
+                        isActive
+                          ? "bg-primary text-white border-primary shadow-lg"
+                          : "border-slate-200 dark:border-slate-700 hover:border-primary hover:text-primary"
+                      }`}
+                    >
+                      {block.startTime} - {block.endTime}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -613,141 +601,55 @@ export default function StudentBookingCreatePage() {
           <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xl p-6 sticky top-24">
             <h3 className="font-bold text-lg mb-4">預約確認</h3>
 
-            {/* Payment Method Selection */}
-            <div className="space-y-3 mb-6">
-              {applicablePurchase && (
-                <div
-                  className={`p-3 rounded-xl border ${selectedPurchaseId === applicablePurchase.id
-                    ? "border-teal-500 bg-teal-50 dark:bg-teal-900/10"
-                    : "border-slate-200"
-                    } transition-all cursor-pointer`}
-                  onClick={() => {
-                    setSelectedPurchaseId(applicablePurchase.id);
-                    setBuyNewPack(false);
-                  }}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-4 h-4 rounded-full border flex items-center justify-center ${selectedPurchaseId === applicablePurchase.id
-                          ? "border-teal-500"
-                          : "border-slate-400"
-                          }`}
-                      >
-                        {selectedPurchaseId === applicablePurchase.id && (
-                          <div className="w-2.5 h-2.5 rounded-full bg-teal-500"></div>
-                        )}
-                      </div>
-                      <span className="font-bold text-sm text-slate-800 dark:text-white">
-                        使用現有課程包
-                      </span>
-                    </div>
-                    <span className="text-xs font-bold bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">
-                      剩餘 {applicablePurchase.remainingHours} hr
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              <div
-                className={`p-3 rounded-xl border ${buyNewPack
-                  ? "border-primary bg-primary/5 dark:bg-primary/10"
-                  : "border-slate-200"
-                  } transition-all cursor-pointer`}
-                onClick={() => {
-                  setSelectedPurchaseId(null);
-                  setBuyNewPack(true);
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`w-4 h-4 rounded-full border flex items-center justify-center ${buyNewPack
-                        ? "border-primary"
-                        : "border-slate-400"
-                        }`}
-                    >
-                      {buyNewPack && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-primary"></div>
-                      )}
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="font-bold text-sm text-slate-800 dark:text-white">
-                        購買新課程方案
-                      </span>
-                      <span className="text-[10px] text-slate-500">包含 {hours} 小時時數</span>
-                    </div>
-                  </div>
-                  <span className="text-xs font-bold text-primary">
-                    NT$ {totalPrice.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-
-              {!applicablePurchase && !buyNewPack && (
-                <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl text-[10px] text-amber-700">
-                  * 建議購買課程方案以獲得更完整的學習追蹤與時數優惠。
-                </div>
-              )}
-            </div>
-
             <div className="space-y-4 mb-6">
               <div className="flex justify-between">
-                <span className="text-slate-500">預約日期</span>
-                <span className="font-bold">
-                  {formattedSelectedDate || "-"}
+                <span className="text-slate-500">課程單價</span>
+                <span className="font-bold text-primary">
+                  NT$ {(course.price || 0).toLocaleString()} / hr
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">本次預約時數</span>
+                <span className="text-slate-500">預約日期</span>
+                <span className="font-bold">{formattedSelectedDate || "-"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">預約時數</span>
                 <span className="font-bold">{hours} 小時</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">已選時段</span>
-                <span className="font-bold text-right">
-                  {selectedCount > 0
-                    ? isSplitMode
-                      ? `${selectedCount} 個時段 (${(selectedCount * 30) / 60
-                      } hr)`
-                      : `${selectedSlots[0]} 起`
-                    : "-"}
+              <div className="flex justify-between items-start">
+                <span className="text-slate-500 w-24">已選時段</span>
+                <span className="font-bold text-right text-sm">
+                  {isRequestMode ? (
+                    slotPreferences.length > 0 ? (
+                      <div className="space-y-1">
+                        {slotPreferences.map((pref, idx) => (
+                          <div key={idx} className="text-xs text-slate-400">
+                            順位 {idx + 1}: {pref.date} {pref.start}-{pref.end}
+                          </div>
+                        ))}
+                      </div>
+                    ) : "等待選擇申請時段..."
+                  ) : selectedBlock ? (
+                    `${selectedBlock.startTime} - ${selectedBlock.endTime}`
+                  ) : "-"}
                 </span>
               </div>
-              {(selectedPurchaseId || buyNewPack) && (
-                <div className="flex justify-between text-teal-600 dark:text-teal-400 text-sm font-medium">
-                  <span>預估剩餘時數</span>
-                  <span className="font-bold">{remainingAfterBooking} hr</span>
-                </div>
-              )}
-              <div className="flex justify-between text-lg border-t pt-4 mt-2">
-                <span className="font-bold">總付款金額</span>
+              <div className="flex justify-between text-lg border-t dark:border-slate-700 pt-4 mt-2">
+                <span className="font-bold">總計金額</span>
                 <span className="font-black text-primary">
-                  {selectedPurchaseId ? (
-                    <span>
-                      <span className="line-through text-slate-400 text-sm mr-2">
-                        NT$ {((course.price || 0) * hours).toLocaleString()}
-                      </span>
-                      0{" "}
-                      <span className="text-xs font-normal text-slate-500">
-                        (扣除 {hours} hr)
-                      </span>
-                    </span>
-                  ) : buyNewPack ? (
-                    `NT$ ${totalPrice.toLocaleString()}`
-                  ) : (
-                    `NT$ ${totalPrice.toLocaleString()}`
-                  )}
+                  NT$ {((course.price || 0) * hours).toLocaleString()}
                 </span>
               </div>
             </div>
 
             <div className="mb-4">
               <label className="block text-xs font-bold text-slate-500 mb-2">
-                備註
+                備註給老師
               </label>
               <textarea
-                className="w-full border rounded-lg p-2 text-sm"
+                className="w-full border dark:border-slate-700 dark:bg-slate-900 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                 rows={3}
+                placeholder="有什麼想先讓老師知道的嗎？"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
               />
@@ -755,11 +657,23 @@ export default function StudentBookingCreatePage() {
 
             <button
               onClick={handleConfirm}
-              disabled={(!isComplete && !isPurchaseOnly) || submitting}
-              className="w-full py-4 rounded-xl bg-slate-900 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-800 transition-colors"
+              disabled={
+                (isRequestMode && slotPreferences.length !== 3) ||
+                (!isRequestMode && !selectedBlock) ||
+                submitting
+              }
+              className="w-full py-4 rounded-xl bg-primary text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
             >
-              {submitting ? "處理中..." : isPurchaseOnly ? "購買方案" : "確認預約"}
+              {submitting
+                ? "處理中..."
+                : isRequestMode
+                ? "送出申請"
+                : "確認預約"}
             </button>
+            <p className="text-xs text-center text-slate-400 mt-4 leading-relaxed">
+              預約提出後，即代表確認購買課程，<br />
+              後續請透過約定方式付款給老師。
+            </p>
           </div>
         </div>
       </div>

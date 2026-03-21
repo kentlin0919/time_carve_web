@@ -5,6 +5,7 @@ import { NotificationRepository } from "@/lib/domain/notification/repository";
 import { CourseRepository } from "@/lib/domain/course/repository";
 import { ProgressRepository } from "@/lib/domain/progress/types";
 import { PurchaseRepository } from "@/lib/domain/purchase/entity";
+import { SlotRequestRepository } from "@/lib/domain/slot-request/repository";
 
 export class CreateBookingUseCase {
   constructor(
@@ -13,19 +14,65 @@ export class CreateBookingUseCase {
     private notificationRepository?: NotificationRepository,
     private purchaseRepository?: PurchaseRepository,
     private courseRepository?: CourseRepository,
-    private progressRepository?: ProgressRepository
+    private progressRepository?: ProgressRepository,
+    private slotRequestRepository?: SlotRequestRepository
   ) { }
 
   async execute(
-    booking: Omit<Booking, "id" | "status" | "studentName" | "studentEmail" | "courseTitle">,
-    options: { buyNewPack?: boolean } = {}
+    booking: Omit<Booking, "id" | "status" | "studentName" | "studentEmail" | "courseTitle"> & {
+      requestedSlots?: { date: string; startTime: string; endTime: string; }[];
+    },
+    options: { buyNewPack?: boolean; skipAvailabilityValidation?: boolean } = {}
   ): Promise<Booking> {
+    
+    // 0. 特殊處理：如果有 requestedSlots，代表這是一個 時段申請 (Slot Request)
+    if (booking.requestedSlots && booking.requestedSlots.length === 3 && this.slotRequestRepository) {
+      const slots = booking.requestedSlots;
+      const request = await this.slotRequestRepository.createSlotRequest({
+        studentId: booking.studentId,
+        teacherId: booking.teacherId,
+        courseId: booking.courseId,
+        notes: booking.notes || undefined,
+        preference1Date: slots[0].date,
+        preference1Start: slots[0].startTime,
+        preference1End: slots[0].endTime,
+        preference2Date: slots[1].date,
+        preference2Start: slots[1].startTime,
+        preference2End: slots[1].endTime,
+        preference3Date: slots[2].date,
+        preference3Start: slots[2].startTime,
+        preference3End: slots[2].endTime,
+      });
+
+      if (this.notificationRepository) {
+        await this.notificationRepository.createNotification(
+          booking.teacherId,
+          'BOOKING',
+          '新時段申請通知',
+          `您收到了一個時段申請請求，請前往教師後台審核。`,
+          { slotRequestId: request.id, studentId: booking.studentId }
+        );
+      }
+      
+      // Return a mock booking to satisfy the interface, the frontend will see success=true and ignore data.
+      return { id: request.id, ...booking, status: 'pending' } as Booking;
+    }
+
+    // --- 以下為一般直接預約邏輯 ---
     // 0. Calculate Duration for the current booking
     const startParts = booking.startTime.split(':').map(Number);
     const endParts = booking.endTime.split(':').map(Number);
     const startMins = startParts[0] * 60 + startParts[1];
     const endMins = endParts[0] * 60 + endParts[1];
-    const durationHours = (endMins - startMins) / 60;
+    const durationHours = Math.max(0, (endMins - startMins) / 60);
+
+    // Calculate baseline price based on course price * duration
+    if (booking.price === undefined && this.courseRepository) {
+      const course = await this.courseRepository.getCourse(booking.courseId);
+      if (course) {
+        booking.price = (course.price || 0) * durationHours;
+      }
+    }
 
     // 1. Handle Auto-Purchase if requested
     if (options.buyNewPack && this.purchaseRepository && this.courseRepository) {
@@ -89,7 +136,9 @@ export class CreateBookingUseCase {
     }
 
     // 3. Validate Availability
-    await this.validateAvailability(booking);
+    if (!options.skipAvailabilityValidation) {
+      await this.validateAvailability(booking);
+    }
 
     // 4. Create Booking
     const newBooking = await this.bookingRepository.createBooking(booking);
@@ -108,8 +157,15 @@ export class CreateBookingUseCase {
     return newBooking;
   }
 
-  private async validateAvailability(booking: Omit<Booking, "id" | "status" | "studentName" | "studentEmail" | "courseTitle">) {
-    const { teacherId, bookingDate, startTime, endTime } = booking;
+  private async validateAvailability(booking: Omit<Booking, "id" | "status" | "studentName" | "studentEmail" | "courseTitle"> & {
+      requestedSlots?: { date: string; startTime: string; endTime: string; }[];
+  }) {
+    const { teacherId, bookingDate, startTime, endTime, requestedSlots } = booking;
+
+    // Skip availability validation if it's a request mode booking (handled separately later)
+    if (requestedSlots && requestedSlots.length > 0) {
+      return;
+    }
 
     // Fetch availability for this specific day
     const [weekly, overrides] = await Promise.all([

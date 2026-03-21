@@ -96,8 +96,22 @@ export class SupabaseBookingRepository implements BookingRepository {
       throw new Error("Could not find 'pending' booking status");
     }
 
-    const startTimestamp = `${booking.bookingDate} ${booking.startTime}:00`;
-    const endTimestamp = `${booking.bookingDate} ${booking.endTime}:00`;
+    const parseDateTime = (dateStr: string, timeStr: string) => {
+      let t = timeStr;
+      if (/^\d{2}:\d{2}$/.test(t)) {
+          t = `${t}:00`;
+      } else if (t.length > 8 && t.includes(':')) {
+          t = t.substring(0, 8); // e.g. "07:30:00:00" -> "07:30:00"
+      }
+      return `${dateStr}T${t}+08:00`;
+    };
+
+    const startDateStr = parseDateTime(booking.bookingDate, booking.startTime);
+    const endDateStr = parseDateTime(booking.bookingDate, booking.endTime);
+    
+    // Fallback to old format if Date parsing fails (e.g. invalid date strings)
+    const startTimestamp = isNaN(new Date(startDateStr).getTime()) ? `${booking.bookingDate} ${booking.startTime}` : new Date(startDateStr).toISOString();
+    const endTimestamp = isNaN(new Date(endDateStr).getTime()) ? `${booking.bookingDate} ${booking.endTime}` : new Date(endDateStr).toISOString();
 
     const { data, error } = await this.client
       .from("bookings")
@@ -245,11 +259,11 @@ export class SupabaseBookingRepository implements BookingRepository {
   }
 
   async getUnpaidBookingsCount(studentId: string): Promise<number> {
-    // Get IDs for active statuses (pending, confirmed)
+    // Get IDs for active statuses that should have been paid (confirmed, completed)
     const { data: activeStatuses } = await this.client
       .from("booking_statuses")
       .select("id")
-      .in("status_key", ["pending", "confirmed"]);
+      .in("status_key", ["confirmed", "completed"]);
 
     if (!activeStatuses || activeStatuses.length === 0) return 0;
     const activeIds = activeStatuses.map(s => s.id);

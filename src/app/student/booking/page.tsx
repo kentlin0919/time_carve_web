@@ -3,6 +3,17 @@
 import React, { useState } from "react";
 import { useModal } from "@/components/providers/ModalContext";
 import { Modal } from "@/components/ui/Modal";
+import Select from "@/components/ui/Select";
+
+const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
+  const h = Math.floor(i / 2);
+  const m = i % 2 === 0 ? "00" : "30";
+  const ampm = h < 12 ? "上午" : "下午";
+  const displayH = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  const value = `${h.toString().padStart(2, "0")}:${m}`;
+  const label = `${ampm} ${displayH.toString().padStart(2, "0")}:${m}`;
+  return { value, label };
+});
 
 // Mock Data
 type Booking = {
@@ -216,12 +227,14 @@ export default function BookingPage() {
             <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-gray-300">
               時間
             </label>
-            <input
-              type="time"
-              className="w-full px-3 py-2 border rounded-xl bg-slate-50 dark:bg-gray-700/50 border-slate-200 dark:border-gray-600 focus:ring-primary focus:border-primary transition-all"
-              value={newTime}
-              onChange={(e) => setNewTime(e.target.value)}
-            />
+            <div className="w-full">
+              <Select
+                value={newTime}
+                onChange={(e) => setNewTime(e.target.value)}
+                options={TIME_OPTIONS}
+                icon="schedule"
+              />
+            </div>
           </div>
         </div>
       </Modal>

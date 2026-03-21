@@ -2,26 +2,70 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { getTeacherBookings, getTeacherPendingBookings, updateBookingFeedback } from "@/app/actions/booking";
+import {
+  approveSlotRequest,
+  getTeacherBookings,
+  getTeacherPendingBookings,
+  getTeacherSlotRequests,
+  rejectSlotRequest,
+  updateBookingFeedback,
+} from "@/app/actions/booking";
 import { getTeacherProfile } from "@/app/actions/teacher";
 import { getTeacherAvailability } from "@/app/teacher/availability/actions";
 import { Booking } from "@/lib/domain/booking/entity";
+import { SlotRequest } from "@/lib/domain/slot-request/entity";
 import { TeacherProfile } from "@/lib/domain/teacher/entity";
 import { EditBookingDialog } from "@/components/teacher/bookings/EditBookingDialog";
 import { CreateBookingDialog } from "@/components/teacher/bookings/CreateBookingDialog";
 import { ReviewRescheduleDialog } from "@/components/bookings/ReviewRescheduleDialog";
 import { useModal } from "@/components/providers/ModalContext";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import Select from "@/components/ui/Select";
+
+const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
+  const h = Math.floor(i / 2);
+  const m = i % 2 === 0 ? "00" : "30";
+  const ampm = h < 12 ? "上午" : "下午";
+  const displayH = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  const value = `${h.toString().padStart(2, "0")}:${m}`;
+  const label = `${ampm} ${displayH.toString().padStart(2, "0")}:${m}`;
+  return { value, label };
+});
 
 export default function TeacherBookingsPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [pendingBookings, setPendingBookings] = useState<Booking[]>([]); // New State
+  const [slotRequests, setSlotRequests] = useState<SlotRequest[]>([]);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<TeacherProfile | null>(null);
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
   const [reviewingBooking, setReviewingBooking] = useState<Booking | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [processingSlotRequestId, setProcessingSlotRequestId] = useState<string | null>(null);
+  const [customizingSlotRequest, setCustomizingSlotRequest] = useState<SlotRequest | null>(null);
+  const [rejectingSlotRequest, setRejectingSlotRequest] = useState<SlotRequest | null>(null);
+  const [customBookingDate, setCustomBookingDate] = useState("");
+  const [customStartTime, setCustomStartTime] = useState("");
+  const [customEndTime, setCustomEndTime] = useState("");
+  const [rejectReason, setRejectReason] = useState("");
+  const [slotInboxTab, setSlotInboxTab] = useState<"pending" | "resolved">(
+    "pending"
+  );
+  const [workbenchTab, setWorkbenchTab] = useState<"inbox" | "schedule">(
+    "inbox"
+  );
+  const [selectedSlotRequestId, setSelectedSlotRequestId] = useState<string | null>(
+    null
+  );
   const { showModal } = useModal();
   const [viewMode, setViewMode] = useState<"month" | "week">("month");
   const [availability, setAvailability] = useState<
@@ -99,13 +143,15 @@ export default function TeacherBookingsPage() {
   async function refreshBookings(startDate: Date, endDate: Date) {
     setLoading(true);
     try {
-      const [data, pendingData] = await Promise.all([
+      const [data, pendingData, slotRequestData] = await Promise.all([
         getTeacherBookings(startDate, endDate),
-        getTeacherPendingBookings()
+        getTeacherPendingBookings(),
+        getTeacherSlotRequests(),
       ]);
 
       setBookings(data);
       setPendingBookings(pendingData);
+      setSlotRequests(slotRequestData);
     } catch (error) {
       console.error("Failed to fetch bookings:", error);
     } finally {
@@ -330,40 +376,235 @@ export default function TeacherBookingsPage() {
     (_, idx) => WEEK_START_HOUR * 60 + idx * SLOT_INTERVAL_MIN
   );
 
+  const formatRequestDate = (date: string) => {
+    const [year, month, day] = date.split("-");
+    if (!year || !month || !day) return date;
+    return `${year}/${month}/${day}`;
+  };
+
+  const pendingSlotRequests = useMemo(
+    () => slotRequests.filter((request) => request.status === "pending"),
+    [slotRequests]
+  );
+
+  const resolvedSlotRequests = useMemo(
+    () => slotRequests.filter((request) => request.status !== "pending"),
+    [slotRequests]
+  );
+
+  const visibleSlotRequests = slotInboxTab === "pending" ? pendingSlotRequests : resolvedSlotRequests;
+
+  useEffect(() => {
+    if (!visibleSlotRequests.length) {
+      setSelectedSlotRequestId(null);
+      return;
+    }
+
+    const hasSelected = visibleSlotRequests.some(
+      (request) => request.id === selectedSlotRequestId
+    );
+    if (!hasSelected) {
+      setSelectedSlotRequestId(visibleSlotRequests[0].id);
+    }
+  }, [visibleSlotRequests, selectedSlotRequestId]);
+
+  const selectedSlotRequest = useMemo(
+    () =>
+      visibleSlotRequests.find((request) => request.id === selectedSlotRequestId) ||
+      visibleSlotRequests[0] ||
+      null,
+    [visibleSlotRequests, selectedSlotRequestId]
+  );
+
+  const selectedDateEvents = useMemo(
+    () =>
+      // @ts-ignore
+      ((events[selectedDate.getDate()] as any[]) || []).map((ev) => ({
+        ...ev,
+        booking: bookings.find((booking) => booking.id === ev.id),
+      })),
+    [events, selectedDate, bookings]
+  );
+
+  const getSlotRequestOptions = (request: SlotRequest) => [
+    {
+      rank: 1 as const,
+      date: request.preference1Date,
+      start: request.preference1Start,
+      end: request.preference1End,
+    },
+    {
+      rank: 2 as const,
+      date: request.preference2Date,
+      start: request.preference2Start,
+      end: request.preference2End,
+    },
+    {
+      rank: 3 as const,
+      date: request.preference3Date,
+      start: request.preference3Start,
+      end: request.preference3End,
+    },
+  ];
+
+  const handleApproveRequestedSlot = async (
+    request: SlotRequest,
+    rank: 1 | 2 | 3
+  ) => {
+    setProcessingSlotRequestId(request.id);
+    try {
+      const result = await approveSlotRequest(request.id, { rank });
+      if (!result.success) {
+        throw new Error(result.error || "建立正式預約時發生問題");
+      }
+      showModal({
+        type: "success",
+        title: "已採用學生提議時段",
+        description: `已建立正式預約，並採用順位 ${rank} 的時段。`,
+        confirmText: "確定",
+      });
+      refreshBookingsForCurrentView();
+    } catch (error: any) {
+      showModal({
+        type: "error",
+        title: "採用失敗",
+        description: error?.message || "建立正式預約時發生問題，請稍後再試。",
+        confirmText: "確定",
+      });
+    } finally {
+      setProcessingSlotRequestId(null);
+    }
+  };
+
+  const openCustomSlotDialog = (request: SlotRequest) => {
+    const firstOption = getSlotRequestOptions(request)[0];
+    setCustomizingSlotRequest(request);
+    setCustomBookingDate(firstOption.date);
+    setCustomStartTime(firstOption.start.slice(0, 5));
+    setCustomEndTime(firstOption.end.slice(0, 5));
+  };
+
+  const handleApproveCustomSlot = async () => {
+    if (!customizingSlotRequest) return;
+    if (!customBookingDate || !customStartTime || !customEndTime) {
+      showModal({
+        type: "error",
+        title: "資料不完整",
+        description: "請先填寫完整的日期與時間。",
+        confirmText: "確定",
+      });
+      return;
+    }
+
+    if (timeToMinutes(customEndTime) <= timeToMinutes(customStartTime)) {
+      showModal({
+        type: "error",
+        title: "時間設定錯誤",
+        description: "結束時間必須晚於開始時間。",
+        confirmText: "確定",
+      });
+      return;
+    }
+
+    setProcessingSlotRequestId(customizingSlotRequest.id);
+    try {
+      const result = await approveSlotRequest(customizingSlotRequest.id, {
+        bookingDate: customBookingDate,
+        startTime: customStartTime,
+        endTime: customEndTime,
+      });
+      if (!result.success) {
+        throw new Error(result.error || "無法使用此時段建立預約");
+      }
+      setCustomizingSlotRequest(null);
+      showModal({
+        type: "success",
+        title: "已改約並建立預約",
+        description: "已用老師指定的新時段建立正式預約。",
+        confirmText: "確定",
+      });
+      refreshBookingsForCurrentView();
+    } catch (error: any) {
+      showModal({
+        type: "error",
+        title: "建立失敗",
+        description: error?.message || "無法使用此時段建立預約。",
+        confirmText: "確定",
+      });
+    } finally {
+      setProcessingSlotRequestId(null);
+    }
+  };
+
+  const openRejectDialog = (request: SlotRequest) => {
+    setRejectingSlotRequest(request);
+    setRejectReason("");
+  };
+
+  const handleRejectSlotRequest = async () => {
+    if (!rejectingSlotRequest) return;
+    setProcessingSlotRequestId(rejectingSlotRequest.id);
+    try {
+      const result = await rejectSlotRequest(rejectingSlotRequest.id, rejectReason);
+      if (!result.success) {
+        throw new Error(result.error || "請稍後再試");
+      }
+      setRejectingSlotRequest(null);
+      showModal({
+        type: "success",
+        title: "已拒絕申請",
+        description: "學生的時段申請已更新為拒絕。",
+        confirmText: "確定",
+      });
+      refreshBookingsForCurrentView();
+    } catch (error: any) {
+      showModal({
+        type: "error",
+        title: "拒絕失敗",
+        description: error?.message || "請稍後再試。",
+        confirmText: "確定",
+      });
+    } finally {
+      setProcessingSlotRequestId(null);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-full xl:h-full bg-background-light dark:bg-background-dark">
       {/* Header */}
-      <header className="w-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark px-4 md:px-8 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 z-10 transition-all">
-        <div className="flex flex-col">
-          <h2 className="text-slate-800 dark:text-white text-xl font-bold tracking-tight flex items-center gap-2">
-            預約管理中心
-          </h2>
-          <p className="text-text-sub dark:text-gray-400 text-sm mt-0.5">
-            管理您的教學日程，確認學生預約與付款狀態
-          </p>
-        </div>
-        <div className="flex items-center gap-3 self-end sm:self-auto">
-          <button className="p-2.5 rounded-full text-text-sub dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-slate-700 relative transition-colors flex-shrink-0">
-            <span className="material-symbols-outlined">notifications</span>
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-surface-dark"></span>
-          </button>
-          <div className="h-8 w-px bg-border-light dark:bg-border-dark mx-1"></div>
-          <div className="flex items-center gap-3 px-2 flex-shrink-0">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-200 whitespace-nowrap">
-              {profile?.name || "Loading..."} 老師
-            </span>
-            {profile?.avatarUrl ? (
-              <div
-                className="w-8 h-8 rounded-full bg-cover bg-center flex-shrink-0"
-                style={{
-                  backgroundImage: `url("${profile.avatarUrl}")`,
-                }}
-              ></div>
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex justify-center items-center font-bold flex-shrink-0">
-                {profile?.name?.[0] || "?"}
-              </div>
-            )}
+      <header className="w-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark sticky top-0 z-10 transition-all">
+        <div className="mx-auto flex w-full max-w-[1680px] flex-col gap-4 px-4 py-4 md:px-8 2xl:px-10 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col">
+            <h2 className="text-slate-800 dark:text-white text-xl font-bold tracking-tight flex items-center gap-2">
+              預約管理中心
+            </h2>
+            <p className="text-text-sub dark:text-gray-400 text-sm mt-0.5">
+              管理您的教學日程，確認學生預約與付款狀態
+            </p>
+          </div>
+          <div className="flex items-center gap-3 self-end sm:self-auto">
+            <button className="p-2.5 rounded-full text-text-sub dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-slate-700 relative transition-colors flex-shrink-0">
+              <span className="material-symbols-outlined">notifications</span>
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-surface-dark"></span>
+            </button>
+            <div className="h-8 w-px bg-border-light dark:bg-border-dark mx-1"></div>
+            <div className="flex items-center gap-3 px-2 flex-shrink-0">
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-200 whitespace-nowrap">
+                {profile?.name || "Loading..."} 老師
+              </span>
+              {profile?.avatarUrl ? (
+                <div
+                  className="w-8 h-8 rounded-full bg-cover bg-center flex-shrink-0"
+                  style={{
+                    backgroundImage: `url("${profile.avatarUrl}")`,
+                  }}
+                ></div>
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex justify-center items-center font-bold flex-shrink-0">
+                  {profile?.name?.[0] || "?"}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -372,43 +613,40 @@ export default function TeacherBookingsPage() {
       <div className="flex-1 flex flex-col xl:overflow-hidden">
         {/* Pending Banner */}
         {pendingBookings.length > 0 && (
-          <div className="bg-orange-50 border-b border-orange-100 px-8 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-orange-600">
-                pending_actions
-              </span>
-              <div>
-                <p className="text-sm font-bold text-orange-800">
-                  您有 {pendingBookings.length} 筆待確認的預約
-                </p>
-                <p className="text-xs text-orange-600">
-                  這些預約可能在其他月份，請盡快審核。
-                </p>
+          <div className="bg-orange-50 border-b border-orange-100">
+            <div className="mx-auto flex w-full max-w-[1680px] items-center justify-between gap-4 px-4 py-3 md:px-8 2xl:px-10">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-orange-600">
+                  pending_actions
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-orange-800">
+                    您有 {pendingBookings.length} 筆待確認的預約
+                  </p>
+                  <p className="text-xs text-orange-600">
+                    這些預約可能在其他月份，請盡快審核。
+                  </p>
+                </div>
               </div>
+              <button
+                onClick={() => {
+                  if (pendingBookings[0]) {
+                    setEditingBooking(pendingBookings[0]);
+                  }
+                }}
+                className="px-4 py-2 bg-white border border-orange-200 text-orange-700 text-xs font-bold rounded-lg hover:bg-orange-50 transition-colors shadow-sm"
+              >
+                立即審核 ({pendingBookings.length})
+              </button>
             </div>
-            <button
-              onClick={() => {
-                // For now, perhaps just log or open a dialog?
-                // Or maybe we should append these pending bookings to the list temporarily to view them?
-                // Let's implement a simple modal or expander to view them later.
-                // For MVP, just scrolling to current date isn't enough.
-                // We'll trigger the EditBookingDialog for the first one for now as a quick fix or just let the user know.
-                if (pendingBookings[0]) {
-                  setEditingBooking(pendingBookings[0]);
-                }
-              }}
-              className="px-4 py-2 bg-white border border-orange-200 text-orange-700 text-xs font-bold rounded-lg hover:bg-orange-50 transition-colors shadow-sm"
-            >
-              立即審核 ({pendingBookings.length})
-            </button>
           </div>
         )}
 
         {/* Toolbar */}
-        <div className="px-4 md:px-8 py-6 pb-2">
-          <div className="flex flex-col xl:flex-row justify-between gap-4">
-            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 flex-1">
-              <div className="relative group w-full sm:flex-1 md:max-w-xs">
+        <div className="mx-auto w-full max-w-[1680px] px-4 py-6 pb-2 md:px-8 2xl:px-10">
+          <div className="flex flex-col 2xl:flex-row justify-between gap-4 2xl:gap-6">
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 flex-1 min-w-0">
+              <div className="relative group w-full sm:flex-1 md:max-w-xs min-w-0">
                 <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">
                   search
                 </span>
@@ -418,7 +656,7 @@ export default function TeacherBookingsPage() {
                   type="text"
                 />
               </div>
-              <div className="relative group w-full sm:flex-1 md:max-w-[200px]">
+              <div className="relative group w-full sm:flex-1 md:max-w-[200px] min-w-0">
                 <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">
                   calendar_month
                 </span>
@@ -435,7 +673,7 @@ export default function TeacherBookingsPage() {
                   }}
                 />
               </div>
-              <div className="relative w-full sm:flex-1 md:max-w-[180px]">
+              <div className="relative w-full sm:flex-1 md:max-w-[180px] min-w-0">
                 <select className="pl-3 pr-8 py-2 w-full rounded-xl border border-transparent bg-white dark:bg-surface-dark shadow-sm ring-1 ring-border-light dark:ring-border-dark focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none text-sm text-slate-700 dark:text-slate-200 transition-all cursor-pointer appearance-none">
                   <option value="">所有付款狀態</option>
                   <option value="unpaid">待付款</option>
@@ -447,11 +685,11 @@ export default function TeacherBookingsPage() {
                 </span>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-3 xl:ml-auto">
-              <div className="flex bg-white dark:bg-surface-dark rounded-lg p-1 shadow-sm ring-1 ring-border-light dark:ring-border-dark">
+            <div className="grid grid-cols-1 sm:grid-cols-3 2xl:flex 2xl:flex-wrap items-stretch 2xl:items-center gap-3 2xl:ml-auto w-full 2xl:w-auto">
+              <div className="flex bg-white dark:bg-surface-dark rounded-lg p-1 shadow-sm ring-1 ring-border-light dark:ring-border-dark min-w-0 sm:col-span-2 xl:col-span-1">
                 <button
                   onClick={() => setViewMode("month")}
-                  className={`px-3 py-1.5 rounded-md font-medium text-sm transition-colors flex items-center gap-1 ${viewMode === "month"
+                  className={`flex-1 px-3 py-1.5 rounded-md font-medium text-sm transition-colors flex items-center justify-center gap-1 ${viewMode === "month"
                     ? "bg-primary/10 text-primary-dark dark:text-primary"
                     : "text-text-sub hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-400"
                     }`}
@@ -463,7 +701,7 @@ export default function TeacherBookingsPage() {
                 </button>
                 <button
                   onClick={() => setViewMode("week")}
-                  className={`px-3 py-1.5 rounded-md font-medium text-sm transition-colors flex items-center gap-1 ${viewMode === "week"
+                  className={`flex-1 px-3 py-1.5 rounded-md font-medium text-sm transition-colors flex items-center justify-center gap-1 ${viewMode === "week"
                     ? "bg-primary/10 text-primary-dark dark:text-primary"
                     : "text-text-sub hover:bg-slate-50 dark:hover:bg-slate-700 dark:text-slate-400"
                     }`}
@@ -476,7 +714,7 @@ export default function TeacherBookingsPage() {
               </div>
               <Link
                 href="/teacher/availability"
-                className="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-surface-dark text-slate-700 dark:text-slate-200 font-medium border border-border-light dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
+                className="flex w-full xl:w-auto items-center justify-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-surface-dark text-slate-700 dark:text-slate-200 font-medium border border-border-light dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
               >
                 <span className="material-symbols-outlined text-[20px]">
                   calendar_clock
@@ -485,7 +723,7 @@ export default function TeacherBookingsPage() {
               </Link>
               <button
                 onClick={() => setIsCreateOpen(true)}
-                className="flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 py-2 rounded-xl bg-primary hover:bg-primary-dark text-white font-medium shadow-lg shadow-primary/20 transition-all active:scale-95 group"
+                className="flex w-full xl:w-auto items-center justify-center gap-2 px-4 py-2 rounded-xl bg-primary hover:bg-primary-dark text-white font-medium shadow-lg shadow-primary/20 transition-all active:scale-95 group"
               >
                 <span className="material-symbols-outlined text-[20px] group-hover:rotate-90 transition-transform">
                   add
@@ -497,10 +735,10 @@ export default function TeacherBookingsPage() {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 flex flex-col xl:flex-row gap-6 p-4 md:p-8 pt-4 xl:overflow-hidden">
+        <div className="mx-auto flex w-full max-w-[1680px] flex-1 flex-col xl:flex-row gap-6 xl:gap-8 px-4 pb-8 pt-4 md:px-8 2xl:px-10 min-h-0 xl:overflow-hidden">
           {/* Calendar Grid */}
           {viewMode === "month" ? (
-            <div className="flex-1 min-h-[500px] xl:min-h-0 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col overflow-hidden">
+            <div className="order-2 xl:order-1 flex-1 min-h-[420px] xl:min-h-0 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col overflow-hidden min-w-0">
               <div className="flex items-center justify-between px-6 py-4 border-b border-border-light dark:border-border-dark">
                 <div className="flex items-center gap-4">
                   <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
@@ -537,27 +775,31 @@ export default function TeacherBookingsPage() {
               </div>
 
               {/* Weekday Header */}
-              <div className="grid grid-cols-7 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-slate-800/50">
-                {["週日", "週一", "週二", "週三", "週四", "週五", "週六"].map(
-                  (d) => (
-                    <div
-                      key={d}
-                      className="py-3 text-center text-xs font-bold text-text-sub uppercase tracking-wider"
-                    >
-                      {d}
-                    </div>
-                  )
-                )}
+              <div className="overflow-x-auto border-b border-border-light dark:border-border-dark">
+                <div className="grid grid-cols-7 min-w-[720px] md:min-w-0 bg-slate-50/50 dark:bg-slate-800/50">
+                  {["週日", "週一", "週二", "週三", "週四", "週五", "週六"].map(
+                    (d) => (
+                      <div
+                        key={d}
+                        className="py-3 text-center text-xs font-bold text-text-sub uppercase tracking-wider"
+                      >
+                        {d}
+                      </div>
+                    )
+                  )}
+                </div>
               </div>
 
               {/* Days */}
-              <div className="flex-1 grid grid-cols-7 grid-rows-5 overflow-y-auto bg-slate-50/20 dark:bg-slate-900/20">
-                {loading ? (
-                  <div className="col-span-7 row-span-5 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </div>
-                ) : (
-                  days.map((d, index) => {
+              <div className="flex-1 min-h-0 overflow-x-auto">
+                <div className="min-w-[720px] md:min-w-0 h-full">
+                  <div className="grid grid-cols-7 grid-rows-5 h-full overflow-y-auto bg-slate-50/20 dark:bg-slate-900/20">
+                    {loading ? (
+                      <div className="col-span-7 row-span-5 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      </div>
+                    ) : (
+                      days.map((d, index) => {
                     if (d.type === "empty") {
                       return (
                         <div
@@ -621,12 +863,14 @@ export default function TeacherBookingsPage() {
                         </div>
                       </div>
                     );
-                  })
-                )}
+                      })
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           ) : (
-            <div className="flex-1 min-h-[600px] xl:min-h-0 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col overflow-hidden">
+            <div className="order-2 xl:order-1 flex-1 min-h-[520px] xl:min-h-0 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col overflow-hidden min-w-0">
               <div className="flex items-center justify-between px-6 py-4 border-b border-border-light dark:border-border-dark">
                 <div className="flex items-center gap-4">
                   <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
@@ -680,35 +924,37 @@ export default function TeacherBookingsPage() {
               </div>
 
               {/* Week Header */}
-              <div className="grid grid-cols-[72px_repeat(7,minmax(0,1fr))] border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-slate-800/50">
-                <div className="py-3 text-center text-xs font-bold text-text-sub uppercase tracking-wider">
-                  時間
+              <div className="overflow-x-auto border-b border-border-light dark:border-border-dark">
+                <div className="grid grid-cols-[72px_repeat(7,minmax(120px,1fr))] min-w-[912px] xl:min-w-0 bg-slate-50/50 dark:bg-slate-800/50">
+                  <div className="py-3 text-center text-xs font-bold text-text-sub uppercase tracking-wider">
+                    時間
+                  </div>
+                  {weekDays.map((day) => {
+                    const isToday = isSameDay(day, new Date());
+                    const isSelected = isSameDay(day, selectedDate);
+                    return (
+                      <button
+                        key={day.toISOString()}
+                        onClick={() => setSelectedDate(day)}
+                        className={`py-3 text-center text-xs font-bold tracking-wider transition-colors ${isSelected
+                          ? "bg-primary/10 text-primary"
+                          : isToday
+                            ? "text-slate-900 dark:text-white"
+                            : "text-text-sub"
+                          }`}
+                      >
+                        <div>{["週一", "週二", "週三", "週四", "週五", "週六", "週日"][day.getDay() === 0 ? 6 : day.getDay() - 1]}</div>
+                        <div className="text-[11px] font-medium text-slate-500">
+                          {day.getMonth() + 1}/{day.getDate()}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-                {weekDays.map((day) => {
-                  const isToday = isSameDay(day, new Date());
-                  const isSelected = isSameDay(day, selectedDate);
-                  return (
-                    <button
-                      key={day.toISOString()}
-                      onClick={() => setSelectedDate(day)}
-                      className={`py-3 text-center text-xs font-bold tracking-wider transition-colors ${isSelected
-                        ? "bg-primary/10 text-primary"
-                        : isToday
-                          ? "text-slate-900 dark:text-white"
-                          : "text-text-sub"
-                        }`}
-                    >
-                      <div>{["週一", "週二", "週三", "週四", "週五", "週六", "週日"][day.getDay() === 0 ? 6 : day.getDay() - 1]}</div>
-                      <div className="text-[11px] font-medium text-slate-500">
-                        {day.getMonth() + 1}/{day.getDate()}
-                      </div>
-                    </button>
-                  );
-                })}
               </div>
 
               <div className="flex-1 overflow-auto">
-                <div className="grid grid-cols-[72px_repeat(7,minmax(0,1fr))]">
+                <div className="grid grid-cols-[72px_repeat(7,minmax(120px,1fr))] min-w-[912px] xl:min-w-0">
                   {/* Time Column */}
                   <div className="border-r border-border-light dark:border-border-dark bg-slate-50/30 dark:bg-slate-800/30">
                     {timeSlots.map((minutes, idx) => {
@@ -879,9 +1125,258 @@ export default function TeacherBookingsPage() {
             </div>
           )}
 
-          {/* Sidebar Schedule */}
-          <div className="w-full xl:w-[360px] flex-shrink-0 flex flex-col gap-5 xl:h-full">
-            <div className="bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col h-auto xl:h-full overflow-hidden">
+          {/* Workbench */}
+          <div className="order-1 xl:order-2 w-full xl:w-[380px] 2xl:w-[420px] flex-shrink-0 flex flex-col gap-5 xl:h-full xl:min-h-0">
+            <div className="rounded-2xl border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark p-2 shadow-card">
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setWorkbenchTab("inbox")}
+                  className={`rounded-xl px-4 py-3 text-sm font-bold transition-colors ${
+                    workbenchTab === "inbox"
+                      ? "bg-primary text-white shadow-sm"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  待處理收件匣
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setWorkbenchTab("schedule")}
+                  className={`rounded-xl px-4 py-3 text-sm font-bold transition-colors ${
+                    workbenchTab === "schedule"
+                      ? "bg-primary text-white shadow-sm"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  今日行程
+                </button>
+              </div>
+            </div>
+
+            {workbenchTab === "inbox" ? (
+              <div className="bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card overflow-hidden flex flex-col min-h-0">
+              <div className="p-5 border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-slate-800/50">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="font-bold text-slate-800 dark:text-white text-base">
+                      待處理收件匣
+                    </h3>
+                    <p className="text-xs text-text-sub mt-0.5">
+                      先處理學生送來的時段申請，再安排正式預約。
+                    </p>
+                  </div>
+                  <span className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-1 rounded text-xs font-bold">
+                    {pendingSlotRequests.length} 待處理
+                  </span>
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSlotInboxTab("pending")}
+                    className={`rounded-lg px-3 py-2 text-sm font-bold transition-colors ${
+                      slotInboxTab === "pending"
+                        ? "bg-primary text-white"
+                        : "bg-white dark:bg-slate-900/30 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                    }`}
+                  >
+                    待處理
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSlotInboxTab("resolved")}
+                    className={`rounded-lg px-3 py-2 text-sm font-bold transition-colors ${
+                      slotInboxTab === "resolved"
+                        ? "bg-primary text-white"
+                        : "bg-white dark:bg-slate-900/30 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                    }`}
+                  >
+                    已處理
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid lg:grid-cols-[180px_minmax(0,1fr)] xl:grid-cols-[168px_minmax(0,1fr)] xl:min-h-0 flex-1">
+                <div className="border-b lg:border-b-0 lg:border-r border-border-light dark:border-border-dark bg-slate-50/40 dark:bg-slate-900/20 xl:min-h-0">
+                  <div className="max-h-[220px] lg:max-h-none lg:h-full overflow-y-auto p-3 space-y-2">
+                    {visibleSlotRequests.length === 0 ? (
+                      <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-700 p-4 text-xs text-slate-500 dark:text-slate-400">
+                        {slotInboxTab === "pending"
+                          ? "目前沒有待處理申請。"
+                          : "目前沒有已處理申請。"}
+                      </div>
+                    ) : (
+                      visibleSlotRequests.map((request) => (
+                        <button
+                          key={request.id}
+                          type="button"
+                          onClick={() => setSelectedSlotRequestId(request.id)}
+                          className={`w-full rounded-xl border px-3 py-3 text-left transition-all ${
+                            selectedSlotRequest?.id === request.id
+                              ? "border-primary bg-primary/10 shadow-sm"
+                              : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/40 hover:border-primary/40"
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold text-slate-800 dark:text-white truncate">
+                                {request.studentName || "學生"}
+                              </p>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                                {request.courseTitle || "未指定課程"}
+                              </p>
+                            </div>
+                            <span
+                              className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-bold ${
+                                request.status === "approved"
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : request.status === "rejected"
+                                  ? "bg-rose-100 text-rose-700"
+                                  : "bg-orange-100 text-orange-700"
+                              }`}
+                            >
+                              {request.status === "approved"
+                                ? "已核准"
+                                : request.status === "rejected"
+                                ? "已拒絕"
+                                : "待處理"}
+                            </span>
+                          </div>
+                          <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
+                            首選：{formatRequestDate(request.preference1Date)}{" "}
+                            {request.preference1Start.slice(0, 5)}-
+                            {request.preference1End.slice(0, 5)}
+                          </p>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                <div className="p-4 lg:min-h-0 lg:overflow-y-auto">
+                  {selectedSlotRequest ? (
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h4 className="text-lg font-bold text-slate-800 dark:text-white">
+                            {selectedSlotRequest.studentName || "學生"}
+                          </h4>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">
+                            {selectedSlotRequest.courseTitle || "未指定課程"}
+                          </p>
+                        </div>
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                            selectedSlotRequest.status === "approved"
+                              ? "bg-emerald-100 text-emerald-700"
+                              : selectedSlotRequest.status === "rejected"
+                              ? "bg-rose-100 text-rose-700"
+                              : "bg-orange-100 text-orange-700"
+                          }`}
+                        >
+                          {selectedSlotRequest.status === "approved"
+                            ? "已核准"
+                            : selectedSlotRequest.status === "rejected"
+                            ? "已拒絕"
+                            : "待處理中"}
+                        </span>
+                      </div>
+
+                      <div className="space-y-2">
+                        {getSlotRequestOptions(selectedSlotRequest).map((option) => (
+                          <div
+                            key={`${selectedSlotRequest.id}-${option.rank}`}
+                            className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/30 p-3"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <div className="text-xs font-bold text-primary">
+                                  順位 {option.rank}
+                                </div>
+                                <div className="mt-1 text-sm font-semibold text-slate-800 dark:text-white">
+                                  {formatRequestDate(option.date)}
+                                </div>
+                                <div className="text-xs text-slate-500 dark:text-slate-400">
+                                  {option.start.slice(0, 5)} - {option.end.slice(0, 5)}
+                                </div>
+                              </div>
+                              {selectedSlotRequest.status === "pending" ? (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleApproveRequestedSlot(
+                                      selectedSlotRequest,
+                                      option.rank
+                                    )
+                                  }
+                                  disabled={
+                                    processingSlotRequestId === selectedSlotRequest.id
+                                  }
+                                  className="rounded-lg bg-primary/10 px-3 py-2 text-[11px] font-bold text-primary hover:bg-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  {processingSlotRequestId === selectedSlotRequest.id
+                                    ? "處理中..."
+                                    : "採用此時段"}
+                                </button>
+                              ) : null}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {selectedSlotRequest.notes ? (
+                        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/30 px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
+                          備註：{selectedSlotRequest.notes}
+                        </div>
+                      ) : null}
+
+                      <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-700 px-4 py-3 text-xs text-slate-500 dark:text-slate-400">
+                        聯絡信箱：{selectedSlotRequest.studentEmail || "未提供"}
+                      </div>
+
+                      {selectedSlotRequest.status === "pending" ? (
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => openCustomSlotDialog(selectedSlotRequest)}
+                            disabled={
+                              processingSlotRequestId === selectedSlotRequest.id
+                            }
+                            className="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-3 text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            改成其他時段
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => openRejectDialog(selectedSlotRequest)}
+                            disabled={
+                              processingSlotRequestId === selectedSlotRequest.id
+                            }
+                            className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-3 text-sm font-bold text-rose-700 hover:bg-rose-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            拒絕申請
+                          </button>
+                        </div>
+                      ) : selectedSlotRequest.status === "approved" ? (
+                        <div className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                          這筆申請已轉成正式預約，可到今日行程或月曆查看。
+                        </div>
+                      ) : (
+                        <div className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+                          已拒絕此申請{selectedSlotRequest.rejectReason ? `：${selectedSlotRequest.rejectReason}` : "。"}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex h-full min-h-[240px] items-center justify-center rounded-xl border border-dashed border-slate-200 dark:border-slate-700 text-sm text-slate-500 dark:text-slate-400">
+                      從左側收件匣選擇一筆申請以查看詳情。
+                    </div>
+                  )}
+                </div>
+              </div>
+              </div>
+            ) : (
+              <div className="bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col h-auto xl:h-full overflow-hidden">
               <div className="p-5 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
                 <div>
                   <h3 className="font-bold text-slate-800 dark:text-white text-base">
@@ -904,12 +1399,10 @@ export default function TeacherBookingsPage() {
               </div>
 
               <div className="flex-1 overflow-y-auto p-5 space-y-4">
-                {/* Selected Date Appointments */}
-                {/* @ts-ignore */}
-                {events[selectedDate.getDate()] ? (
-                  // @ts-ignore
-                  events[selectedDate.getDate()].map((ev, idx) => {
-                    const booking = bookings.find((b) => b.id === ev.id);
+                {selectedDateEvents.length ? (
+                  selectedDateEvents.map((eventItem, idx) => {
+                    const ev = eventItem;
+                    const booking = eventItem.booking;
                     const draft = booking ? feedbackDrafts[booking.id] : undefined;
                     return (
                       <div key={idx} className="group relative">
@@ -1099,60 +1592,60 @@ export default function TeacherBookingsPage() {
 
                 {/* Upcoming items could be added here later */}
               </div>
-
-              <div className="bg-gradient-to-br from-primary to-primary-dark rounded-2xl p-5 text-white shadow-lg shadow-primary/20 relative overflow-hidden m-5 mt-0">
-                <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
-                {/* Calculate Revenue */}
-                {(() => {
-                  const pendingTotal = bookings
-                    .filter((b) => b.status === "pending")
-                    .reduce((sum, b) => sum + (b.coursePrice || 0), 0);
-
-                  const receivedTotal = bookings
-                    .filter(
-                      (b) =>
-                        b.status === "confirmed" || b.status === "completed"
-                    )
-                    .reduce((sum, b) => sum + (b.coursePrice || 0), 0);
-
-                  const projectedTotal = pendingTotal + receivedTotal;
-
-                  return (
-                    <>
-                      <div className="flex items-center justify-between mb-3 relative z-10">
-                        <span className="text-xs font-medium text-white/90">
-                          本月預估收入 (Projected)
-                        </span>
-                        <span className="material-symbols-outlined text-[20px] text-white/80">
-                          payments
-                        </span>
-                      </div>
-                      <div className="text-2xl font-bold tracking-tight relative z-10">
-                        NT$ {projectedTotal.toLocaleString()}
-                      </div>
-
-                      <div className="mt-4 flex flex-col gap-1 relative z-10">
-                        <div className="flex justify-between items-center text-xs text-white/90">
-                          <span>已收款 (Received):</span>
-                          <span className="font-bold">
-                            NT$ {receivedTotal.toLocaleString()}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center text-xs text-white/70">
-                          <span>待確認 (Pending):</span>
-                          <span>NT$ {pendingTotal.toLocaleString()}</span>
-                        </div>
-                      </div>
-
-                      <div className="mt-3 pt-3 border-t border-white/20 relative z-10 flex text-[10px] text-white/80 gap-2">
-                        <span>共 {bookings.length} 筆預約</span>
-                      </div>
-                    </>
-                  );
-                })()}
               </div>
-            </div>
+            )}
           </div>
+        </div>
+
+        <div className="mx-auto w-full max-w-[1680px] px-4 pb-8 md:px-8 2xl:px-10">
+          {(() => {
+            const pendingTotal = bookings
+              .filter((b) => b.status === "pending")
+              .reduce((sum, b) => sum + (b.coursePrice || 0), 0);
+
+            const receivedTotal = bookings
+              .filter((b) => b.status === "confirmed" || b.status === "completed")
+              .reduce((sum, b) => sum + (b.coursePrice || 0), 0);
+
+            const projectedTotal = pendingTotal + receivedTotal;
+
+            return (
+              <div className="grid gap-4 lg:gap-6 md:grid-cols-2 2xl:grid-cols-3">
+                <div className="rounded-2xl bg-gradient-to-br from-primary to-primary-dark p-5 text-white shadow-lg shadow-primary/20 relative overflow-hidden">
+                  <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+                  <div className="relative z-10 flex items-center justify-between mb-3">
+                    <span className="text-xs font-medium text-white/90">
+                      本月預估收入
+                    </span>
+                    <span className="material-symbols-outlined text-[20px] text-white/80">
+                      payments
+                    </span>
+                  </div>
+                  <div className="relative z-10 text-2xl font-bold tracking-tight">
+                    NT$ {projectedTotal.toLocaleString()}
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark p-5 shadow-card">
+                  <div className="text-xs font-medium text-text-sub">已收款</div>
+                  <div className="mt-2 text-2xl font-bold text-slate-800 dark:text-white">
+                    NT$ {receivedTotal.toLocaleString()}
+                  </div>
+                  <div className="mt-2 text-xs text-slate-500">
+                    已確認與已完成的正式預約收入
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark p-5 shadow-card">
+                  <div className="text-xs font-medium text-text-sub">待確認收入</div>
+                  <div className="mt-2 text-2xl font-bold text-slate-800 dark:text-white">
+                    NT$ {pendingTotal.toLocaleString()}
+                  </div>
+                  <div className="mt-2 text-xs text-slate-500">
+                    目前共有 {bookings.length} 筆預約，待老師後續確認
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
 
@@ -1188,6 +1681,165 @@ export default function TeacherBookingsPage() {
           />
         );
       })()}
+
+      <Dialog
+        open={!!customizingSlotRequest}
+        onOpenChange={(open) => {
+          if (!open) setCustomizingSlotRequest(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-[520px]">
+          <DialogHeader>
+            <DialogTitle>改成其他時段</DialogTitle>
+            <DialogDescription>
+              老師可指定一個不同於學生三順位的新時段，系統會直接建立正式預約。
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-2">
+            <div className="grid gap-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                日期
+              </label>
+              <input
+                type="date"
+                value={customBookingDate}
+                onChange={(e) => setCustomBookingDate(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Select
+                  label="開始時間"
+                  value={customStartTime}
+                  onChange={(e) => setCustomStartTime(e.target.value)}
+                  options={TIME_OPTIONS}
+                  icon="schedule"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Select
+                  label="結束時間"
+                  value={customEndTime}
+                  onChange={(e) => setCustomEndTime(e.target.value)}
+                  options={TIME_OPTIONS}
+                  icon="schedule"
+                />
+              </div>
+            </div>
+
+            {customizingSlotRequest && (() => {
+              const expectedMins = timeToMinutes(customizingSlotRequest.preference1End) - timeToMinutes(customizingSlotRequest.preference1Start);
+              const expectedHours = Math.floor(expectedMins / 60);
+              const expectedRemaingMins = expectedMins % 60;
+              
+              const currentMins = customStartTime && customEndTime ? timeToMinutes(customEndTime) - timeToMinutes(customStartTime) : 0;
+              const isMatch = expectedMins === currentMins;
+
+              return (
+                <div className="flex items-center justify-between -mt-1 px-1">
+                  <div className={`text-xs font-bold ${isMatch ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500"}`}>
+                    {!customStartTime || !customEndTime || currentMins <= 0
+                      ? ""
+                      : isMatch
+                      ? "✓ 時長相符"
+                      : "⚠️ 時長與原先申請不符"}
+                  </div>
+                  <div className="text-right text-sm font-bold text-blue-600 dark:text-blue-400">
+                    設定時長應為：{expectedHours > 0 ? `${expectedHours} 小時 ` : ""}{expectedRemaingMins > 0 ? `${expectedRemaingMins} 分鐘` : ""}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {customizingSlotRequest ? (
+              <div className="rounded-lg bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 px-4 py-3 text-xs text-slate-500 dark:text-slate-400">
+                對象：{customizingSlotRequest.studentName || "學生"} /{" "}
+                {customizingSlotRequest.courseTitle || "未指定課程"}
+              </div>
+            ) : null}
+          </div>
+
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => setCustomizingSlotRequest(null)}
+              className="rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300"
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              onClick={handleApproveCustomSlot}
+              disabled={
+                !customizingSlotRequest ||
+                processingSlotRequestId === customizingSlotRequest.id
+              }
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {customizingSlotRequest &&
+              processingSlotRequestId === customizingSlotRequest.id
+                ? "建立中..."
+                : "建立正式預約"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!rejectingSlotRequest}
+        onOpenChange={(open) => {
+          if (!open) setRejectingSlotRequest(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-[520px]">
+          <DialogHeader>
+            <DialogTitle>拒絕時段申請</DialogTitle>
+            <DialogDescription>
+              可填寫拒絕原因，讓學生知道為什麼這次無法安排。
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-2 py-2">
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
+              拒絕原因
+            </label>
+            <textarea
+              rows={4}
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="例如：這三個時段都有既有課程，請再送出其他日期。"
+              className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm"
+            />
+          </div>
+
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => setRejectingSlotRequest(null)}
+              className="rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300"
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              onClick={handleRejectSlotRequest}
+              disabled={
+                !rejectingSlotRequest ||
+                processingSlotRequestId === rejectingSlotRequest.id
+              }
+              className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-bold text-white hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {rejectingSlotRequest &&
+              processingSlotRequestId === rejectingSlotRequest.id
+                ? "送出中..."
+                : "確認拒絕"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {profile && (
         <CreateBookingDialog
