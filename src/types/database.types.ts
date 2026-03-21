@@ -567,6 +567,7 @@ export type Database = {
           id: string
           portfolio_id: string
           sort_order: number | null
+          description: string | null
         }
         Insert: {
           created_at?: string | null
@@ -575,6 +576,7 @@ export type Database = {
           id?: string
           portfolio_id: string
           sort_order?: number | null
+          description?: string | null
         }
         Update: {
           created_at?: string | null
@@ -583,6 +585,7 @@ export type Database = {
           id?: string
           portfolio_id?: string
           sort_order?: number | null
+          description?: string | null
         }
         Relationships: [
           {
@@ -1481,6 +1484,7 @@ export type Database = {
           base_price: number
           bio: string
           educations: Json
+          email: string
           experience_years: number
           experiences: Json
           name: string

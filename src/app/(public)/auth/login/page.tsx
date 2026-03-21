@@ -506,34 +506,25 @@ function LoginContent() {
                       </span>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-3">
                     <button
                       type="button"
-                      className="flex items-center justify-center gap-2 py-2.5 border border-slate-200 dark:border-gray-600 rounded-xl hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors text-sm font-medium text-slate-700 dark:text-gray-300"
+                      className="flex items-center justify-center gap-3 py-2.5 border border-slate-200 dark:border-gray-600 rounded-xl hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors text-sm font-medium text-slate-700 dark:text-gray-300"
                     >
-                      <div className="w-5 h-5 relative">
-                        <Image
-                          alt="Google"
-                          src="https://lh3.googleusercontent.com/aida-public/AB6AXuActoeFgeACj5j868KbNSODvUCcGssflFs-JuMbBA6Z9_5GmYHHSmhbVJvH62yPMnq0maPe7jF-MqhlLYWHLad5nueGKj7b5RrnLEkF93gY6ug2cg6JfbY-jv470WnHyi-S0q8bTwoyF6EkR9bcT5XOzHJOju8jmaCXr_1p0012XkfHDpyAvT0bYqVxIf6eIAU8wX1ljJ8WeMW7Ok5FT81l1Z001OJE6tw8iYd8L-s6Bw3NG05LqqkzFDpAAAVGdPBiqIuxplawacY"
-                          fill
-                          className="object-contain"
-                        />
-                      </div>
-                      <span className="hidden sm:inline">Google</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="flex items-center justify-center gap-2 py-2.5 border border-slate-200 dark:border-gray-600 rounded-xl hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors text-sm font-medium text-slate-700 dark:text-gray-300"
-                    >
-                      <div className="w-5 h-5 relative">
-                        <Image
-                          alt="Facebook"
-                          src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_03tU9o1bP6_58eLpazAdhvnX6O--ihoUf_LKHLZTp2XzLIWVDIGdofwUaaksnVd7ArVaCNn2yxiPz0wF96A-82vNP498VrC-dl75tomPDJT1R3OxU0IbLZMqgA33j-vBTZFNweQZPhI_rhqeU8GQg3QRAFeNqD6gcYewyAzHEpXqVdKcTspsztXHS8vIklalZCmYnZQcWPBW3Ue6fcTlqBjtv8qISsb8O13_oGDazHJdBBbl45Kt-ryyiEGYAu5_8zYwZtKq0YU"
-                          fill
-                          className="object-contain"
-                        />
-                      </div>
-                      <span className="hidden sm:inline">Facebook</span>
+                      {/* Google 官方四色 Logo SVG */}
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 48 48"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                        <path fill="none" d="M0 0h48v48H0z"/>
+                      </svg>
+                      <span>使用 Google 登入</span>
                     </button>
                   </div>
                 </form>

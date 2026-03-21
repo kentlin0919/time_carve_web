@@ -86,6 +86,7 @@ export default function TeacherPortfolioGalleryPage() {
             setTeacher({
                 id: teacherResult.teacher_code,
                 name: teacherResult.name,
+                email: teacherResult.email,
                 avatar_url: teacherResult.avatar_url,
                 title: teacherResult.title,
                 bio: teacherResult.bio,
