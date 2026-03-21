@@ -287,34 +287,40 @@ export type Database = {
       }
       course_purchases: {
         Row: {
+          actual_price: number
           course_id: string
           created_at: string
           id: string
-          price_paid: number
+          notes: string | null
+          payment_status: string
+          purchased_at: string
           remaining_hours: number
-          status: string
           student_id: string
           total_hours: number
           updated_at: string
         }
         Insert: {
+          actual_price: number
           course_id: string
           created_at?: string
           id?: string
-          price_paid?: number
-          remaining_hours?: number
-          status?: string
+          notes?: string | null
+          payment_status?: string
+          purchased_at?: string
+          remaining_hours: number
           student_id: string
-          total_hours?: number
+          total_hours: number
           updated_at?: string
         }
         Update: {
+          actual_price?: number
           course_id?: string
           created_at?: string
           id?: string
-          price_paid?: number
+          notes?: string | null
+          payment_status?: string
+          purchased_at?: string
           remaining_hours?: number
-          status?: string
           student_id?: string
           total_hours?: number
           updated_at?: string
@@ -337,17 +343,14 @@ export type Database = {
       course_tags: {
         Row: {
           course_id: string
-          created_at: string | null
           tag_id: string
         }
         Insert: {
           course_id: string
-          created_at?: string | null
           tag_id: string
         }
         Update: {
           course_id?: string
-          created_at?: string | null
           tag_id?: string
         }
         Relationships: [
@@ -367,55 +370,49 @@ export type Database = {
       }
       courses: {
         Row: {
-          content: string | null
-          course_type: string
-          created_at: string | null
+          category: string | null
+          created_at: string
           description: string | null
           duration_minutes: number
-          expected_learning_outcomes: string[] | null
           id: string
           image_url: string | null
           is_active: boolean | null
-          location: string | null
-          price: number | null
-          sections: Json | null
-          teacher_id: string | null
+          level: string | null
+          price: number
+          syllabus: Json | null
+          teacher_id: string
           title: string
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
-          content?: string | null
-          course_type?: string
-          created_at?: string | null
+          category?: string | null
+          created_at?: string
           description?: string | null
-          duration_minutes?: number
-          expected_learning_outcomes?: string[] | null
+          duration_minutes: number
           id?: string
           image_url?: string | null
           is_active?: boolean | null
-          location?: string | null
-          price?: number | null
-          sections?: Json | null
-          teacher_id?: string | null
+          level?: string | null
+          price: number
+          syllabus?: Json | null
+          teacher_id: string
           title: string
-          updated_at?: string | null
+          updated_at?: string
         }
         Update: {
-          content?: string | null
-          course_type?: string
-          created_at?: string | null
+          category?: string | null
+          created_at?: string
           description?: string | null
           duration_minutes?: number
-          expected_learning_outcomes?: string[] | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
-          location?: string | null
-          price?: number | null
-          sections?: Json | null
-          teacher_id?: string | null
+          level?: string | null
+          price?: number
+          syllabus?: Json | null
+          teacher_id?: string
           title?: string
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -430,65 +427,83 @@ export type Database = {
         Row: {
           created_at: string | null
           id: number
+          is_active: boolean | null
           label_zh: string
           status_key: string
+          updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           id?: number
+          is_active?: boolean | null
           label_zh: string
           status_key: string
+          updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           id?: number
+          is_active?: boolean | null
           label_zh?: string
           status_key?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       identity: {
         Row: {
+          created_at: string | null
           identity_id: number
+          is_active: boolean | null
+          label_zh: string | null
           name: string
         }
         Insert: {
+          created_at?: string | null
           identity_id?: number
+          is_active?: boolean | null
+          label_zh?: string | null
           name: string
         }
         Update: {
+          created_at?: string | null
           identity_id?: number
+          is_active?: boolean | null
+          label_zh?: string | null
           name?: string
         }
         Relationships: []
       }
       notifications: {
         Row: {
-          content: string
           created_at: string
-          data: Json | null
           id: string
           is_read: boolean
+          link: string | null
+          message: string
+          payload: Json | null
           title: string
           type: string
           user_id: string
         }
         Insert: {
-          content: string
           created_at?: string
-          data?: Json | null
           id?: string
           is_read?: boolean
+          link?: string | null
+          message: string
+          payload?: Json | null
           title: string
           type: string
           user_id: string
         }
         Update: {
-          content?: string
           created_at?: string
-          data?: Json | null
           id?: string
           is_read?: boolean
+          link?: string | null
+          message?: string
+          payload?: Json | null
           title?: string
           type?: string
           user_id?: string
@@ -550,48 +565,45 @@ export type Database = {
       platform_settings: {
         Row: {
           key: string
-          label: string | null
-          updated_at: string | null
-          value: string | null
+          value: Json
         }
         Insert: {
           key: string
-          label?: string | null
-          updated_at?: string | null
-          value?: string | null
+          value: Json
         }
         Update: {
           key?: string
-          label?: string | null
-          updated_at?: string | null
-          value?: string | null
+          value?: Json
         }
         Relationships: []
       }
       portfolio_media: {
         Row: {
-          created_at: string | null
-          file_type: string | null
-          file_url: string
+          alt_text: string | null
+          created_at: string
+          display_order: number
           id: string
+          media_type: string
           portfolio_id: string
-          sort_order: number | null
+          url: string
         }
         Insert: {
-          created_at?: string | null
-          file_type?: string | null
-          file_url: string
+          alt_text?: string | null
+          created_at?: string
+          display_order?: number
           id?: string
+          media_type: string
           portfolio_id: string
-          sort_order?: number | null
+          url: string
         }
         Update: {
-          created_at?: string | null
-          file_type?: string | null
-          file_url?: string
+          alt_text?: string | null
+          created_at?: string
+          display_order?: number
           id?: string
+          media_type?: string
           portfolio_id?: string
-          sort_order?: number | null
+          url?: string
         }
         Relationships: [
           {
@@ -632,28 +644,22 @@ export type Database = {
       }
       portfolio_types: {
         Row: {
-          created_at: string | null
+          created_at: string
           id: string
           name: string
-          sort_order: number | null
           teacher_id: string
-          updated_at: string | null
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           name: string
-          sort_order?: number | null
           teacher_id: string
-          updated_at?: string | null
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           name?: string
-          sort_order?: number | null
           teacher_id?: string
-          updated_at?: string | null
         }
         Relationships: [
           {
@@ -666,55 +672,40 @@ export type Database = {
       }
       portfolios: {
         Row: {
-          allow_comments: boolean | null
-          category: string | null
-          content: string | null
+          content: string
           cover_image_url: string | null
-          created_at: string | null
+          created_at: string
           description: string | null
           id: string
-          likes_count: number | null
-          publish_at: string | null
-          status: string | null
+          is_published: boolean | null
           teacher_id: string
           title: string
           type_id: string | null
-          updated_at: string | null
-          views_count: number | null
+          updated_at: string
         }
         Insert: {
-          allow_comments?: boolean | null
-          category?: string | null
-          content?: string | null
+          content: string
           cover_image_url?: string | null
-          created_at?: string | null
+          created_at?: string
           description?: string | null
           id?: string
-          likes_count?: number | null
-          publish_at?: string | null
-          status?: string | null
+          is_published?: boolean | null
           teacher_id: string
           title: string
           type_id?: string | null
-          updated_at?: string | null
-          views_count?: number | null
+          updated_at?: string
         }
         Update: {
-          allow_comments?: boolean | null
-          category?: string | null
-          content?: string | null
+          content?: string
           cover_image_url?: string | null
-          created_at?: string | null
+          created_at?: string
           description?: string | null
           id?: string
-          likes_count?: number | null
-          publish_at?: string | null
-          status?: string | null
+          is_published?: boolean | null
           teacher_id?: string
           title?: string
           type_id?: string | null
-          updated_at?: string | null
-          views_count?: number | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -734,8 +725,7 @@ export type Database = {
       schools: {
         Row: {
           city: string | null
-          code: string | null
-          country: string | null
+          code: string
           created_at: string | null
           id: string
           name: string
@@ -743,8 +733,7 @@ export type Database = {
         }
         Insert: {
           city?: string | null
-          code?: string | null
-          country?: string | null
+          code: string
           created_at?: string | null
           id?: string
           name: string
@@ -752,8 +741,7 @@ export type Database = {
         }
         Update: {
           city?: string | null
-          code?: string | null
-          country?: string | null
+          code?: string
           created_at?: string | null
           id?: string
           name?: string
@@ -860,39 +848,33 @@ export type Database = {
           completed_section_ids: Json | null
           course_id: string
           created_at: string
-          current_section_id: string | null
           id: string
-          progress_percentage: number | null
-          status: string
+          last_accessed_at: string
+          notes: string | null
           student_id: string
           teacher_id: string
-          teacher_notes: string | null
           updated_at: string
         }
         Insert: {
           completed_section_ids?: Json | null
           course_id: string
           created_at?: string
-          current_section_id?: string | null
           id?: string
-          progress_percentage?: number | null
-          status?: string
+          last_accessed_at?: string
+          notes?: string | null
           student_id: string
           teacher_id: string
-          teacher_notes?: string | null
           updated_at?: string
         }
         Update: {
           completed_section_ids?: Json | null
           course_id?: string
           created_at?: string
-          current_section_id?: string | null
           id?: string
-          progress_percentage?: number | null
-          status?: string
+          last_accessed_at?: string
+          notes?: string | null
           student_id?: string
           teacher_id?: string
-          teacher_notes?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -919,40 +901,46 @@ export type Database = {
       student_education: {
         Row: {
           created_at: string | null
+          degree: string | null
           degree_level: string | null
           department: string | null
           end_year: number | null
-          grade: string | null
           id: string
+          is_verified: boolean | null
           school_id: string
           start_year: number | null
           status_id: number
+          study_year: number | null
           student_id: string
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
+          degree?: string | null
           degree_level?: string | null
           department?: string | null
           end_year?: number | null
-          grade?: string | null
           id?: string
+          is_verified?: boolean | null
           school_id: string
           start_year?: number | null
           status_id: number
+          study_year?: number | null
           student_id: string
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
+          degree?: string | null
           degree_level?: string | null
           department?: string | null
           end_year?: number | null
-          grade?: string | null
           id?: string
+          is_verified?: boolean | null
           school_id?: string
           start_year?: number | null
           status_id?: number
+          study_year?: number | null
           student_id?: string
           updated_at?: string | null
         }
@@ -979,25 +967,25 @@ export type Database = {
       }
       student_info: {
         Row: {
-          created_at: string | null
+          created_at: string
           id: string
           student_code: string | null
-          teacher_code: string
-          updated_at: string | null
+          teacher_code: string | null
+          updated_at: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           id: string
           student_code?: string | null
-          teacher_code: string
-          updated_at?: string | null
+          teacher_code?: string | null
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           student_code?: string | null
-          teacher_code?: string
-          updated_at?: string | null
+          teacher_code?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -1016,46 +1004,43 @@ export type Database = {
       }
       system_modules: {
         Row: {
-          badge: string | null
-          created_at: string
+          created_at: string | null
+          description: string | null
           icon: string | null
           id: string
           identity_id: number
-          is_active: boolean
-          key: string
-          label: string
-          parent_key: string | null
-          route: string | null
-          sequence: number | null
-          updated_at: string
+          is_active: boolean | null
+          module_key: string
+          name: string
+          path: string
+          sort_order: number | null
+          updated_at: string | null
         }
         Insert: {
-          badge?: string | null
-          created_at?: string
+          created_at?: string | null
+          description?: string | null
           icon?: string | null
           id?: string
           identity_id: number
-          is_active?: boolean
-          key: string
-          label: string
-          parent_key?: string | null
-          route?: string | null
-          sequence?: number | null
-          updated_at?: string
+          is_active?: boolean | null
+          module_key: string
+          name: string
+          path: string
+          sort_order?: number | null
+          updated_at?: string | null
         }
         Update: {
-          badge?: string | null
-          created_at?: string
+          created_at?: string | null
+          description?: string | null
           icon?: string | null
           id?: string
           identity_id?: number
-          is_active?: boolean
-          key?: string
-          label?: string
-          parent_key?: string | null
-          route?: string | null
-          sequence?: number | null
-          updated_at?: string
+          is_active?: boolean | null
+          module_key?: string
+          name?: string
+          path?: string
+          sort_order?: number | null
+          updated_at?: string | null
         }
         Relationships: [
           {
