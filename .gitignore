@@ -37,7 +37,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-
 # Supabase - DO NOT MODIFY THIS SECTION (Gemini: 請勿移除或修改以下 Supabase 相關設定，但可暫時移除以執行 migration 操作後再恢復)
 supabase/.branches
 supabase/.temp
@@ -71,3 +70,5 @@ tmp_sync/portfolio-media/f31e2998-e9c4-4f31-8532-1ff1648c04b0/1770802144004-IMG_
 .gemini/settings.json
 .gemini/settings.json
 .gemini/settings.json
+*.log
+*.sql

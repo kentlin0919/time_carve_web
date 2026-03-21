@@ -33,6 +33,8 @@ type StudentCourseDetailViewProps = {
   backLabel: string;
   hideActions?: boolean;
   pendingHours?: number;
+  selectedHours?: number;
+  onHoursChange?: (hours: number) => void;
 };
 
 export default function StudentCourseDetailView({

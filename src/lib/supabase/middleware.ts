@@ -2,6 +2,28 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { Database } from '@/types/database.types'
 
+function getSupabaseStorageKey(supabaseUrl: string) {
+  const hostname = new URL(supabaseUrl).hostname
+  return `sb-${hostname.split('.')[0]}-auth-token`
+}
+
+function clearSupabaseAuthCookies(request: NextRequest, response: NextResponse, storageKey: string) {
+  const cookieNames = request.cookies
+    .getAll()
+    .map(({ name }) => name)
+    .filter((name) => name === storageKey || name.startsWith(`${storageKey}.`) || name.startsWith(`${storageKey}-`))
+
+  cookieNames.forEach((name) => {
+    request.cookies.delete(name)
+    response.cookies.set({
+      name,
+      value: '',
+      maxAge: 0,
+      path: '/',
+    })
+  })
+}
+
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({
     request: {
@@ -10,6 +32,7 @@ export async function updateSession(request: NextRequest) {
   })
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const storageKey = supabaseUrl ? getSupabaseStorageKey(supabaseUrl) : ''
   // Fallback to ANON_KEY or PUBLISHABLE_KEY. 
   // Note: For server-side middleware, we can also use SERVICE_ROLE_KEY if needed, 
   // but for auth session management, ANON_KEY is correct.
@@ -54,6 +77,11 @@ export async function updateSession(request: NextRequest) {
   )
 
   const { data: { user }, error } = await supabase.auth.getUser()
+  const isInvalidRefreshToken = error?.code === 'refresh_token_not_found'
+
+  if (isInvalidRefreshToken && storageKey) {
+    clearSupabaseAuthCookies(request, response, storageKey)
+  }
 
   // Protect routes logic
   const path = request.nextUrl.pathname;
@@ -64,16 +92,18 @@ export async function updateSession(request: NextRequest) {
     path.startsWith('/teacher') || 
     path.startsWith('/admin');
 
-  // Auth Routes (Login, Signup, etc.) - redirect to dashboard if logged in?
-  // Maybe later. For now focus on blocking unauthenticated access.
-  const isAuthRoute = path.startsWith('/auth/login') || path.startsWith('/auth/signup');
-
-  if (isProtectedRoute && !user && !error) {
+  if (isProtectedRoute && !user) {
      // Redirect to login
      const url = request.nextUrl.clone()
      url.pathname = '/auth/login'
      url.searchParams.set('redirect', path); // keep the original path
-     return NextResponse.redirect(url)
+     const redirectResponse = NextResponse.redirect(url)
+
+     if (isInvalidRefreshToken && storageKey) {
+       clearSupabaseAuthCookies(request, redirectResponse, storageKey)
+     }
+
+     return redirectResponse
   }
 
   // Optional: Redirect logged in users away from login page?
