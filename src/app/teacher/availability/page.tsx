@@ -48,6 +48,7 @@ export default function AvailabilityPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [availability, setAvailability] = useState<DateAvailability[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [teacherId, setTeacherId] = useState<string | null>(null);
 
   // Weekly Settings State
@@ -121,62 +122,60 @@ export default function AvailabilityPage() {
     });
   };
 
-  const handleSaveCurrentDay = async () => {
-    if (!teacherId || !selectedDayOverride) return;
+  const handleSaveAllPending = async () => {
+    if (!teacherId) return;
 
-    // Logic Fix: If user selects NO slots and does NOT check "Unavailable",
-    // we should treat it as "Unavailable" (Closed for the day),
-    // otherwise the system saves 0 overrides, causing it to fall back to Weekly settings.
-    const effectiveIsUnavailable =
-      selectedDayOverride.isUnavailable ||
-      selectedDayOverride.slots.length === 0;
-
-    if (effectiveIsUnavailable) {
-      const result = await saveOverrides(teacherId, selectedDayOverride.date, [
-        {
-          teacherId,
-          date: selectedDayOverride.date,
-          startTime: null,
-          endTime: null,
-          isUnavailable: true,
-        },
-      ]);
-      if (!result.success) {
-        showModal({ type: "error", title: "儲存失敗", description: result.error, confirmText: "確定" });
+    setIsSaving(true);
+    try {
+      // Collect all pending overrides
+      const datesToSave = Object.values(pendingOverrides);
+      if (datesToSave.length === 0) {
+        showModal({ type: "success", title: "無變更", description: "目前沒有需要儲存的設定", confirmText: "確定" });
         return;
       }
-    } else {
-      const overrides = selectedDayOverride.slots.map((slot) => ({
-        teacherId,
-        date: selectedDayOverride.date,
-        startTime: slot.start,
-        endTime: slot.end,
-        isUnavailable: false,
-      }));
-      const result = await saveOverrides(
-        teacherId,
-        selectedDayOverride.date,
-        overrides
+
+      await Promise.all(
+        datesToSave.map(async (overrideData) => {
+          const effectiveIsUnavailable = overrideData.isUnavailable || overrideData.slots.length === 0;
+
+          if (effectiveIsUnavailable) {
+            const result = await saveOverrides(teacherId, overrideData.date, [
+              {
+                teacherId,
+                date: overrideData.date,
+                startTime: null,
+                endTime: null,
+                isUnavailable: true,
+              },
+            ]);
+            if (!result.success) throw new Error(result.error || `儲存 ${overrideData.date} 失敗`);
+          } else {
+            const overrides = overrideData.slots.map((slot) => ({
+              teacherId,
+              date: overrideData.date,
+              startTime: slot.start,
+              endTime: slot.end,
+              isUnavailable: false,
+            }));
+            const result = await saveOverrides(teacherId, overrideData.date, overrides);
+            if (!result.success) throw new Error(result.error || `儲存 ${overrideData.date} 失敗`);
+          }
+        })
       );
-      if (!result.success) {
-        showModal({ type: "error", title: "儲存失敗", description: result.error, confirmText: "確定" });
-        return;
-      }
+
+      showModal({ type: "success", title: "設定已儲存", description: "所有的變更已成功存檔", confirmText: "確定" });
+      setPendingOverrides({});
+
+      // Refresh
+      const start = format(startOfMonth(currentDate), "yyyy-MM-dd");
+      const end = format(endOfMonth(currentDate), "yyyy-MM-dd");
+      const data = await getTeacherAvailability(teacherId, start, end);
+      setAvailability(data);
+    } catch (error: any) {
+      showModal({ type: "error", title: "儲存失敗", description: error.message || "發生未知錯誤", confirmText: "確定" });
+    } finally {
+      setIsSaving(false);
     }
-
-    showModal({ type: "success", title: "設定已儲存", description: "預約時段設定已成功更新", confirmText: "確定" });
-
-    setPendingOverrides((prev) => {
-      const next = { ...prev };
-      delete next[selectedDayOverride.date];
-      return next;
-    });
-
-    // Refresh
-    const start = format(startOfMonth(currentDate), "yyyy-MM-dd");
-    const end = format(endOfMonth(currentDate), "yyyy-MM-dd");
-    const data = await getTeacherAvailability(teacherId, start, end);
-    setAvailability(data);
   };
 
   // Weekly Logic helpers (same as before)
@@ -663,7 +662,7 @@ export default function AvailabilityPage() {
                               列出本月已設定為開放或不可預約的日期與時段。
                             </p>
                           </div>
-                          <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                          <span className="whitespace-nowrap flex-shrink-0 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                             {previewEntries.length} 筆
                           </span>
                         </div>
@@ -722,13 +721,20 @@ export default function AvailabilityPage() {
                       </div>
 
                       <button
-                        onClick={handleSaveCurrentDay}
-                        className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-primary dark:hover:bg-primary-dark text-white dark:text-slate-900 font-bold py-3.5 rounded-xl shadow-lg shadow-slate-300/50 dark:shadow-glow transition-all flex items-center justify-center gap-2 group transform active:scale-[0.98]"
+                        onClick={handleSaveAllPending}
+                        disabled={isSaving}
+                        className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-primary dark:hover:bg-primary-dark text-white dark:text-slate-900 font-bold py-3.5 rounded-xl shadow-lg shadow-slate-300/50 dark:shadow-glow transition-all flex items-center justify-center gap-2 group transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <span>儲存此日設定</span>
-                        <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">
-                          arrow_forward
-                        </span>
+                        {isSaving ? (
+                            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                        ) : (
+                          <>
+                            <span>儲存全部設定</span>
+                            <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">
+                              save
+                            </span>
+                          </>
+                        )}
                       </button>
                     </div>
                   </>

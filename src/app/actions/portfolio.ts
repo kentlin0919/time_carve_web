@@ -91,20 +91,41 @@ export async function uploadPortfolioMedia(formData: FormData) {
     .from('portfolio-media')
     .upload(fileName, file);
 
-  if (error) throw error;
+  if (error) {
+    console.error("uploadPortfolioMedia storage upload failed", {
+      portfolioId,
+      fileName,
+      originalFileName: file.name,
+      fileType: file.type,
+      fileSize: file.size,
+      error,
+    });
+    throw error;
+  }
 
   const { data: { publicUrl } } = supabase.storage
     .from('portfolio-media')
     .getPublicUrl(fileName);
 
   const repository = await getRepository();
-  return await repository.addMedia({
-    portfolio_id: portfolioId,
-    file_url: publicUrl,
-    file_type: file.type.startsWith('video') ? 'video' : 'image',
-    description: description || null,
-    sort_order: 0
-  });
+  try {
+    return await repository.addMedia({
+      portfolio_id: portfolioId,
+      file_url: publicUrl,
+      file_type: file.type.startsWith('video') ? 'video' : 'image',
+      description: description || null,
+      sort_order: 0
+    });
+  } catch (error) {
+    console.error("uploadPortfolioMedia database insert failed", {
+      portfolioId,
+      fileName,
+      publicUrl,
+      fileType: file.type,
+      error,
+    });
+    throw error;
+  }
 }
 
 export async function updatePortfolioMedia(mediaId: string, data: { description?: string | null, sort_order?: number }) {

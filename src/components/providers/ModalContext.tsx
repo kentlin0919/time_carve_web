@@ -8,11 +8,13 @@ interface ModalOptions {
   description?: string;
   type?: ModalType;
   size?: ModalSize;
+  showConfirm?: boolean;
   confirmText?: string;
   onConfirm?: () => void;
   showCancel?: boolean;
   cancelText?: string;
   onCancel?: () => void;
+  closable?: boolean;
   children?: ReactNode;
 }
 

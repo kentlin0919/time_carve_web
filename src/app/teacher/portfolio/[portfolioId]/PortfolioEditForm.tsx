@@ -33,7 +33,7 @@ export default function PortfolioEditForm({
   isCreating = false,
 }: PortfolioEditFormProps) {
   const router = useRouter();
-  const { showModal } = useModal();
+  const { showModal, hideModal } = useModal();
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [origin, setOrigin] = useState("");
@@ -139,11 +139,29 @@ export default function PortfolioEditForm({
 
     try {
       setLoading(true);
+      showModal({
+        title: "封面上傳中",
+        description: "正在上傳作品封面圖片，請稍候...",
+        showConfirm: false,
+        closable: false,
+        children: (
+          <div className="flex flex-col items-center gap-3 py-2 text-center">
+            <span className="material-symbols-outlined animate-spin text-primary text-3xl">
+              progress_activity
+            </span>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              上傳完成後會自動套用到目前作品
+            </p>
+          </div>
+        ),
+      });
       const { uploadPortfolioCoverImage: uploadAction } = await import("@/app/actions/portfolio");
       const url = await uploadAction(uploadFormData);
       setFormData({ ...formData, cover_image_url: url });
+      hideModal();
     } catch (error) {
       console.error("Cover upload failed:", error);
+      hideModal();
       showModal({ type: "error", title: "上傳失敗", description: "封面圖片上傳失敗", confirmText: "確定" });
     } finally {
       setLoading(false);

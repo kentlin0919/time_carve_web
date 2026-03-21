@@ -13,10 +13,25 @@ interface PortfolioMediaManagerProps {
 
 export default function PortfolioMediaManager({ portfolioId, media }: PortfolioMediaManagerProps) {
     const router = useRouter();
-    const { showModal } = useModal();
+    const { showModal, hideModal } = useModal();
     const [uploading, setUploading] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editDescription, setEditDescription] = useState("");
+
+    const getErrorMessage = (error: unknown) => {
+        if (error instanceof Error && error.message) {
+            return error.message;
+        }
+
+        if (typeof error === "object" && error !== null) {
+            const maybeMessage = "message" in error ? error.message : null;
+            if (typeof maybeMessage === "string" && maybeMessage.trim()) {
+                return maybeMessage;
+            }
+        }
+
+        return "請稍後重試";
+    };
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files?.length) return;
@@ -35,6 +50,22 @@ export default function PortfolioMediaManager({ portfolioId, media }: PortfolioM
         // Actually, let's keep it simple: Upload immediately, then show as a card where they can edit description.
 
         setUploading(true);
+        showModal({
+            title: "圖片上傳中",
+            description: "正在上傳作品卡片圖片，請稍候...",
+            showConfirm: false,
+            closable: false,
+            children: (
+                <div className="flex flex-col items-center gap-3 py-2 text-center">
+                    <span className="material-symbols-outlined animate-spin text-primary text-3xl">
+                        progress_activity
+                    </span>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                        上傳完成後會自動更新列表
+                    </p>
+                </div>
+            ),
+        });
         const formData = new FormData();
         formData.append("file", file);
         formData.append("portfolioId", portfolioId);
@@ -42,10 +73,26 @@ export default function PortfolioMediaManager({ portfolioId, media }: PortfolioM
         try {
             await uploadPortfolioMedia(formData);
             router.refresh();
+            hideModal();
             showModal({ type: "success", title: "上傳成功", description: "圖片已新增，您可以編輯說明文字" });
         } catch (error) {
-            console.error(error);
-            showModal({ type: "error", title: "上傳失敗", description: "請稍後重試" });
+            console.error("Portfolio card upload failed", {
+                portfolioId,
+                fileName: file.name,
+                fileType: file.type,
+                fileSize: file.size,
+                error,
+                message: getErrorMessage(error),
+                code: typeof error === "object" && error !== null && "code" in error ? error.code : undefined,
+                details: typeof error === "object" && error !== null && "details" in error ? error.details : undefined,
+                statusCode: typeof error === "object" && error !== null && "statusCode" in error ? error.statusCode : undefined,
+            });
+            hideModal();
+            showModal({
+                type: "error",
+                title: "上傳失敗",
+                description: getErrorMessage(error),
+            });
         } finally {
             setUploading(false);
             e.target.value = ""; // Reset input

@@ -14,11 +14,13 @@ interface ModalProps {
   children?: React.ReactNode;
   type?: ModalType;
   size?: ModalSize;
+  showConfirm?: boolean;
   confirmText?: string;
   onConfirm?: () => void;
   showCancel?: boolean;
   cancelText?: string;
   onCancel?: () => void;
+  closable?: boolean;
 }
 
 export function Modal({
@@ -29,11 +31,13 @@ export function Modal({
   children,
   type = "info",
   size = "md",
+  showConfirm = true,
   confirmText = "我知道了",
   onConfirm,
   showCancel = false,
   cancelText = "取消",
   onCancel,
+  closable = true,
 }: ModalProps) {
   const [visible, setVisible] = useState(false);
 
@@ -74,7 +78,7 @@ export function Modal({
     >
       <div
         className="absolute inset-0 bg-slate-900/40 backdrop-blur-[6px]"
-        onClick={onClose}
+        onClick={closable ? onClose : undefined}
       ></div>
       <div
         className={`relative w-full transform rounded-[32px] bg-white dark:bg-gray-800 p-8 text-left shadow-2xl transition-all duration-300 border border-slate-100 dark:border-gray-700 ${isOpen ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
@@ -132,23 +136,27 @@ export function Modal({
               {cancelText}
             </button>
           )}
-          <button
-            onClick={handleConfirm}
-            className="group w-full bg-primary hover:bg-primary-dark text-white font-bold py-2 sm:py-2 rounded-xl transition-all shadow-lg shadow-primary/25 hover:shadow-primary/40 active:scale-[0.98] flex items-center justify-center gap-2"
-          >
-            <span>{confirmText}</span>
-            <span className="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-1">
-              arrow_forward
-            </span>
-          </button>
+          {showConfirm && (
+            <button
+              onClick={handleConfirm}
+              className="group w-full bg-primary hover:bg-primary-dark text-white font-bold py-2 sm:py-2 rounded-xl transition-all shadow-lg shadow-primary/25 hover:shadow-primary/40 active:scale-[0.98] flex items-center justify-center gap-2"
+            >
+              <span>{confirmText}</span>
+              <span className="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-1">
+                arrow_forward
+              </span>
+            </button>
+          )}
         </div>
 
-        <button
-          onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all"
-        >
-          <span className="material-symbols-outlined text-[24px]">close</span>
-        </button>
+        {closable && (
+          <button
+            onClick={onClose}
+            className="absolute top-5 right-5 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all"
+          >
+            <span className="material-symbols-outlined text-[24px]">close</span>
+          </button>
+        )}
       </div>
     </div>
   );

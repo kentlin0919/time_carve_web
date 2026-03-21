@@ -47,31 +47,89 @@ export async function getTeacherPayments(
   const startStr = startDate.toISOString().split("T")[0]; // YYYY-MM-DD
   const endStr = endDate.toISOString().split("T")[0];
 
-  const query = supabase
+  const bookingsQuery = supabase
     .from("bookings")
-    .select(`
-      id,
-      booking_date,
-      start_time,
-      end_time,
-      price,
-      paid_at,
-      booking_statuses(status_key),
-      course:courses(title, price),
-      student:student_info(
-        user:user_info(name, email, avatar_url)
-      )
-    `)
+    .select(
+      "id, booking_date, start_time, end_time, price, paid_at, status_id, course_id, student_id"
+    )
     .eq("teacher_id", user.id)
     .gte("booking_date", startStr)
     .lte("booking_date", endStr);
 
-  const { data: bookings, error } = await query;
+  const { data: bookings, error } = await bookingsQuery;
 
   if (error) {
     console.error("Error fetching payments detailed:", JSON.stringify(error, null, 2));
     throw new Error(`Failed to fetch payments: ${error.message} (Details: ${error.details || 'none'}, Hint: ${error.hint || 'none'})`);
   }
+
+  const statusIds = Array.from(
+    new Set((bookings || []).map((booking) => booking.status_id).filter((value): value is number => typeof value === "number"))
+  );
+  const courseIds = Array.from(
+    new Set((bookings || []).map((booking) => booking.course_id).filter((value): value is string => Boolean(value)))
+  );
+  const studentIds = Array.from(
+    new Set((bookings || []).map((booking) => booking.student_id).filter((value): value is string => Boolean(value)))
+  );
+
+  const [
+    { data: statuses, error: statusError },
+    { data: courses, error: courseError },
+    { data: studentProfiles, error: studentError },
+  ] = await Promise.all([
+    statusIds.length > 0
+      ? supabase
+          .from("booking_statuses")
+          .select("id, status_key")
+          .in("id", statusIds)
+      : Promise.resolve({ data: [], error: null }),
+    courseIds.length > 0
+      ? supabase
+          .from("courses")
+          .select("id, title, price")
+          .in("id", courseIds)
+      : Promise.resolve({ data: [], error: null }),
+    studentIds.length > 0
+      ? supabase
+          .from("student_info")
+          .select("id")
+          .in("id", studentIds)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+
+  if (statusError || courseError || studentError) {
+    const detail = {
+      statusError,
+      courseError,
+      studentError,
+    };
+    console.error("Error fetching payment relations:", JSON.stringify(detail, null, 2));
+    throw new Error("Failed to fetch payment related data");
+  }
+
+  const userIds = Array.from(
+    new Set((studentProfiles || []).map((student) => student.id).filter((value): value is string => Boolean(value)))
+  );
+
+  const { data: users, error: userError } =
+    userIds.length > 0
+      ? await supabase
+          .from("user_info")
+          .select("id, name, email, avatar_url")
+          .in("id", userIds)
+      : { data: [], error: null };
+
+  if (userError) {
+    console.error("Error fetching payment users:", JSON.stringify(userError, null, 2));
+    throw new Error("Failed to fetch payment user data");
+  }
+
+  const statusMap = new Map(
+    (statuses || []).map((status) => [status.id, status.status_key])
+  );
+  const courseMap = new Map((courses || []).map((course) => [course.id, course]));
+  const userMap = new Map((users || []).map((profile) => [profile.id, profile]));
 
   const now = new Date();
   
@@ -85,9 +143,11 @@ export async function getTeacherPayments(
   };
 
   for (const booking of bookings || []) {
-    const course = booking.course as { title: string; price: number } | null;
-    const studentUser = booking.student?.user as { name: string; email: string; avatar_url: string | null } | null;
-    const statusKey = booking.booking_statuses?.status_key as string || 'pending';
+    const course = booking.course_id ? courseMap.get(booking.course_id) ?? null : null;
+    const studentUser = booking.student_id ? userMap.get(booking.student_id) ?? null : null;
+    const statusKey = typeof booking.status_id === "number"
+      ? statusMap.get(booking.status_id) ?? "pending"
+      : "pending";
 
     if (statusKey === "cancelled" || statusKey === "rejected") {
       continue;
