@@ -100,12 +100,6 @@ export default function AvailabilityPage() {
   }, [teacherId, currentDate]); // Remove overly frequent deps
 
   const handleDayClick = (day: Date) => {
-    if (selectedDayOverride) {
-      setPendingOverrides((prev) => ({
-        ...prev,
-        [selectedDayOverride.date]: selectedDayOverride,
-      }));
-    }
 
     setSelectedDate(day);
     const dateStr = format(day, "yyyy-MM-dd");
