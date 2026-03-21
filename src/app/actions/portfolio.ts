@@ -87,9 +87,13 @@ export async function uploadPortfolioMedia(formData: FormData) {
   const supabase = await createClient();
   const fileName = `${portfolioId}/${Date.now()}-${sanitizeFileName(file.name)}`;
 
+  const fileBuffer = await file.arrayBuffer();
   const { data, error } = await supabase.storage
     .from('portfolio-media')
-    .upload(fileName, file);
+    .upload(fileName, fileBuffer, {
+      contentType: file.type,
+      upsert: false
+    });
 
   if (error) {
     console.error("uploadPortfolioMedia storage upload failed", {
@@ -175,9 +179,11 @@ export async function uploadPortfolioCoverImage(formData: FormData) {
 
   const fileName = `covers/${user.id}/${Date.now()}-${sanitizeFileName(file.name)}`;
 
+  const fileBuffer = await file.arrayBuffer();
   const { data, error } = await supabase.storage
     .from('portfolio-media')
-    .upload(fileName, file, {
+    .upload(fileName, fileBuffer, {
+      contentType: file.type,
       upsert: true
     });
 
@@ -247,9 +253,11 @@ export async function uploadContentImage(formData: FormData): Promise<string> {
 
   const fileName = `content/${user.id}/${Date.now()}-${sanitizeFileName(file.name)}`;
 
+  const fileBuffer = await file.arrayBuffer();
   const { error } = await supabase.storage
     .from('portfolio-media')
-    .upload(fileName, file, {
+    .upload(fileName, fileBuffer, {
+      contentType: file.type,
       upsert: true
     });
 
