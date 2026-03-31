@@ -623,8 +623,8 @@ export default function TeacherBookingsPage() {
         {/* Toolbar */}
         <div className="mx-auto w-full max-w-[1680px] px-4 py-6 pb-2 md:px-8 2xl:px-10">
           <div className="flex flex-col 2xl:flex-row justify-between gap-4 2xl:gap-6">
-            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 flex-1 min-w-0">
-              <div className="relative group w-full sm:flex-1 md:max-w-xs min-w-0">
+            <div className="grid grid-cols-2 sm:flex sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <div className="relative group col-span-2 sm:col-span-auto sm:flex-1 md:max-w-xs min-w-0">
                 <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">
                   search
                 </span>
@@ -634,12 +634,12 @@ export default function TeacherBookingsPage() {
                   type="text"
                 />
               </div>
-              <div className="relative group w-full sm:flex-1 md:max-w-[200px] min-w-0">
-                <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[20px]">
+              <div className="relative group col-span-1 w-full sm:flex-1 md:max-w-[200px] min-w-0">
+                <span className="material-symbols-outlined absolute left-2 sm:left-3 top-2 sm:top-2.5 text-slate-400 text-[18px] sm:text-[20px]">
                   calendar_month
                 </span>
                 <input
-                  className="pl-10 pr-4 py-2 w-full rounded-xl border border-transparent bg-white dark:bg-surface-dark shadow-sm ring-1 ring-border-light dark:ring-border-dark focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none text-sm text-slate-700 dark:text-slate-200 transition-all cursor-pointer"
+                  className="pl-8 sm:pl-10 pr-2 sm:pr-4 py-1.5 sm:py-2 w-full rounded-xl border border-transparent bg-white dark:bg-surface-dark shadow-sm ring-1 ring-border-light dark:ring-border-dark focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none text-xs sm:text-sm text-slate-700 dark:text-slate-200 transition-all cursor-pointer"
                   type="date"
                   value={selectedDate.toISOString().split("T")[0]}
                   onChange={(e) => {
@@ -651,8 +651,8 @@ export default function TeacherBookingsPage() {
                   }}
                 />
               </div>
-              <div className="relative w-full sm:flex-1 md:max-w-[180px] min-w-0">
-                <select className="pl-3 pr-8 py-2 w-full rounded-xl border border-transparent bg-white dark:bg-surface-dark shadow-sm ring-1 ring-border-light dark:ring-border-dark focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none text-sm text-slate-700 dark:text-slate-200 transition-all cursor-pointer appearance-none">
+              <div className="relative w-full col-span-1 sm:flex-1 md:max-w-[180px] min-w-0">
+                <select className="pl-2 sm:pl-3 pr-6 sm:pr-8 py-1.5 sm:py-2 w-full rounded-xl border border-transparent bg-white dark:bg-surface-dark shadow-sm ring-1 ring-border-light dark:ring-border-dark focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none text-xs sm:text-sm text-slate-700 dark:text-slate-200 transition-all cursor-pointer appearance-none">
                   <option value="">所有付款狀態</option>
                   <option value="unpaid">待付款</option>
                   <option value="paid">已付款</option>
@@ -663,8 +663,8 @@ export default function TeacherBookingsPage() {
                 </span>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 2xl:flex 2xl:flex-wrap items-stretch 2xl:items-center gap-3 2xl:ml-auto w-full 2xl:w-auto">
-              <div className="flex bg-white dark:bg-surface-dark rounded-lg p-1 shadow-sm ring-1 ring-border-light dark:ring-border-dark min-w-0 sm:col-span-2 xl:col-span-1">
+            <div className="grid grid-cols-2 sm:grid-cols-3 2xl:flex 2xl:flex-wrap items-stretch 2xl:items-center gap-2 sm:gap-3 w-full 2xl:w-auto">
+              <div className="flex bg-white dark:bg-surface-dark rounded-xl p-1 shadow-sm ring-1 ring-border-light dark:ring-border-dark min-w-0 col-span-2 sm:col-span-3 xl:col-span-1 w-full relative z-0">
                 <button
                   onClick={() => setViewMode("month")}
                   className={`flex-1 px-3 py-1.5 rounded-md font-medium text-sm transition-colors flex items-center justify-center gap-1 ${viewMode === "month"
@@ -692,18 +692,18 @@ export default function TeacherBookingsPage() {
               </div>
               <Link
                 href="/teacher/availability"
-                className="flex w-full xl:w-auto items-center justify-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-surface-dark text-slate-700 dark:text-slate-200 font-medium border border-border-light dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
+                className="col-span-1 flex w-full xl:w-auto items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-white dark:bg-surface-dark text-slate-700 dark:text-slate-200 font-medium border border-border-light dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
               >
-                <span className="material-symbols-outlined text-[20px]">
+                <span className="material-symbols-outlined text-[18px] sm:text-[20px]">
                   calendar_clock
                 </span>
                 <span className="text-sm min-w-max">設定預約時間</span>
               </Link>
               <button
                 onClick={() => setIsCreateOpen(true)}
-                className="flex w-full xl:w-auto items-center justify-center gap-2 px-4 py-2 rounded-xl bg-primary hover:bg-primary-dark text-white font-medium shadow-lg shadow-primary/20 transition-all active:scale-95 group"
+                className="col-span-1 flex w-full xl:w-auto items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-primary hover:bg-primary-dark text-white font-medium shadow-lg shadow-primary/20 transition-all active:scale-95 group"
               >
-                <span className="material-symbols-outlined text-[20px] group-hover:rotate-90 transition-transform">
+                <span className="material-symbols-outlined text-[18px] sm:text-[20px] group-hover:rotate-90 transition-transform">
                   add
                 </span>
                 <span className="text-sm min-w-max">新增預約</span>
@@ -716,7 +716,7 @@ export default function TeacherBookingsPage() {
         <div className="mx-auto flex w-full max-w-[1680px] flex-1 flex-col xl:flex-row gap-6 xl:gap-8 px-4 pb-8 pt-4 md:px-8 2xl:px-10 min-h-0 xl:overflow-hidden">
           {/* Calendar Grid */}
           {viewMode === "month" ? (
-            <div className="order-2 xl:order-1 flex-1 min-h-[420px] xl:min-h-0 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col overflow-hidden min-w-0">
+            <div className="flex-1 min-h-[320px] md:min-h-[380px] xl:min-h-0 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col overflow-hidden min-w-0">
               <div className="flex flex-col gap-3 border-b border-border-light px-4 py-4 dark:border-border-dark sm:flex-row sm:items-center sm:justify-between sm:px-6">
                 <div className="flex items-center justify-between gap-3 sm:justify-start sm:gap-4">
                   <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
@@ -778,9 +778,12 @@ export default function TeacherBookingsPage() {
               {/* Days */}
               <div className="flex-1 min-h-0">
                 <div className="h-full">
-                  <div className="grid h-full grid-cols-7 grid-rows-5 overflow-y-auto bg-slate-50/20 dark:bg-slate-900/20">
+                  <div
+                    className="grid h-full grid-cols-7 overflow-y-auto bg-slate-50/20 dark:bg-slate-900/20"
+                    style={{ gridAutoRows: '1fr' }}
+                  >
                     {loading ? (
-                      <div className="col-span-7 row-span-5 flex items-center justify-center">
+                      <div className="col-span-7 flex items-center justify-center" style={{ gridRow: 'span 5' }}>
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                       </div>
                     ) : (
@@ -789,7 +792,7 @@ export default function TeacherBookingsPage() {
                       return (
                         <div
                           key={index}
-                          className="min-h-[88px] overflow-hidden cursor-pointer border-b border-r border-border-light bg-slate-50/50 p-1 transition-colors group hover:bg-slate-50 dark:border-border-dark dark:bg-slate-800/50 dark:hover:bg-slate-800/80 sm:min-h-[100px] sm:p-2"
+                          className="min-h-[50px] sm:min-h-[100px] overflow-hidden cursor-pointer border-b border-r border-border-light bg-slate-50/50 p-1 sm:p-2 transition-colors group hover:bg-slate-50 dark:border-border-dark dark:bg-slate-800/50 dark:hover:bg-slate-800/80"
                         ></div>
                       );
                     }
@@ -807,7 +810,7 @@ export default function TeacherBookingsPage() {
                           setSelectedDate(d.date);
                         }}
                         className={`
-                                    min-h-[88px] border-b border-r border-border-light p-1 dark:border-border-dark sm:min-h-[100px] sm:p-2
+                                    min-h-[50px] sm:min-h-[100px] border-b border-r border-border-light p-1 sm:p-2 dark:border-border-dark
                                     overflow-hidden transition-colors cursor-pointer group relative
                                     ${isSelected
                             ? "bg-blue-50/40 dark:bg-primary/5 hover:bg-blue-50/60 dark:hover:bg-primary/10 ring-1 ring-inset ring-primary/30 z-10"
@@ -826,34 +829,47 @@ export default function TeacherBookingsPage() {
                         >
                           {d.day}
                         </span>
-                        <div className="mt-1 flex flex-col gap-1 sm:mt-2">
+                        {/* Mobile summary view (Horizontal dots) */}
+                        <div className="mt-1 flex flex-wrap gap-[3px] items-center sm:hidden">
+                          {dayEvents.slice(0, 3).map((ev: any, evIdx: number) => {
+                             const dotColorClasses = ev.color === "red" ? "bg-red-500" : ev.color === "orange" ? "bg-orange-500" : ev.color === "emerald" ? "bg-emerald-500" : "bg-slate-500";
+                             return <div key={evIdx} className={`h-1.5 w-1.5 border border-white/50 rounded-full ${dotColorClasses}`}></div>;
+                          })}
+                          {dayEvents.length > 3 && (
+                             <span className="text-[9px] text-slate-500 dark:text-slate-400 font-bold ml-0.5">+{dayEvents.length - 3}</span>
+                          )}
+                        </div>
+
+                        {/* Desktop/Tablet explicit view */}
+                        <div className="mt-1 hidden sm:flex flex-col gap-0.5">
                           {dayEvents.slice(0, 2).map((ev: any, evIdx: number) => (
                             <div
                               key={evIdx}
+                              title={`${ev.time}${ev.endTime ? `–${ev.endTime}` : ""} ${ev.name}`}
                               className={`
-                                            rounded px-1.5 py-1 text-[10px] font-medium truncate shadow-sm sm:px-2 sm:text-[11px]
-                                            ${evIdx === 1 ? "hidden sm:block" : ""}
+                                            rounded px-1.5 py-0.5 text-[10px] font-medium truncate shadow-sm border cursor-default
+                                            ${evIdx === 1 ? "hidden lg:block" : ""}
                                             ${ev.color === "red"
-                                  ? "bg-red-100 text-red-700 border border-red-200 opacity-70"
+                                  ? "bg-red-100 text-red-700 border-red-200 opacity-70"
                                   : ev.color === "orange"
-                                    ? "bg-orange-100 text-orange-700 border border-orange-200"
+                                    ? "bg-orange-100 text-orange-700 border-orange-200"
                                     : ev.color === "emerald"
-                                      ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-                                      : "bg-slate-100 text-slate-700 border border-slate-200"
+                                      ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                                      : "bg-slate-100 text-slate-700 border-slate-200"
                                 }
                                         `}
                             >
-                              {ev.time}{ev.endTime ? `–${ev.endTime}` : ""} {ev.name}
+                              {ev.time}{ev.endTime ? `–${ev.endTime}` : ""}
                             </div>
                           ))}
-                          {dayEvents.length > 1 ? (
-                            <div className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400 sm:hidden">
-                              +{dayEvents.length - 1}
+                          {dayEvents.length > 2 ? (
+                            <div className="hidden rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400 lg:block w-max">
+                              +{dayEvents.length - 2} 筆
                             </div>
                           ) : null}
-                          {dayEvents.length > 2 ? (
-                            <div className="hidden rounded bg-slate-100 px-2 py-1 text-[11px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400 sm:block">
-                              +{dayEvents.length - 2} 筆
+                          {dayEvents.length > 1 ? (
+                            <div className="hidden sm:block lg:hidden rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400 w-max">
+                              +{dayEvents.length - 1} 筆
                             </div>
                           ) : null}
                         </div>
@@ -866,7 +882,7 @@ export default function TeacherBookingsPage() {
               </div>
             </div>
           ) : (
-            <div className="order-2 xl:order-1 flex-1 min-h-[520px] xl:min-h-0 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col overflow-hidden min-w-0">
+            <div className="flex-1 min-h-[520px] xl:min-h-0 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-card flex flex-col overflow-hidden min-w-0">
               <div className="flex items-center justify-between px-6 py-4 border-b border-border-light dark:border-border-dark">
                 <div className="flex items-center gap-4">
                   <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
@@ -919,40 +935,42 @@ export default function TeacherBookingsPage() {
                 </div>
               </div>
 
-              {/* Week Header */}
-              <div className="overflow-x-auto border-b border-border-light dark:border-border-dark">
-                <div className="grid grid-cols-[72px_repeat(7,minmax(120px,1fr))] min-w-[912px] xl:min-w-0 bg-slate-50/50 dark:bg-slate-800/50">
-                  <div className="py-3 text-center text-xs font-bold text-text-sub uppercase tracking-wider">
-                    時間
+              {/* Overall container for horizontal scroll */}
+              <div className="flex-1 overflow-x-auto overflow-y-hidden snap-x snap-mandatory flex flex-col relative w-full">
+                <div className="min-w-[912px] xl:min-w-0 flex flex-col h-full">
+                  {/* Static Header relative to vertical, moves horizontally */}
+                  <div className="grid grid-cols-[72px_repeat(7,minmax(120px,1fr))] border-b border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-slate-800/50 sticky top-0 z-30">
+                    <div className="py-3 text-center text-xs font-bold text-text-sub uppercase tracking-wider sticky left-0 z-40 bg-slate-50 dark:bg-slate-800/50 shadow-[1px_0_0_0_rgba(0,0,0,0.05)] border-r border-border-light dark:border-border-dark">
+                      時間
+                    </div>
+                    {weekDays.map((day) => {
+                      const isToday = isSameDay(day, new Date());
+                      const isSelected = isSameDay(day, selectedDate);
+                      return (
+                        <button
+                          key={day.toISOString()}
+                          onClick={() => setSelectedDate(day)}
+                          className={`snap-start py-3 text-center text-xs font-bold tracking-wider transition-colors ${isSelected
+                            ? "bg-primary/10 text-primary"
+                            : isToday
+                              ? "text-slate-900 dark:text-white"
+                              : "text-text-sub"
+                            }`}
+                        >
+                          <div>{["週一", "週二", "週三", "週四", "週五", "週六", "週日"][day.getDay() === 0 ? 6 : day.getDay() - 1]}</div>
+                          <div className="text-[11px] font-medium text-slate-500">
+                            {day.getMonth() + 1}/{day.getDate()}
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
-                  {weekDays.map((day) => {
-                    const isToday = isSameDay(day, new Date());
-                    const isSelected = isSameDay(day, selectedDate);
-                    return (
-                      <button
-                        key={day.toISOString()}
-                        onClick={() => setSelectedDate(day)}
-                        className={`py-3 text-center text-xs font-bold tracking-wider transition-colors ${isSelected
-                          ? "bg-primary/10 text-primary"
-                          : isToday
-                            ? "text-slate-900 dark:text-white"
-                            : "text-text-sub"
-                          }`}
-                      >
-                        <div>{["週一", "週二", "週三", "週四", "週五", "週六", "週日"][day.getDay() === 0 ? 6 : day.getDay() - 1]}</div>
-                        <div className="text-[11px] font-medium text-slate-500">
-                          {day.getMonth() + 1}/{day.getDate()}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
 
-              <div className="flex-1 overflow-auto">
-                <div className="grid grid-cols-[72px_repeat(7,minmax(120px,1fr))] min-w-[912px] xl:min-w-0">
-                  {/* Time Column */}
-                  <div className="border-r border-border-light dark:border-border-dark bg-slate-50/30 dark:bg-slate-800/30">
+                  {/* Vertical Scroll Body */}
+                  <div className="flex-1 overflow-y-auto overflow-x-hidden relative">
+                    <div className="grid grid-cols-[72px_repeat(7,minmax(120px,1fr))]">
+                      {/* Time Column */}
+                      <div className="sticky left-0 z-20 bg-slate-50/90 dark:bg-slate-800/90 backdrop-blur-md shadow-[1px_0_0_0_rgba(0,0,0,0.05)] border-r border-border-light dark:border-border-dark bg-clip-padding">
                     {timeSlots.map((minutes, idx) => {
                       const isHour = minutes % 60 === 0;
                       return (
@@ -987,7 +1005,7 @@ export default function TeacherBookingsPage() {
                     return (
                       <div
                         key={dateStr}
-                        className="relative border-r border-border-light dark:border-border-dark bg-white dark:bg-surface-dark"
+                        className="snap-start relative border-r border-border-light dark:border-border-dark bg-white dark:bg-surface-dark"
                         style={{ height: dayHeight }}
                       >
                         {/* Grid Lines */}
@@ -1118,11 +1136,13 @@ export default function TeacherBookingsPage() {
                   })}
                 </div>
               </div>
+              </div>{/* Close min-w-[912px] wrapper */}
+              </div>{/* Close flex-1 overflow-x-auto wrapper */}
             </div>
           )}
 
           {/* Workbench */}
-          <div className="order-1 xl:order-2 w-full xl:w-[380px] 2xl:w-[420px] flex-shrink-0 flex flex-col gap-5 xl:h-full xl:min-h-0">
+          <div className="w-full xl:w-[380px] 2xl:w-[420px] flex-shrink-0 flex flex-col gap-5 xl:h-full xl:min-h-0">
             <div className="rounded-2xl border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark p-2 shadow-card">
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -1402,8 +1422,8 @@ export default function TeacherBookingsPage() {
                     const draft = booking ? feedbackDrafts[booking.id] : undefined;
                     return (
                       <div key={idx} className="group relative">
-                        <div className="absolute -left-5 top-0 bottom-0 w-1 bg-primary rounded-r-full"></div>
-                        <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 dark:bg-primary/10 shadow-sm transition-all hover:shadow-md hover:border-primary/40">
+                        <div className="absolute -left-3 sm:-left-5 top-0 bottom-0 w-1 bg-primary rounded-r-full"></div>
+                        <div className="p-3 sm:p-4 rounded-xl border border-primary/20 bg-primary/5 dark:bg-primary/10 shadow-sm transition-all hover:shadow-md hover:border-primary/40">
                           <div className="flex justify-between items-start mb-2">
                             <div className="flex items-center gap-1.5 text-primary">
                               <span className="material-symbols-outlined text-[16px]">
@@ -1428,10 +1448,10 @@ export default function TeacherBookingsPage() {
                                   : ev.status}
                             </span>
                           </div>
-                          <h4 className="text-sm font-bold text-slate-800 dark:text-white mb-1">
+                          <h4 className="text-sm border-b border-primary/10 pb-2 sm:text-base font-bold text-slate-800 dark:text-white mb-2">
                             {ev.courseTitle || "課程"}
                           </h4>
-                          <div className="flex items-center gap-2 mt-3">
+                          <div className="flex items-center gap-2 mt-2">
                             <div className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 flex items-center justify-center text-xs font-bold ring-2 ring-white dark:ring-surface-dark">
                               {ev.name[0]}
                             </div>
@@ -1606,14 +1626,14 @@ export default function TeacherBookingsPage() {
             const projectedTotal = pendingTotal + receivedTotal;
 
             return (
-              <div className="grid gap-4 lg:gap-6 md:grid-cols-2 2xl:grid-cols-3">
-                <div className="rounded-2xl bg-gradient-to-br from-primary to-primary-dark p-5 text-white shadow-lg shadow-primary/20 relative overflow-hidden">
-                  <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
-                  <div className="relative z-10 flex items-center justify-between mb-3">
+              <div className="grid gap-3 sm:gap-4 lg:gap-6 grid-cols-2 md:grid-cols-3">
+                <div className="col-span-2 md:col-span-1 rounded-2xl bg-gradient-to-br from-primary to-primary-dark p-4 text-white shadow-lg shadow-primary/20 relative overflow-hidden flex flex-col justify-center">
+                  <div className="absolute -right-4 -top-4 w-20 h-20 sm:w-24 sm:h-24 bg-white/10 rounded-full blur-2xl"></div>
+                  <div className="relative z-10 flex items-center justify-between mb-2">
                     <span className="text-xs font-medium text-white/90">
                       本月預估收入
                     </span>
-                    <span className="material-symbols-outlined text-[20px] text-white/80">
+                    <span className="material-symbols-outlined text-[18px] sm:text-[20px] text-white/80">
                       payments
                     </span>
                   </div>
@@ -1621,21 +1641,25 @@ export default function TeacherBookingsPage() {
                     NT$ {projectedTotal.toLocaleString()}
                   </div>
                 </div>
-                <div className="rounded-2xl border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark p-5 shadow-card">
-                  <div className="text-xs font-medium text-text-sub">已收款</div>
-                  <div className="mt-2 text-2xl font-bold text-slate-800 dark:text-white">
-                    NT$ {receivedTotal.toLocaleString()}
+                <div className="col-span-1 rounded-2xl border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark p-3 sm:p-5 shadow-card flex flex-col justify-center">
+                  <div className="text-[11px] sm:text-xs font-medium text-text-sub">已收款</div>
+                  <div className="mt-1 flex-1 flex flex-col justify-center">
+                    <div className="text-lg sm:text-2xl font-bold text-slate-800 dark:text-white truncate">
+                      NT$ {receivedTotal.toLocaleString()}
+                    </div>
                   </div>
-                  <div className="mt-2 text-xs text-slate-500">
+                  <div className="mt-1 sm:mt-2 text-[10px] sm:text-xs text-slate-500 line-clamp-2">
                     已確認與已完成的正式預約收入
                   </div>
                 </div>
-                <div className="rounded-2xl border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark p-5 shadow-card">
-                  <div className="text-xs font-medium text-text-sub">待確認收入</div>
-                  <div className="mt-2 text-2xl font-bold text-slate-800 dark:text-white">
-                    NT$ {pendingTotal.toLocaleString()}
+                <div className="col-span-1 rounded-2xl border border-border-light dark:border-border-dark bg-white dark:bg-surface-dark p-3 sm:p-5 shadow-card flex flex-col justify-center">
+                  <div className="text-[11px] sm:text-xs font-medium text-text-sub">待確認收入</div>
+                  <div className="mt-1 flex-1 flex flex-col justify-center">
+                    <div className="text-lg sm:text-2xl font-bold text-slate-800 dark:text-white truncate">
+                      NT$ {pendingTotal.toLocaleString()}
+                    </div>
                   </div>
-                  <div className="mt-2 text-xs text-slate-500">
+                  <div className="mt-1 sm:mt-2 text-[10px] sm:text-xs text-slate-500 line-clamp-2">
                     目前共有 {bookings.length} 筆預約，待老師後續確認
                   </div>
                 </div>

@@ -1,273 +1,35 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
-import { Database } from "@/types/database.types";
-import { useModal } from "@/components/providers/ModalContext";
-
-
-// Define types for joined data
-type StudentWithDetails =
-  Database["public"]["Tables"]["student_info"]["Row"] & {
-    user_info: Database["public"]["Tables"]["user_info"]["Row"] | null;
-    teacher_info:
-    | (Database["public"]["Tables"]["teacher_info"]["Row"] & {
-      user_info: Pick<
-        Database["public"]["Tables"]["user_info"]["Row"],
-        "name" | "email"
-      > | null;
-    })
-    | null;
-  };
+import React from "react";
+import { useAdminStudentsController } from "./useAdminStudentsController";
 
 export default function AdminStudentManagementPage() {
-  const [loading, setLoading] = useState(true);
-  const [students, setStudents] = useState<StudentWithDetails[]>([]);
-  const { showModal } = useModal();
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<
-    "all" | "active" | "disabled"
-  >("all");
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
-    null
-  );
-
-  // Teacher Filter State
-  const [teachers, setTeachers] = useState<
-    { name: string; teacher_code: string }[]
-  >([]);
-  const [selectedTeacherCode, setSelectedTeacherCode] = useState<string>("");
-
-  // Edit Mode State
-  const [isEditing, setIsEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [editForm, setEditForm] = useState({
-    name: "",
-    phone: "",
-    isActive: true,
-  });
-
-  useEffect(() => {
-    const initData = async () => {
-      await fetchTeachers();
-      await fetchAllStudents();
-    };
-    initData();
-  }, []);
-
-  const fetchTeachers = async () => {
-    try {
-      const { data, error } = await supabase.from("teacher_info").select(`
-          teacher_code,
-          user_info (
-            name
-          )
-        `);
-
-      if (error) {
-        console.error("Error fetching teachers:", error);
-        return;
-      }
-
-      if (data) {
-        const mappedTeachers = data
-          .map((t) => ({
-            name: t.user_info?.name || "未命名",
-            teacher_code: t.teacher_code,
-          }))
-          .sort((a, b) => a.name.localeCompare(b.name));
-        setTeachers(mappedTeachers);
-      }
-    } catch (error) {
-      console.error("Error fetching teachers list:", error);
-    }
-  };
-
-  // When selected student changes, reset edit mode
-  useEffect(() => {
-    setIsEditing(false);
-  }, [selectedStudentId]);
-
-  const fetchAllStudents = async () => {
-    try {
-      setLoading(true);
-
-      // Admin fetches ALL students with their user info AND teacher info
-      const { data: studentsData, error: studentsError } = await supabase.from(
-        "student_info"
-      ).select(`
-          *,
-          user_info (*),
-          teacher_info (
-            *,
-            user_info (
-              name,
-              email
-            )
-          )
-        `);
-
-      if (studentsError) throw studentsError;
-
-      if (studentsData) {
-        setStudents(studentsData as unknown as StudentWithDetails[]);
-        if (studentsData.length > 0 && !selectedStudentId) {
-          setSelectedStudentId(studentsData[0].id);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching students:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const selectedStudent = students.find((s) => s.id === selectedStudentId);
-
-  const handleEditClick = () => {
-    if (!selectedStudent || !selectedStudent.user_info) return;
-    setEditForm({
-      name: selectedStudent.user_info.name || "",
-      phone: selectedStudent.user_info.phone || "",
-      isActive: selectedStudent.user_info.is_active ?? true,
-    });
-    setIsEditing(true);
-  };
-
-  const handleSave = async () => {
-    if (!selectedStudent || !selectedStudent.user_info) return;
-
-    try {
-      setSaving(true);
-      const { error } = await supabase
-        .from("user_info")
-        .update({
-          name: editForm.name,
-          phone: editForm.phone,
-          is_active: editForm.isActive,
-        })
-        .eq("id", selectedStudent.user_info.id);
-
-      if (error) throw error;
-
-      // Update local state
-      const updatedStudents = students.map((s) => {
-        if (s.id === selectedStudent.id && s.user_info) {
-          return {
-            ...s,
-            user_info: {
-              ...s.user_info,
-              name: editForm.name,
-              phone: editForm.phone,
-              is_active: editForm.isActive,
-            },
-          };
-        }
-        return s;
-      });
-      setStudents(updatedStudents);
-      setIsEditing(false);
-      showModal({
-        title: "成功",
-        description: "儲存成功！",
-        confirmText: "確定",
-      });
-    } catch (error: any) {
-      console.error("Error updating student:", error);
-      showModal({
-        title: "錯誤",
-        description: "儲存失敗：" + error.message,
-        confirmText: "確定",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!selectedStudent || !selectedStudent.user_info) return;
-
-    showModal({
-      title: "永久刪除確認",
-      description:
-        "您確定要「永久刪除」此學生帳號嗎？此操作無法復原，將連同所有關聯資料一起刪除。",
-      type: "warning",
-      confirmText: "確認刪除",
-      showCancel: true,
-      cancelText: "取消",
-      onConfirm: async () => {
-        try {
-          const { error } = await supabase.rpc("admin_delete_user", {
-            target_user_id: selectedStudent.user_info!.id,
-          });
-
-          if (error) throw error;
-
-          // Update local state
-          const remainingStudents = students.filter(
-            (s) => s.id !== selectedStudent.id
-          );
-          setStudents(remainingStudents);
-          setSelectedStudentId(
-            remainingStudents.length > 0 ? remainingStudents[0].id : null
-          );
-          setIsEditing(false);
-
-          showModal({
-            title: "已刪除",
-            description: "學生帳號已永久刪除。",
-            confirmText: "確定",
-          });
-        } catch (error: any) {
-          console.error("Error deleting student:", error);
-          showModal({
-            title: "刪除失敗",
-            description: error.message || "發生未知錯誤",
-            confirmText: "確定",
-          });
-        }
-      },
-    });
-  };
-
-  const filteredStudents = students.filter((student) => {
-    const userInfo = student.user_info;
-    const teacherInfo = student.teacher_info;
-
-    // Note: We intentionally DO NOT return false if userInfo is missing,
-    // so that "orphan" student records can still be seen and deleted/managed by Admin.
-
-    // Filter by Status
-    // If userInfo is missing, we consider it "active" (or neutral) for filter purposes,
-    // or you might decide to show them only in "active" or "all".
-    // Here we treat missing userInfo as "potentially active" but effectively "all".
-    if (statusFilter === "active" && userInfo && !userInfo.is_active)
-      return false;
-    if (statusFilter === "disabled" && userInfo && userInfo.is_active)
-      return false;
-
-    // Link: student -> teacher_code, teacher -> teacher_code
-    // Note: student_info has teacher_code directly.
-    if (selectedTeacherCode && student.teacher_code !== selectedTeacherCode)
-      return false;
-
-    const searchLower = searchQuery.toLowerCase();
-    const userName = userInfo?.name || "";
-    const userEmail = userInfo?.email || "";
-    const teacherName = teacherInfo?.user_info?.name || "";
-
-    // Search by student name, email, OR teacher name
-    return (
-      userName.toLowerCase().includes(searchLower) ||
-      userEmail.toLowerCase().includes(searchLower) ||
-      teacherName.toLowerCase().includes(searchLower) ||
-      (student.student_code || "").toLowerCase().includes(searchLower)
-    );
-  });
-
-  const getAvatarChar = (name: string) => (name ? name.charAt(0) : "?");
-  const activeCount = filteredStudents.length;
+  const {
+    loading,
+    students,
+    teachers,
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter,
+    selectedStudentId,
+    selectedStudent,
+    setSelectedStudent,
+    selectedTeacherCode,
+    setSelectedTeacherCode,
+    isEditing,
+    saving,
+    editForm,
+    updateEditForm,
+    filteredStudents,
+    activeCount,
+    getAvatarChar,
+    handleEditClick,
+    handleCancelEdit,
+    handleSave,
+    handleDelete,
+    handleForceDeleteOrphanStudent,
+  } = useAdminStudentsController();
 
   return (
     <div className="flex-1 flex flex-col h-full bg-background-light dark:bg-background-dark overflow-hidden">
@@ -401,7 +163,7 @@ export default function AdminStudentManagementPage() {
                     return (
                       <div
                         key={student.id}
-                        onClick={() => setSelectedStudentId(student.id)}
+                        onClick={() => setSelectedStudent(student.id)}
                         className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors border-l-4 ${isSelected
                           ? "border-primary bg-blue-50/50 dark:bg-blue-900/10"
                           : "border-transparent"
@@ -503,40 +265,7 @@ export default function AdminStudentManagementPage() {
                           So we CAN delete it using student.id! 
                       */}
                     <button
-                      onClick={() => {
-                        // Special handler for orphan student delete
-                        // Using the student.id as the target_user_id since they are 1:1
-                        showModal({
-                          title: "強制刪除異常資料",
-                          description:
-                            "確定要強制刪除此異常的學生紀錄嗎？這會嘗試刪除對應的 User ID。",
-                          type: "warning",
-                          confirmText: "確認刪除",
-                          showCancel: true,
-                          cancelText: "取消",
-                          onConfirm: async () => {
-                            try {
-                              const { error } = await supabase.rpc(
-                                "admin_delete_user",
-                                {
-                                  target_user_id: selectedStudent.id,
-                                }
-                              );
-                              if (error) throw error;
-                              const remaining = students.filter(
-                                (s) => s.id !== selectedStudent.id
-                              );
-                              setStudents(remaining);
-                              setSelectedStudentId(
-                                remaining.length > 0 ? remaining[0].id : null
-                              );
-                            } catch (e: any) {
-                              console.error(e);
-                              showModal({ type: "error", title: "刪除失敗", description: e.message, confirmText: "確定" });
-                            }
-                          },
-                        });
-                      }}
+                      onClick={handleForceDeleteOrphanStudent}
                       className="mt-6 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
                     >
                       強制刪除此紀錄
@@ -594,10 +323,7 @@ export default function AdminStudentManagementPage() {
                                 <input
                                   checked={editForm.isActive}
                                   onChange={(e) =>
-                                    setEditForm({
-                                      ...editForm,
-                                      isActive: e.target.checked,
-                                    })
+                                    updateEditForm("isActive", e.target.checked)
                                   }
                                   className="sr-only peer"
                                   type="checkbox"
@@ -676,10 +402,7 @@ export default function AdminStudentManagementPage() {
                                     type="text"
                                     value={editForm.name}
                                     onChange={(e) =>
-                                      setEditForm({
-                                        ...editForm,
-                                        name: e.target.value,
-                                      })
+                                      updateEditForm("name", e.target.value)
                                     }
                                     required
                                   />
@@ -714,10 +437,7 @@ export default function AdminStudentManagementPage() {
                                     type="tel"
                                     value={editForm.phone}
                                     onChange={(e) =>
-                                      setEditForm({
-                                        ...editForm,
-                                        phone: e.target.value,
-                                      })
+                                      updateEditForm("phone", e.target.value)
                                     }
                                     placeholder="請輸入電話號碼"
                                   />
@@ -765,7 +485,7 @@ export default function AdminStudentManagementPage() {
                     {/* Footer */}
                     <div className="flex items-center justify-between p-5 border-t border-border-light dark:border-border-dark bg-slate-50/50 dark:bg-slate-800/50">
                       <button
-                        onClick={() => setIsEditing(false)}
+                        onClick={handleCancelEdit}
                         className="px-5 py-2 rounded-lg border border-border-light dark:border-border-dark text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors font-medium text-sm flex items-center gap-2"
                       >
                         <span className="material-symbols-outlined text-[18px]">

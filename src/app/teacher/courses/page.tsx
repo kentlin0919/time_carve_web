@@ -1,208 +1,37 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useModal } from "@/components/providers/ModalContext";
-
-import { createClient } from "@/lib/supabase/client";
-import { Course, CourseSection } from "@/lib/domain/course/entity";
-import { SupabaseCourseRepository } from "@/lib/infrastructure/course/SupabaseCourseRepository";
-import { SupabaseAuthRepository } from "@/lib/infrastructure/auth/SupabaseAuthRepository";
+import React from "react";
 import CourseDetailForm from "./CourseDetailForm";
+import { useTeacherCoursesController } from "./useTeacherCoursesController";
 
 export default function TeacherCoursesPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const { showModal } = useModal();
-
-  // Edit Mode State
-  const [isEditing, setIsEditing] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [editForm, setEditForm] = useState<Partial<Course>>({});
-  const [activeTab, setActiveTab] = useState<"info" | "content">("info"); // Tab state
-  const [showAllFields, setShowAllFields] = useState(false);
-  const [expandedContent, setExpandedContent] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<
-    Record<string, boolean>
-  >({});
-
-  // Load courses on mount
-  useEffect(() => {
-    const loadCourses = async () => {
-      setLoading(true);
-      try {
-        const supabase = createClient();
-        const authRepo = new SupabaseAuthRepository();
-        const courseRepo = new SupabaseCourseRepository(supabase);
-        const user = await authRepo.getUser();
-
-        if (user) {
-          const data = await courseRepo.getTeacherCourses(user.id);
-          setCourses(data);
-          if (data.length > 0) {
-            setSelectedCourseId(data[0].id);
-          }
-        }
-      } catch (error) {
-        console.error("Error loading courses:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadCourses();
-  }, []);
-
-  // Check for 'new=true' query param
-  useEffect(() => {
-    if (searchParams.get("new") === "true") {
-      setEditForm({
-        title: "",
-        price: 0,
-        priceUnit: "小時",
-        desc: "",
-        status: "draft",
-        sections: [],
-      });
-      setIsCreating(true);
-      setIsEditing(false);
-
-      // Optional: Clean up the URL
-      router.replace("/teacher/courses");
-    }
-  }, [searchParams, router]);
-
-  // When selected course changes, reset edit mode
-  useEffect(() => {
-    setIsEditing(false);
-    setActiveTab("info");
-    setExpandedContent(false);
-    setExpandedSections({});
-  }, [selectedCourseId]);
-
-  const selectedCourse = courses.find((c) => c.id === selectedCourseId);
-
-  const handleEditClick = () => {
-    if (!selectedCourse) return;
-    setEditForm(JSON.parse(JSON.stringify(selectedCourse)));
-    setIsEditing(true);
-    setIsCreating(false);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setIsCreating(false);
-    setEditForm({});
-  };
-
-  const handleSaveCourse = async (formData: Partial<Course>) => {
-    setSaving(true);
-    try {
-      const supabase = createClient();
-      const courseRepo = new SupabaseCourseRepository(supabase);
-
-      if (isCreating) {
-        const authRepo = new SupabaseAuthRepository();
-        const user = await authRepo.getUser();
-        if (!user) return;
-
-        const newCourseData = {
-          teacherId: user.id,
-          title: formData.title || "未命名課程",
-          desc: formData.desc || "",
-          content: formData.content || "",
-          courseType: formData.courseType || "1-on-1",
-          durationMinutes: formData.durationMinutes || 60,
-          price: formData.price || 0,
-          imageUrl: formData.imageUrl || null,
-          isActive: formData.isActive || false, // Default from form shouldn't override unless set
-          status: formData.status || "draft",
-          sections: formData.sections || [],
-          tags: formData.tags || [],
-          icon: formData.icon || "school",
-          iconColor: formData.iconColor || "blue",
-          priceUnit: formData.priceUnit || "小時",
-        };
-
-        const createdCourse = await courseRepo.createCourse(newCourseData);
-        if (createdCourse) {
-          setCourses((prev) => [createdCourse, ...prev]);
-          setSelectedCourseId(createdCourse.id);
-          showModal({
-            title: "成功",
-            description: "課程建立成功",
-            confirmText: "確定",
-          });
-          setIsCreating(false);
-        }
-      } else {
-        // Validation: Ensure ID exists
-        if (!formData.id && selectedCourse?.id) {
-          // Fallback to selected ID if form doesn't have it (it should based on editForm init)
-          // But actually formData is partial from form state, might lack ID if not passed
-          // Let's us selectedCourse.id
-        }
-
-        const targetId = formData.id || selectedCourse?.id;
-        if (!targetId) return;
-
-        const updatedCourse = await courseRepo.updateCourse(targetId, formData);
-
-        if (updatedCourse) {
-          setCourses((prev) =>
-            prev.map((c) => (c.id === updatedCourse.id ? updatedCourse : c))
-          );
-          showModal({
-            title: "成功",
-            description: "儲存成功",
-            confirmText: "確定",
-          });
-          setIsEditing(false);
-        }
-      }
-    } catch (error) {
-      console.error("Error saving course:", error);
-      showModal({
-        title: "錯誤",
-        description: "儲存失敗，請稍後再試",
-        confirmText: "確定",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleCreateCourse = () => {
-    setEditForm({
-      title: "",
-      price: 0,
-      priceUnit: "小時",
-      desc: "",
-      status: "draft",
-      sections: [],
-    });
-    setIsCreating(true);
-    setIsEditing(false);
-  };
-
-  const filteredCourses = courses.filter(
-    (course) =>
-      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (course.desc || "").toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const formatDateTime = (value?: string | null) => {
-    if (!value) return "";
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return value;
-    return date.toLocaleString();
-  };
+  const {
+    courses,
+    selectedCourseId,
+    setSelectedCourseId,
+    searchQuery,
+    setSearchQuery,
+    isEditing,
+    isCreating,
+    saving,
+    loading,
+    editForm,
+    showAllFields,
+    setShowAllFields,
+    expandedContent,
+    setExpandedContent,
+    expandedSections,
+    setExpandedSections,
+    selectedCourse,
+    handleEditClick,
+    handleCancel,
+    handleSaveCourse,
+    handleCreateCourse,
+    handlePreviewCourse,
+    filteredCourses,
+    formatDateTime,
+  } = useTeacherCoursesController();
 
   const renderField = (
     label: string,
@@ -705,11 +534,7 @@ export default function TeacherCoursesPage() {
 
                         <div className="pt-4 mt-4 border-t border-border-light dark:border-border-dark">
                           <button
-                            onClick={() =>
-                              router.push(
-                                `/teacher/courses/preview/${selectedCourse.id}`
-                              )
-                            }
+                            onClick={() => handlePreviewCourse(selectedCourse.id)}
                             className="w-full p-4 rounded-xl border border-dashed border-border-light dark:border-border-dark flex items-center justify-center gap-2 text-primary hover:bg-primary/5 transition-colors"
                           >
                             <span className="material-symbols-outlined">

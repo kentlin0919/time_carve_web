@@ -1,221 +1,36 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
-import { useModal } from "@/components/providers/ModalContext";
 import Link from "next/link";
-// Removed EducationInputs as it is now in Profile page
+import { useTeacherSettingsController } from "./useTeacherSettingsController";
 
 export default function TeacherSettingsPage() {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const { showModal } = useModal();
-
-  // Profile Preview (Read-only)
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
-
-  // Booking State
-  const [bookingWindow, setBookingWindow] = useState("2 週內");
-  const [bookingBuffer, setBookingBuffer] = useState("15 分鐘");
-  const [cancelPolicy, setCancelPolicy] = useState("課程開始前 24 小時");
-  const [limitFreq, setLimitFreq] = useState(false);
-
-  // Notification State
-  const [notifNewBooking, setNotifNewBooking] = useState({
-    email: true,
-    app: true,
-    line: true,
-  });
-  const [notifReminder, setNotifReminder] = useState({
-    email: false,
-    app: true,
-    line: true,
-  });
-  const [notifCancel, setNotifCancel] = useState({
-    email: true,
-    app: true,
-    line: true,
-  });
-  const [notifSystem, setNotifSystem] = useState({
-    email: true,
-    app: true,
-    line: false,
-  });
-
-  // New Reminder Config
-  const [reminderEmailEnabled, setReminderEmailEnabled] = useState(false);
-  const [reminderMinutes, setReminderMinutes] = useState(30);
-
-  // Integration State
-  const [googleEnabled, setGoogleEnabled] = useState(false);
-  const [lineEnabled, setLineEnabled] = useState(false);
-  const [lineToken, setLineToken] = useState("");
-
-  // Account State
-  const [isPaused, setIsPaused] = useState(false);
-
-  useEffect(() => {
-    fetchSettings();
-  }, []);
-
-  const fetchSettings = async () => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Fetch User Info
-      const { data: userData } = await supabase
-        .from("user_info")
-        .select("name, email, avatar_url")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (userData) {
-        setName(userData.name || "");
-        setEmail(userData.email || "");
-        setAvatarUrl(
-          userData.avatar_url ||
-          "https://ui-avatars.com/api/?name=" + (userData.name || "User")
-        );
-      }
-
-      // Fetch Teacher Info
-      const { data: teacherData } = await supabase
-        .from("teacher_info")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (teacherData) {
-        const bookingSettings = (teacherData.booking_settings as any) || {};
-        setBookingWindow(bookingSettings.window || "2 週內");
-        setBookingBuffer(bookingSettings.buffer || "15 分鐘");
-        setCancelPolicy(bookingSettings.cancel_policy || "課程開始前 24 小時");
-        setLimitFreq(bookingSettings.limit_freq || false);
-
-        const notifSettings = (teacherData.notification_settings as any) || {};
-        if (notifSettings.new_booking)
-          setNotifNewBooking(notifSettings.new_booking);
-        if (notifSettings.reminder) setNotifReminder(notifSettings.reminder);
-        if (notifSettings.cancel) setNotifCancel(notifSettings.cancel);
-        if (notifSettings.system) setNotifSystem(notifSettings.system);
-
-        // Reminder settings (top-level fields)
-        const td = teacherData as any;
-        setReminderEmailEnabled(td.enable_email_reminders || false);
-        setReminderMinutes(td.reminder_minutes || 30);
-
-        setGoogleEnabled(teacherData.google_calendar_enabled || false);
-        setLineEnabled(teacherData.line_notify_enabled || false);
-        setLineToken(teacherData.line_notify_token || "");
-
-        // Paused if NOT public
-        setIsPaused(!teacherData.is_public);
-      }
-    } catch (error) {
-      console.error("Error fetching settings:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      // Update Teacher Info (Settings only)
-      const { error: teacherError } = await supabase
-        .from("teacher_info")
-        .update({
-          booking_settings: {
-            window: bookingWindow,
-            buffer: bookingBuffer,
-            cancel_policy: cancelPolicy,
-            limit_freq: limitFreq,
-          },
-          notification_settings: {
-            new_booking: notifNewBooking,
-            reminder: notifReminder,
-            cancel: notifCancel,
-            system: notifSystem,
-          },
-          enable_email_reminders: reminderEmailEnabled,
-          reminder_minutes: reminderMinutes,
-          google_calendar_enabled: googleEnabled,
-          line_notify_enabled: lineEnabled,
-          line_notify_token: lineToken,
-          is_public: !isPaused,
-        })
-        .eq("id", user.id);
-
-      if (teacherError) throw teacherError;
-
-      showModal({
-        title: "成功",
-        description: "系統設定已儲存",
-        confirmText: "確定",
-      });
-    } catch (error: any) {
-      console.error("Error saving settings:", error);
-      showModal({
-        title: "錯誤",
-        description: "儲存失敗: " + error.message,
-        confirmText: "確定",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handlePauseService = async () => {
-    const action = isPaused ? "恢復" : "暫停";
-    // ... (Use same logic but simpler implementation if needed, or keep existing)
-    // Re-implementing for clarity in replacement
-    showModal({
-      title: "確認",
-      description: `確定要${action}服務嗎？`,
-      confirmText: "確定",
-      cancelText: "取消",
-      showCancel: true,
-      onConfirm: async () => {
-        try {
-          const {
-            data: { user },
-          } = await supabase.auth.getUser();
-          if (!user) return;
-
-          const { error } = await supabase
-            .from("teacher_info")
-            .update({ is_public: isPaused } as any)
-            .eq("id", user.id);
-
-          if (error) throw error;
-
-          setIsPaused(!isPaused);
-          showModal({
-            title: "成功",
-            description: `服務已${action}`,
-            confirmText: "確定",
-          });
-        } catch (error) {
-          console.error(error);
-          showModal({
-            title: "錯誤",
-            description: "操作失敗",
-            confirmText: "確定",
-          });
-        }
-      },
-    });
-  };
+  const {
+    loading,
+    saving,
+    avatarUrl,
+    bookingWindow,
+    setBookingWindow,
+    bookingBuffer,
+    setBookingBuffer,
+    cancelPolicy,
+    setCancelPolicy,
+    limitFreq,
+    setLimitFreq,
+    notifNewBooking,
+    setNotifNewBooking,
+    notifReminder,
+    setNotifReminder,
+    reminderMinutes,
+    setReminderMinutes,
+    googleEnabled,
+    setGoogleEnabled,
+    lineEnabled,
+    setLineEnabled,
+    isPaused,
+    fetchSettings,
+    handleSave,
+    handlePauseService,
+  } = useTeacherSettingsController();
 
   if (loading) {
     return <div className="p-8 text-center text-gray-500">載入設定中...</div>;

@@ -14,9 +14,9 @@ export function usePublicCourses() {
         const courseRepo = new SupabaseCourseRepository();
         const publicCourses = await courseRepo.getAllPublicCourses();
         setCourses(publicCourses);
-      } catch (err: any) {
-        console.error(err);
-        setError(err.message || "載入課程失敗");
+      } catch (error: unknown) {
+        console.error(error);
+        setError(error instanceof Error ? error.message : "載入課程失敗");
       } finally {
         setLoading(false);
       }

@@ -1,57 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getAdminBookingStats } from "@/app/actions/admin";
-import {
-  startOfMonth,
-  endOfMonth,
-  format,
-  addMonths,
-  subMonths,
-} from "date-fns";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { useModal } from "@/components/providers/ModalContext";
+import { useAdminBookingsController } from "./useAdminBookingsController";
 
 export default function AdminBookingsPage() {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [stats, setStats] = useState<{
-    summary: {
-      totalBookings: number;
-      totalRevenue: number;
-      totalProjectedRevenue: number;
-    };
-    byTeacher: {
-      teacherId: string;
-      teacherName: string;
-      bookingsCount: number;
-      pendingRevenue: number;
-      receivedRevenue: number;
-      projectedRevenue: number;
-    }[];
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { showModal } = useModal();
-
-  useEffect(() => {
-    async function loadStats() {
-      setLoading(true);
-      try {
-        const start = startOfMonth(currentDate);
-        const end = endOfMonth(currentDate);
-        const data = await getAdminBookingStats(start, end);
-        setStats(data);
-      } catch (error) {
-        console.error("Failed to load admin stats", error);
-        showModal({ type: "error", title: "載入失敗", description: "無法載入數據", confirmText: "確定" });
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadStats();
-  }, [currentDate]);
-
-  const handlePrevMonth = () => setCurrentDate(subMonths(currentDate, 1));
-  const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
+  const { currentDate, stats, loading, handlePrevMonth, handleNextMonth } =
+    useAdminBookingsController();
 
   if (loading && !stats) {
     return <div className="p-8 text-center text-text-sub">載入中...</div>;

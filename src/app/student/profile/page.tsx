@@ -1,304 +1,41 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { supabase } from "@/lib/supabase";
-import { updateUserAvatar } from "@/lib/avatar";
-import { useRouter } from "next/navigation";
-import { useModal } from "@/components/providers/ModalContext";
+import Image from "next/image";
 import EducationInputs from "@/components/ui/EducationInputs";
-import { useSchools } from "@/hooks/useSchools";
-
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  avatar_url: string | null;
-  student_code?: string;
-  teacher_code?: string;
-}
+import { useStudentProfileController } from "./useStudentProfileController";
 
 export default function StudentProfilePage() {
-  const router = useRouter();
-  const { showModal } = useModal();
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-
-  // Use shared hook for school data (for validation in handleSave)
-  const schools = useSchools();
-
-  // Form States
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [bio, setBio] = useState(""); // Note: 'bio' is not in user_info/student_info schema, might need to be stored elsewhere or omitted if not supported. I will mock it or use local state for now as it's in the design. actually teacher_info has bio, student doesn't. I'll omit or check if I should add it.
-  // Wait, the design has "School/Grade" and "Bio". Database `student_info` has `student_code`, `teacher_code`. `user_info` has `name`, `email`, `phone`, `avatar_url`.
-  // I will map "School/Grade" to a placeholder or `student_code` if appropriate, but `student_code` seems to be an ID.
-  // For now I will keep "School/Grade" and "Bio" as UI-only or store in metadata if needed, but to strictly follow DB I should probably omit or clarify.
-  // Actually, I'll store "School/Grade" and "Bio" in `user_metadata` for now if they don't exist in columns, OR just wire up the existing columns: Name, Email, Phone.
-  // Let's stick to real columns `name`, `phone`, `avatar_url`.
-
-  // Password Change State
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
-
-  // Avatar State
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
-
-  // Education State
-  const [school, setSchool] = useState("");
-  const [status, setStatus] = useState("studying");
-  const [department, setDepartment] = useState("");
-  const [degreeLevel, setDegreeLevel] = useState("");
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        router.push("/auth/login");
-        return;
-      }
-
-      const { data: userInfo, error } = await supabase
-        .from("user_info")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (error) throw error;
-
-      if (userInfo) {
-        setUserProfile(userInfo as any);
-        setName(userInfo.name || "");
-        setEmail(userInfo.email || "");
-        setPhone(userInfo.phone || "");
-        setAvatarPreview(userInfo.avatar_url);
-
-        // Fetch Education
-        const { data: eduData } = await supabase
-          .from("student_education")
-          .select(
-            `
-            *,
-            schools (name, code),
-            education_statuses (status_key)
-          `
-          )
-          .eq("student_id", user.id)
-          .maybeSingle();
-
-        if (eduData) {
-          if (eduData.schools) {
-            // @ts-ignore
-            setSchool(eduData.schools.name);
-          }
-          if (eduData.education_statuses) {
-            // @ts-ignore
-            setStatus(eduData.education_statuses.status_key);
-          }
-          setDepartment(eduData.department || "");
-          setDegreeLevel(eduData.degree_level || "");
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUpdateProfile = async () => {
-    if (!userProfile) return;
-    setSaving(true);
-    try {
-      console.log("Starting profile update...");
-
-      // 1. Update basic info
-      const updates = {
-        id: userProfile.id,
-        name,
-        phone,
-        updated_at: new Date().toISOString(),
-      };
-
-      const { error } = await supabase
-        .from("user_info")
-        .update(updates)
-        .eq("id", userProfile.id);
-
-      if (error) {
-        console.error("Basic info update error:", error);
-        throw error;
-      }
-
-      // 2. Update Education
-      console.log("Updating education with:", { school, status, department, degreeLevel });
-
-      // Get/Create School ID
-      const matchedSchool = schools.find((s) => s.name === school);
-      const schoolCode = matchedSchool ? matchedSchool.code : null;
-
-      const { data: schoolId, error: schoolError } = await supabase.rpc(
-        "get_or_create_school",
-        {
-          p_code: schoolCode || "",
-          p_name: school,
-        }
-      );
-
-      if (schoolError) {
-        console.error("School error:", schoolError);
-        throw schoolError;
-      }
-      console.log("School ID resolved:", schoolId);
-
-      // Get Status ID
-      const { data: statusData, error: statusError } = await supabase
-        .from("education_statuses")
-        .select("id")
-        .eq("status_key", status)
-        .single();
-
-      if (statusError) {
-        console.error("Status lookup error:", statusError);
-        throw statusError;
-      }
-      console.log("Status ID resolved:", statusData.id);
-
-      // Upsert Student Education
-      const { data: existingEdu } = await supabase
-        .from("student_education")
-        .select("id")
-        .eq("student_id", userProfile.id)
-        .maybeSingle();
-
-      console.log("Existing education record:", existingEdu);
-
-      const eduUpdates = {
-        student_id: userProfile.id,
-        school_id: schoolId,
-        status_id: statusData.id,
-        department: department,
-        degree_level: degreeLevel,
-        updated_at: new Date().toISOString(),
-      };
-
-      let eduResult;
-      if (existingEdu) {
-        console.log("Updating existing education:", existingEdu.id);
-        eduResult = await supabase
-          .from("student_education")
-          .update(eduUpdates)
-          .eq("id", existingEdu.id)
-          .select();
-      } else {
-        console.log("Inserting new education...");
-        eduResult = await supabase
-          .from("student_education")
-          .insert(eduUpdates)
-          .select();
-      }
-
-      console.log("Education update result:", eduResult);
-
-      if (eduResult.error) {
-        console.error("Education update error:", eduResult.error);
-        throw eduResult.error;
-      }
-
-      showModal({
-        title: "成功",
-        description: "個人資料與學歷已更新！",
-        confirmText: "確定",
-      });
-    } catch (error: any) {
-      console.error("Detailed update error:", error);
-      showModal({
-        title: "錯誤",
-        description: "更新失敗: " + error.message + " (Check Console)",
-        confirmText: "確定",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleUpdatePassword = async () => {
-    setPasswordError("");
-    setPasswordSuccess("");
-
-    if (newPassword !== confirmPassword) {
-      setPasswordError("新密碼與確認密碼不符");
-      return;
-    }
-    if (newPassword.length < 6) {
-      setPasswordError("密碼長度至少需 6 個字元");
-      return;
-    }
-
-    // Note: Supabase implementation usually requires re-auth for password change if checking old password,
-    // but `updateUser` with new password works if session is active.
-    // Validating `currentPassword` is not directly supported by `updateUser` without signIn.
-    // For this implementation, I will just update to new password.
-
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-      if (error) throw error;
-      setPasswordSuccess("密碼已更新！");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch (error: any) {
-      setPasswordError(error.message);
-    }
-  };
-
-  const handleAvatarUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (!event.target.files || event.target.files.length === 0) {
-      return;
-    }
-    const file = event.target.files[0];
-    setUploadingAvatar(true);
-    try {
-      if (userProfile) {
-        const publicUrl = await updateUserAvatar({
-          userId: userProfile.id,
-          file,
-        });
-        setAvatarPreview(publicUrl);
-        showModal({
-          title: "成功",
-          description: "頭像更新成功！",
-          confirmText: "確定",
-        });
-      }
-    } catch (error: any) {
-      showModal({
-        title: "錯誤",
-        description: "頭像上傳失敗: " + error.message,
-        confirmText: "確定",
-      });
-    } finally {
-      setUploadingAvatar(false);
-    }
-  };
+  const {
+    fileInputRef,
+    loading,
+    saving,
+    name,
+    setName,
+    email,
+    phone,
+    setPhone,
+    newPassword,
+    setNewPassword,
+    confirmPassword,
+    setConfirmPassword,
+    passwordError,
+    passwordSuccess,
+    avatarPreview,
+    uploadingAvatar,
+    school,
+    setSchool,
+    status,
+    setStatus,
+    department,
+    setDepartment,
+    degreeLevel,
+    setDegreeLevel,
+    openFilePicker,
+    handleUpdateProfile,
+    handleUpdatePassword,
+    handleAvatarUpload,
+    showDeleteAccountNotice,
+  } = useStudentProfileController();
 
   if (loading) {
     return <div className="p-10 text-center">載入中...</div>;
@@ -341,16 +78,17 @@ export default function StudentProfilePage() {
               <div className="w-full flex flex-col items-center gap-6">
                 <div
                   className="relative group cursor-pointer"
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={openFilePicker}
                 >
                   <div className="size-44 rounded-full border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden relative ring-4 ring-primary/20 bg-slate-100">
-                    <img
+                    <Image
                       alt="Profile Preview"
-                      className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
+                      fill
+                      unoptimized
+                      className="object-cover transform hover:scale-105 transition-transform duration-500"
                       src={
                         avatarPreview ||
-                        `https://ui-avatars.com/api/?name=${name || "User"
-                        }&background=random`
+                        `https://ui-avatars.com/api/?name=${name || "User"}&background=random`
                       }
                     />
                   </div>
@@ -372,7 +110,7 @@ export default function StudentProfilePage() {
                 <div className="w-full bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-100 dark:border-slate-700/50 flex flex-col gap-4">
                   <div className="grid grid-cols-1 gap-3 pt-2">
                     <button
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={openFilePicker}
                       disabled={uploadingAvatar}
                       className="flex items-center justify-center gap-2 px-3 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 hover:border-slate-300 dark:hover:border-slate-500 transition-all shadow-sm disabled:opacity-50"
                     >
@@ -624,13 +362,7 @@ export default function StudentProfilePage() {
               </div>
               <button
                 className="text-red-500 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/30 px-4 py-2 rounded-lg text-sm font-bold trans-all"
-                onClick={() =>
-                  showModal({
-                    title: "刪除帳戶",
-                    description: "請聯繫管理員刪除您的帳戶",
-                    confirmText: "確定",
-                  })
-                }
+                onClick={showDeleteAccountNotice}
               >
                 刪除帳戶
               </button>

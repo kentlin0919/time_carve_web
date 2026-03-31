@@ -1,170 +1,36 @@
 "use client";
 
 import Link from "next/link";
-import { createClient } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
-import { useState } from "react";
-import { Database } from "@/types/database.types";
-import { useRouter } from "next/navigation";
-import { useModal } from "@/components/providers/ModalContext";
+import { useAddTeacherController } from "./useAddTeacherController";
 
 export default function AddTeacherPage() {
-  const router = useRouter();
-  const { showModal } = useModal();
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Form State
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  // Plan is currently just UI in the form, we can store it in metadata if needed,
-  // currently DB schema might not have 'plan' column on teacher_info or user_info.
-  // We'll focus on creating the teacher first. The prompt didn't ask for Plan DB schema changes.
-  const [status, setStatus] = useState("active"); // active | disabled
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    // 1. Validation
-    if (password !== confirmPassword) {
-      setError("密碼不一致");
-      setLoading(false);
-      return;
-    }
-    if (password.length < 6) {
-      setError("密碼長度至少需 6 碼");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      // 1.5 Check if email already exists (using RPC)
-      // We use the admin client (supabase) to check, because authorized client can call the secure RPC
-      const { data: emailExists, error: checkError } = await supabase.rpc(
-        "admin_check_email_exists",
-        {
-          email_arg: email,
-        }
-      );
-
-      if (checkError) {
-        console.error("Email check failed:", checkError);
-        throw new Error(
-          `無法驗證 Email: ${checkError.message} (${checkError.code})`
-        );
-      }
-
-      if (emailExists) {
-        setError("此電子郵件已被註冊");
-        setLoading(false);
-        return;
-      }
-
-      // 2. Create a temporary Supabase client to create the new user
-      // We do this to avoid logging out the current admin user.
-      const tempSupabase = createClient<Database>(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key',
-        {
-          auth: {
-            persistSession: false, // Critical: Do not persist this session
-            autoRefreshToken: false,
-          },
-        }
-      );
-
-      // 3. Helper: Sign up the teacher
-      const { data: authData, error: authError } =
-        await tempSupabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              name: name,
-              role: "teacher",
-            },
-          },
-        });
-
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("User creation failed");
-
-      // 4. Promote to Teacher (using Admin RPC)
-      // The new user is created as Student (id=3) by default trigger.
-      // We verify ourselves as Admin and call the RPC to promote them.
-      const { error: rpcError } = await supabase.rpc(
-        "admin_promote_to_teacher",
-        {
-          target_user_id: authData.user.id,
-          teacher_name: name,
-          is_active: status === "active",
-        }
-      );
-
-      if (rpcError) {
-        console.error("Promotion failed:", rpcError);
-
-        // --- ROLLBACK LOGIC ---
-        // If promotion fails, we must delete the user we just created to avoid
-        // leaving a "Student" account with the teacher's email.
-        console.log("Initiating rollback: Deleting incomplete user account...");
-        try {
-          const { error: deleteError } = await supabase.rpc(
-            "admin_delete_user",
-            {
-              target_user_id: authData.user.id,
-            }
-          );
-
-          if (deleteError) {
-            console.error(
-              "Rollback failed! User may still exist:",
-              deleteError
-            );
-            throw new Error(
-              `新增失敗且回滾失敗: ${rpcError.message} (請聯繫管理員手動刪除帳號)`
-            );
-          } else {
-            console.log("Rollback successful: User deleted.");
-          }
-        } catch (rollbackErr) {
-          console.error("Rollback exception:", rollbackErr);
-          // Don't overwrite the original error, but maybe append info
-        }
-        // ----------------------
-
-        throw new Error(`新增失敗 (已自動回滾): ${rpcError.message}`);
-      }
-
-      // Success
-      showModal({
-        title: "成功",
-        description: "教師帳號新增成功！",
-        confirmText: "確定",
-        onConfirm: () => router.push("/admin/teachers"),
-      });
-    } catch (err: any) {
-      console.error("Error adding teacher:", err);
-      setError(err.message || "新增失敗，請稍後再試");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    loading,
+    error,
+    name,
+    setName,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    confirmPassword,
+    setConfirmPassword,
+    showPassword,
+    toggleShowPassword,
+    status,
+    setStatus,
+    goBack,
+    handleRegister,
+  } = useAddTeacherController();
 
   return (
-    <div className="flex-1 px-6 py-8 md:px-12 md:py-10 max-w-[1000px] mx-auto w-full">
+    <div className="mx-auto flex w-full max-w-[1000px] flex-1 flex-col px-6 py-8 md:px-12 md:py-10">
       <div className="mb-6">
         <Link
           href="/admin/teachers"
-          className="inline-flex items-center gap-1.5 text-gray-500 dark:text-gray-400 hover:text-sky-500 transition-colors group"
+          className="group inline-flex items-center gap-1.5 text-gray-500 transition-colors hover:text-sky-500 dark:text-gray-400"
         >
-          <span className="material-symbols-outlined text-[20px] group-hover:-translate-x-1 transition-transform">
+          <span className="material-symbols-outlined text-[20px] transition-transform group-hover:-translate-x-1">
             arrow_back
           </span>
           <span className="text-sm font-bold">返回教師列表</span>
@@ -172,38 +38,37 @@ export default function AddTeacherPage() {
       </div>
 
       <header className="mb-10">
-        <h2 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white tracking-tight mb-2">
+        <h2 className="mb-2 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">
           新增教師
         </h2>
-        <p className="text-gray-500 dark:text-gray-400 text-base">
+        <p className="text-base text-gray-500 dark:text-gray-400">
           填寫以下資訊以為牙牙學語系統建立新的教師帳號。
         </p>
       </header>
 
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm p-6 md:p-10">
+      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-800 md:p-10">
         <form onSubmit={handleRegister} className="flex flex-col gap-8">
           {error && (
-            <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-100 flex items-center gap-2">
+            <div className="flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 p-4 text-red-600">
               <span className="material-symbols-outlined">error</span>
               <span className="text-sm font-bold">{error}</span>
             </div>
           )}
 
-          {/* Basic Information */}
           <div className="flex flex-col gap-6">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <span className="w-1 h-5 rounded-full bg-sky-500"></span>
+            <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
+              <span className="h-5 w-1 rounded-full bg-sky-500" />
               基本資料
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-bold text-gray-900 dark:text-white">
                   教師姓名 <span className="text-red-500">*</span>
                 </label>
                 <input
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full h-12 px-4 rounded-xl bg-gray-50 dark:bg-gray-900 border-2 border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-gray-800 focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-400/60 transition-all outline-none"
+                  onChange={(event) => setName(event.target.value)}
+                  className="h-12 w-full rounded-xl border-2 border-transparent bg-gray-50 px-4 text-gray-900 outline-none transition-all placeholder:text-gray-400/60 focus:border-sky-500 focus:bg-white focus:ring-0 dark:bg-gray-900 dark:text-white dark:focus:bg-gray-800"
                   placeholder="請輸入真實姓名"
                   required
                   type="text"
@@ -215,31 +80,31 @@ export default function AddTeacherPage() {
                 </label>
                 <input
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-12 px-4 rounded-xl bg-gray-50 dark:bg-gray-900 border-2 border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-gray-800 focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-400/60 transition-all outline-none"
+                  onChange={(event) => setEmail(event.target.value)}
+                  className="h-12 w-full rounded-xl border-2 border-transparent bg-gray-50 px-4 text-gray-900 outline-none transition-all placeholder:text-gray-400/60 focus:border-sky-500 focus:bg-white focus:ring-0 dark:bg-gray-900 dark:text-white dark:focus:bg-gray-800"
                   placeholder="name@example.com"
                   required
                   type="email"
                 />
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-bold text-gray-900 dark:text-white">
                   初始密碼 <span className="text-red-500">*</span>
                 </label>
-                <div className="relative group">
+                <div className="group relative">
                   <input
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-12 px-4 rounded-xl bg-gray-50 dark:bg-gray-900 border-2 border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-gray-800 focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-400/60 transition-all outline-none"
+                    onChange={(event) => setPassword(event.target.value)}
+                    className="h-12 w-full rounded-xl border-2 border-transparent bg-gray-50 px-4 text-gray-900 outline-none transition-all placeholder:text-gray-400/60 focus:border-sky-500 focus:bg-white focus:ring-0 dark:bg-gray-900 dark:text-white dark:focus:bg-gray-800"
                     placeholder="••••••••"
                     required
                     type={showPassword ? "text" : "password"}
                   />
                   <button
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-sky-500 transition-colors"
+                    onClick={toggleShowPassword}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-sky-500"
                     type="button"
                   >
                     <span className="material-symbols-outlined text-[20px]">
@@ -247,7 +112,7 @@ export default function AddTeacherPage() {
                     </span>
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 pl-1">
+                <p className="pl-1 text-xs text-gray-500 dark:text-gray-400">
                   密碼長度須至少 6 碼。
                 </p>
               </div>
@@ -257,8 +122,8 @@ export default function AddTeacherPage() {
                 </label>
                 <input
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full h-12 px-4 rounded-xl bg-gray-50 dark:bg-gray-900 border-2 border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-gray-800 focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-400/60 transition-all outline-none"
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  className="h-12 w-full rounded-xl border-2 border-transparent bg-gray-50 px-4 text-gray-900 outline-none transition-all placeholder:text-gray-400/60 focus:border-sky-500 focus:bg-white focus:ring-0 dark:bg-gray-900 dark:text-white dark:focus:bg-gray-800"
                   placeholder="請再次輸入密碼"
                   required
                   type="password"
@@ -269,31 +134,30 @@ export default function AddTeacherPage() {
 
           <hr className="border-gray-100 dark:border-gray-800" />
 
-          {/* Permissions and Plans */}
           <div className="flex flex-col gap-6">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <span className="w-1 h-5 rounded-full bg-sky-500"></span>
+            <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
+              <span className="h-5 w-1 rounded-full bg-sky-500" />
               權限與方案
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-bold text-gray-900 dark:text-white">
                   維護費方案 <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <select
-                    className="w-full h-12 px-4 pr-10 appearance-none rounded-xl bg-gray-50 dark:bg-gray-900 border-2 border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-gray-800 focus:ring-0 text-gray-900 dark:text-white cursor-pointer outline-none transition-all"
+                    className="h-12 w-full cursor-pointer appearance-none rounded-xl border-2 border-transparent bg-gray-50 px-4 pr-10 text-gray-900 outline-none transition-all focus:border-sky-500 focus:bg-white focus:ring-0 dark:bg-gray-900 dark:text-white dark:focus:bg-gray-800"
                     defaultValue="pro"
                   >
                     <option value="basic">基礎版 (Basic)</option>
                     <option value="pro">專業版 (Pro)</option>
                     <option value="enterprise">企業版 (Enterprise)</option>
                   </select>
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-400 pointer-events-none text-sm">
+                  <span className="material-symbols-outlined pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">
                     expand_more
                   </span>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 pl-1">
+                <p className="pl-1 text-xs text-gray-500 dark:text-gray-400">
                   不同方案將影響教師可開設的課程數量上限。
                 </p>
               </div>
@@ -301,31 +165,31 @@ export default function AddTeacherPage() {
                 <label className="text-sm font-bold text-gray-900 dark:text-white">
                   初始狀態
                 </label>
-                <div className="flex items-center gap-4 h-12 bg-gray-50 dark:bg-gray-900 rounded-xl px-4 border-2 border-transparent">
-                  <label className="flex items-center gap-2 cursor-pointer group">
+                <div className="flex h-12 items-center gap-4 rounded-xl border-2 border-transparent bg-gray-50 px-4 dark:bg-gray-900">
+                  <label className="group flex cursor-pointer items-center gap-2">
                     <input
                       checked={status === "active"}
                       onChange={() => setStatus("active")}
-                      className="size-4 text-sky-500 focus:ring-sky-500 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                      className="size-4 border-gray-300 bg-white text-sky-500 focus:ring-sky-500 dark:border-gray-600 dark:bg-gray-800"
                       name="status"
                       type="radio"
                       value="active"
                     />
-                    <span className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-sky-500 transition-colors">
+                    <span className="text-sm font-bold text-gray-900 transition-colors group-hover:text-sky-500 dark:text-white">
                       啟用帳號
                     </span>
                   </label>
-                  <div className="w-px h-4 bg-gray-300 dark:bg-gray-700"></div>
-                  <label className="flex items-center gap-2 cursor-pointer group">
+                  <div className="h-4 w-px bg-gray-300 dark:bg-gray-700" />
+                  <label className="group flex cursor-pointer items-center gap-2">
                     <input
                       checked={status === "disabled"}
                       onChange={() => setStatus("disabled")}
-                      className="size-4 text-gray-400 focus:ring-gray-400 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                      className="size-4 border-gray-300 bg-white text-gray-400 focus:ring-gray-400 dark:border-gray-600 dark:bg-gray-800"
                       name="status"
                       type="radio"
                       value="disabled"
                     />
-                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                    <span className="text-sm font-medium text-gray-500 transition-colors group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white">
                       暫時禁用
                     </span>
                   </label>
@@ -334,18 +198,17 @@ export default function AddTeacherPage() {
             </div>
           </div>
 
-          {/* Form Actions */}
-          <div className="flex items-center justify-end gap-4 mt-4 pt-6 text-right border-t border-gray-100 dark:border-gray-800">
+          <div className="mt-4 flex items-center justify-end gap-4 border-t border-gray-100 pt-6 text-right dark:border-gray-800">
             <button
-              onClick={() => router.back()}
-              className="h-12 px-6 rounded-xl border border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 font-bold transition-colors"
+              onClick={goBack}
+              className="h-12 rounded-xl border border-transparent px-6 font-bold text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
               type="button"
             >
               取消
             </button>
             <button
               disabled={loading}
-              className="h-12 px-8 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold shadow-lg shadow-sky-500/20 transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex h-12 items-center gap-2 rounded-xl bg-sky-500 px-8 font-bold text-white shadow-lg shadow-sky-500/20 transition-all active:scale-95 hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
               type="submit"
             >
               {loading ? (
@@ -353,9 +216,7 @@ export default function AddTeacherPage() {
                   sync
                 </span>
               ) : (
-                <span className="material-symbols-outlined text-[20px]">
-                  check
-                </span>
+                <span className="material-symbols-outlined text-[20px]">check</span>
               )}
               <span>{loading ? "處理中..." : "確認新增"}</span>
             </button>
